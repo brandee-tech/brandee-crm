@@ -1,13 +1,13 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, Edit, Trash2, FileText } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, FileText, Eye } from 'lucide-react';
 import { useScripts, Script } from '@/hooks/useScripts';
 import { AddScriptDialog } from '@/components/AddScriptDialog';
 import { EditScriptDialog } from '@/components/EditScriptDialog';
+import { ViewScriptDialog } from '@/components/ViewScriptDialog';
 import { useAuth } from '@/hooks/useAuth';
 
 export const Scripts = () => {
@@ -17,6 +17,7 @@ export const Scripts = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedScript, setSelectedScript] = useState<Script | null>(null);
 
   const filteredScripts = scripts.filter(script => {
@@ -41,6 +42,11 @@ export const Scripts = () => {
 
   const canEditScript = (script: Script) => {
     return user && script.created_by === user.id;
+  };
+
+  const handleView = (script: Script) => {
+    setSelectedScript(script);
+    setViewDialogOpen(true);
   };
 
   if (isLoading) {
@@ -105,31 +111,43 @@ export const Scripts = () => {
                     <CardDescription>{script.description}</CardDescription>
                   )}
                 </div>
-                {canEditScript(script) && (
-                  <div className="flex gap-1 ml-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(script)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(script.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
+                <div className="flex gap-1 ml-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleView(script)}
+                    title="Visualizar script"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  {canEditScript(script) && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(script)}
+                        title="Editar script"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(script.id)}
+                        title="Excluir script"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             </CardHeader>
             <CardContent>
               <div className="bg-gray-50 p-3 rounded-md">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700">Conteúdo:</span>
+                  <span className="text-sm font-medium text-gray-700">Prévia:</span>
                 </div>
                 <p className="text-sm text-gray-600 line-clamp-4">
                   {script.content}
@@ -165,6 +183,12 @@ export const Scripts = () => {
       <EditScriptDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
+        script={selectedScript}
+      />
+
+      <ViewScriptDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
         script={selectedScript}
       />
     </div>

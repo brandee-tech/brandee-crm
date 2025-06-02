@@ -14,10 +14,6 @@ interface Task {
   assignee_id: string | null;
   task_type: string | null;
   created_at: string;
-  profiles?: {
-    full_name: string | null;
-    email: string | null;
-  };
 }
 
 export const useTasks = () => {
@@ -30,13 +26,7 @@ export const useTasks = () => {
     try {
       const { data, error } = await supabase
         .from('tasks')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -53,18 +43,12 @@ export const useTasks = () => {
     }
   };
 
-  const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'profiles'>) => {
+  const createTask = async (taskData: Omit<Task, 'id' | 'created_at'>) => {
     try {
       const { data, error } = await supabase
         .from('tasks')
         .insert([{ ...taskData, created_by: user?.id }])
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email
-          )
-        `)
+        .select()
         .single();
 
       if (error) throw error;
@@ -90,13 +74,7 @@ export const useTasks = () => {
         .from('tasks')
         .update(updates)
         .eq('id', id)
-        .select(`
-          *,
-          profiles (
-            full_name,
-            email
-          )
-        `)
+        .select()
         .single();
 
       if (error) throw error;

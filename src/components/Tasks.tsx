@@ -152,8 +152,6 @@ export const Tasks = () => {
                       <span>{formatDate(task.due_date)}</span>
                     </div>
                     <span>•</span>
-                    <span>{task.profiles?.full_name || task.profiles?.email || 'Usuário'}</span>
-                    <span>•</span>
                     <span>{task.task_type}</span>
                   </div>
                   <div className="flex gap-2">

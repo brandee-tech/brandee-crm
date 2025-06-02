@@ -5,13 +5,41 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAppointments } from '@/hooks/useAppointments';
 import { AddAppointmentDialog } from './AddAppointmentDialog';
+import { EditAppointmentDialog } from './EditAppointmentDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Calendar, Clock, User, Building, Edit2, Trash2, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+interface Appointment {
+  id: string;
+  title: string;
+  description: string | null;
+  date: string;
+  time: string;
+  duration: number;
+  lead_id: string | null;
+  contact_id: string | null;
+  scheduled_by: string;
+  assigned_to: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  leads?: {
+    name: string;
+    company: string | null;
+  };
+  contacts?: {
+    name: string;
+    company_id: string | null;
+  };
+}
+
 export const Appointments = () => {
   const { appointments, loading, deleteAppointment } = useAppointments();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
   const formatDate = (dateStr: string) => {
     return format(new Date(dateStr), 'dd/MM/yyyy', { locale: ptBR });
@@ -36,10 +64,13 @@ export const Appointments = () => {
     }
   };
 
+  const handleEdit = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setEditDialogOpen(true);
+  };
+
   const handleDelete = async (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este agendamento?')) {
-      await deleteAppointment(id);
-    }
+    await deleteAppointment(id);
   };
 
   if (loading) {
@@ -68,17 +99,41 @@ export const Appointments = () => {
             <div className="flex justify-between items-start mb-4">
               <h3 className="font-semibold text-lg">{appointment.title}</h3>
               <div className="flex gap-1">
-                <Button variant="ghost" size="sm">
-                  <Edit2 className="w-4 h-4" />
-                </Button>
                 <Button 
                   variant="ghost" 
-                  size="sm" 
-                  className="text-red-600 hover:text-red-700"
-                  onClick={() => handleDelete(appointment.id)}
+                  size="sm"
+                  onClick={() => handleEdit(appointment)}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Edit2 className="w-4 h-4" />
                 </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir este agendamento? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => handleDelete(appointment.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Excluir
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
 
@@ -142,6 +197,12 @@ export const Appointments = () => {
       <AddAppointmentDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
+      />
+
+      <EditAppointmentDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        appointment={selectedAppointment}
       />
     </div>
   );

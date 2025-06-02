@@ -98,6 +98,7 @@ export const useAppointments = () => {
         description: "Não foi possível criar o agendamento",
         variant: "destructive"
       });
+      throw error;
     }
   };
 
@@ -134,6 +135,7 @@ export const useAppointments = () => {
         description: "Não foi possível atualizar o agendamento",
         variant: "destructive"
       });
+      throw error;
     }
   };
 
@@ -157,6 +159,7 @@ export const useAppointments = () => {
         description: "Não foi possível remover o agendamento",
         variant: "destructive"
       });
+      throw error;
     }
   };
 

@@ -5,66 +5,40 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-const contactsData = [
-  {
-    id: 1,
-    name: 'João Silva',
-    company: 'Tech Corp',
-    position: 'CTO',
-    email: 'joao@techcorp.com',
-    phone: '(11) 99999-9999',
-    location: 'São Paulo, SP',
-    avatar: '',
-    lastContact: '2024-01-15'
-  },
-  {
-    id: 2,
-    name: 'Maria Santos',
-    company: 'Inovação Ltda',
-    position: 'CEO',
-    email: 'maria@inovacao.com',
-    phone: '(11) 88888-8888',
-    location: 'Rio de Janeiro, RJ',
-    avatar: '',
-    lastContact: '2024-01-14'
-  },
-  {
-    id: 3,
-    name: 'Carlos Oliveira',
-    company: 'StartUp XYZ',
-    position: 'Founder',
-    email: 'carlos@startup.com',
-    phone: '(11) 77777-7777',
-    location: 'Belo Horizonte, MG',
-    avatar: '',
-    lastContact: '2024-01-13'
-  },
-  {
-    id: 4,
-    name: 'Ana Costa',
-    company: 'Digital Solutions',
-    position: 'Marketing Manager',
-    email: 'ana@digital.com',
-    phone: '(11) 66666-6666',
-    location: 'Porto Alegre, RS',
-    avatar: '',
-    lastContact: '2024-01-12'
-  }
-];
+import { useContacts } from '@/hooks/useContacts';
 
 export const Contacts = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { contacts, loading, deleteContact } = useContacts();
 
-  const filteredContacts = contactsData.filter(contact =>
+  const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.position.toLowerCase().includes(searchTerm.toLowerCase())
+    (contact.companies?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (contact.position || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este contato?')) {
+      await deleteContact(id);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="text-lg">Carregando contatos...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 space-y-6">
@@ -107,7 +81,7 @@ export const Contacts = () => {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Avatar className="w-12 h-12">
-                  <AvatarImage src={contact.avatar} />
+                  <AvatarImage src="" />
                   <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
                     {getInitials(contact.name)}
                   </AvatarFallback>
@@ -121,7 +95,12 @@ export const Contacts = () => {
                 <Button variant="ghost" size="sm">
                   <Edit2 className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-red-600 hover:text-red-700"
+                  onClick={() => handleDelete(contact.id)}
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
@@ -129,39 +108,49 @@ export const Contacts = () => {
 
             <div className="space-y-3">
               <div>
-                <p className="font-medium text-gray-900">{contact.company}</p>
+                <p className="font-medium text-gray-900">{contact.companies?.name || 'Empresa não informada'}</p>
               </div>
 
               <div className="space-y-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  <span>{contact.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  <span>{contact.phone}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>{contact.location}</span>
-                </div>
+                {contact.email && (
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    <span>{contact.email}</span>
+                  </div>
+                )}
+                {contact.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-4 h-4" />
+                    <span>{contact.phone}</span>
+                  </div>
+                )}
+                {contact.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>{contact.location}</span>
+                  </div>
+                )}
               </div>
 
               <div className="pt-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500">
-                  Último contato: {contact.lastContact}
+                  Último contato: {formatDate(contact.last_contact)}
                 </p>
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Ligar
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Email
-                </Button>
+                {contact.phone && (
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Phone className="w-4 h-4 mr-2" />
+                    Ligar
+                  </Button>
+                )}
+                {contact.email && (
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Email
+                  </Button>
+                )}
               </div>
             </div>
           </Card>

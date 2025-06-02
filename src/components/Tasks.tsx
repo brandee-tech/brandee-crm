@@ -6,54 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-
-const tasksData = [
-  {
-    id: 1,
-    title: 'Ligar para João Silva',
-    description: 'Acompanhar proposta enviada ontem',
-    dueDate: '2024-01-16',
-    priority: 'Alta',
-    status: 'Pendente',
-    assignee: 'Você',
-    type: 'Ligação'
-  },
-  {
-    id: 2,
-    title: 'Enviar proposta para Tech Corp',
-    description: 'Finalizar e enviar proposta comercial',
-    dueDate: '2024-01-17',
-    priority: 'Alta',
-    status: 'Em andamento',
-    assignee: 'Maria Silva',
-    type: 'Email'
-  },
-  {
-    id: 3,
-    title: 'Reunião com StartUp XYZ',
-    description: 'Apresentação da solução',
-    dueDate: '2024-01-18',
-    priority: 'Média',
-    status: 'Agendada',
-    assignee: 'Carlos Santos',
-    type: 'Reunião'
-  },
-  {
-    id: 4,
-    title: 'Follow-up com Digital Solutions',
-    description: 'Verificar andamento da análise',
-    dueDate: '2024-01-15',
-    priority: 'Baixa',
-    status: 'Concluída',
-    assignee: 'Você',
-    type: 'Email'
-  }
-];
+import { useTasks } from '@/hooks/useTasks';
 
 export const Tasks = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
-  const [tasks, setTasks] = useState(tasksData);
+  const { tasks, loading, updateTask, deleteTask } = useTasks();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -81,20 +39,36 @@ export const Tasks = () => {
     }
   };
 
-  const toggleTaskComplete = (taskId: number) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId 
-        ? { ...task, status: task.status === 'Concluída' ? 'Pendente' : 'Concluída' }
-        : task
-    ));
+  const toggleTaskComplete = async (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'Concluída' ? 'Pendente' : 'Concluída';
+    await updateTask(taskId, { status: newStatus });
   };
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         (task.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'Todos' || task.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
+      await deleteTask(id);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="text-lg">Carregando tarefas...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 space-y-6">
@@ -152,7 +126,7 @@ export const Tasks = () => {
             <div className="flex items-start gap-4">
               <Checkbox
                 checked={task.status === 'Concluída'}
-                onCheckedChange={() => toggleTaskComplete(task.id)}
+                onCheckedChange={() => toggleTaskComplete(task.id, task.status || 'Pendente')}
                 className="mt-1"
               />
               
@@ -164,8 +138,8 @@ export const Tasks = () => {
                     {task.title}
                   </h3>
                   <div className="flex items-center gap-2">
-                    {getStatusIcon(task.status)}
-                    <Badge className={getPriorityColor(task.priority)}>{task.priority}</Badge>
+                    {getStatusIcon(task.status || 'Pendente')}
+                    <Badge className={getPriorityColor(task.priority || 'Média')}>{task.priority || 'Média'}</Badge>
                   </div>
                 </div>
                 
@@ -175,24 +149,34 @@ export const Tasks = () => {
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      <span>{task.dueDate}</span>
+                      <span>{formatDate(task.due_date)}</span>
                     </div>
                     <span>•</span>
-                    <span>{task.assignee}</span>
+                    <span>{task.profiles?.full_name || task.profiles?.email || 'Usuário'}</span>
                     <span>•</span>
-                    <span>{task.type}</span>
+                    <span>{task.task_type}</span>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    task.status === 'Concluída' 
-                      ? 'bg-green-100 text-green-700'
-                      : task.status === 'Em andamento'
-                      ? 'bg-blue-100 text-blue-700'
-                      : task.status === 'Agendada'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}>
-                    {task.status}
-                  </span>
+                  <div className="flex gap-2">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      task.status === 'Concluída' 
+                        ? 'bg-green-100 text-green-700'
+                        : task.status === 'Em andamento'
+                        ? 'bg-blue-100 text-blue-700'
+                        : task.status === 'Agendada'
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}>
+                      {task.status}
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDelete(task.id)}
+                      className="text-red-600 hover:text-red-700 ml-2"
+                    >
+                      Excluir
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

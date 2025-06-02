@@ -2,57 +2,69 @@
 import { 
   TrendingUp, 
   Users, 
-  DollarSign, 
-  Target,
+  Building2, 
+  CheckSquare,
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-
-const metrics = [
-  {
-    title: 'Receita Total',
-    value: 'R$ 124.850',
-    change: '+12.5%',
-    trend: 'up',
-    icon: DollarSign,
-    color: 'text-green-600'
-  },
-  {
-    title: 'Novos Leads',
-    value: '156',
-    change: '+8.2%',
-    trend: 'up',
-    icon: TrendingUp,
-    color: 'text-blue-600'
-  },
-  {
-    title: 'Vendas Fechadas',
-    value: '23',
-    change: '-2.1%',
-    trend: 'down',
-    icon: Target,
-    color: 'text-purple-600'
-  },
-  {
-    title: 'Total de Contatos',
-    value: '1.284',
-    change: '+15.3%',
-    trend: 'up',
-    icon: Users,
-    color: 'text-orange-600'
-  }
-];
-
-const recentLeads = [
-  { name: 'João Silva', company: 'Tech Corp', value: 'R$ 25.000', status: 'Quente' },
-  { name: 'Maria Santos', company: 'Inovação Ltda', value: 'R$ 18.500', status: 'Morno' },
-  { name: 'Carlos Oliveira', company: 'StartUp XYZ', value: 'R$ 32.000', status: 'Quente' },
-  { name: 'Ana Costa', company: 'Digital Solutions', value: 'R$ 15.200', status: 'Frio' }
-];
+import { useDashboard } from '@/hooks/useDashboard';
 
 export const Dashboard = () => {
+  const { stats, loading } = useDashboard();
+
+  const metrics = [
+    {
+      title: 'Total de Leads',
+      value: stats.totalLeads.toString(),
+      change: '+12.5%',
+      trend: 'up',
+      icon: TrendingUp,
+      color: 'text-blue-600'
+    },
+    {
+      title: 'Total de Contatos',
+      value: stats.totalContacts.toString(),
+      change: '+15.3%',
+      trend: 'up',
+      icon: Users,
+      color: 'text-orange-600'
+    },
+    {
+      title: 'Total de Empresas',
+      value: stats.totalCompanies.toString(),
+      change: '+8.2%',
+      trend: 'up',
+      icon: Building2,
+      color: 'text-purple-600'
+    },
+    {
+      title: 'Total de Tarefas',
+      value: stats.totalTasks.toString(),
+      change: '-2.1%',
+      trend: 'down',
+      icon: CheckSquare,
+      color: 'text-green-600'
+    }
+  ];
+
+  const formatValue = (value: number | null) => {
+    if (!value) return 'R$ 0';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="text-lg">Carregando dashboard...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 space-y-8">
       <div className="flex justify-between items-center">
@@ -97,38 +109,19 @@ export const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Pipeline de Vendas */}
+        {/* Pipeline de Tarefas */}
         <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6">Pipeline de Vendas</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Status das Tarefas</h3>
           <div className="space-y-4">
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Prospecção</span>
-                <span className="text-sm text-gray-500">45 leads</span>
+            {Object.entries(stats.tasksByStatus).map(([status, count]) => (
+              <div key={status}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">{status}</span>
+                  <span className="text-sm text-gray-500">{count} tarefas</span>
+                </div>
+                <Progress value={(count / stats.totalTasks) * 100} className="h-2" />
               </div>
-              <Progress value={75} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Qualificação</span>
-                <span className="text-sm text-gray-500">28 leads</span>
-              </div>
-              <Progress value={60} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Proposta</span>
-                <span className="text-sm text-gray-500">12 leads</span>
-              </div>
-              <Progress value={40} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Fechamento</span>
-                <span className="text-sm text-gray-500">8 leads</span>
-              </div>
-              <Progress value={25} className="h-2" />
-            </div>
+            ))}
           </div>
         </Card>
 
@@ -136,14 +129,14 @@ export const Dashboard = () => {
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Leads Recentes</h3>
           <div className="space-y-4">
-            {recentLeads.map((lead, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            {stats.recentLeads.map((lead) => (
+              <div key={lead.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div>
                   <p className="font-medium text-gray-900">{lead.name}</p>
                   <p className="text-sm text-gray-500">{lead.company}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">{lead.value}</p>
+                  <p className="font-semibold text-gray-900">{formatValue(lead.value)}</p>
                   <span className={`inline-block px-2 py-1 text-xs rounded-full ${
                     lead.status === 'Quente' 
                       ? 'bg-red-100 text-red-700'

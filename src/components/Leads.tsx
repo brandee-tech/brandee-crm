@@ -5,57 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-
-const leadsData = [
-  {
-    id: 1,
-    name: 'João Silva',
-    company: 'Tech Corp',
-    email: 'joao@techcorp.com',
-    phone: '(11) 99999-9999',
-    value: 'R$ 25.000',
-    status: 'Quente',
-    source: 'Website',
-    date: '2024-01-15'
-  },
-  {
-    id: 2,
-    name: 'Maria Santos',
-    company: 'Inovação Ltda',
-    email: 'maria@inovacao.com',
-    phone: '(11) 88888-8888',
-    value: 'R$ 18.500',
-    status: 'Morno',
-    source: 'Indicação',
-    date: '2024-01-14'
-  },
-  {
-    id: 3,
-    name: 'Carlos Oliveira',
-    company: 'StartUp XYZ',
-    email: 'carlos@startup.com',
-    phone: '(11) 77777-7777',
-    value: 'R$ 32.000',
-    status: 'Quente',
-    source: 'LinkedIn',
-    date: '2024-01-13'
-  },
-  {
-    id: 4,
-    name: 'Ana Costa',
-    company: 'Digital Solutions',
-    email: 'ana@digital.com',
-    phone: '(11) 66666-6666',
-    value: 'R$ 15.200',
-    status: 'Frio',
-    source: 'Google Ads',
-    date: '2024-01-12'
-  }
-];
+import { useLeads } from '@/hooks/useLeads';
 
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
+  const { leads, loading, deleteLead } = useLeads();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -70,12 +25,38 @@ export const Leads = () => {
     }
   };
 
-  const filteredLeads = leadsData.filter(lead => {
+  const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         lead.company.toLowerCase().includes(searchTerm.toLowerCase());
+                         (lead.company || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'Todos' || lead.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
+
+  const formatValue = (value: number | null) => {
+    if (!value) return 'R$ 0';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este lead?')) {
+      await deleteLead(id);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="text-lg">Carregando leads...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 space-y-6">
@@ -131,33 +112,42 @@ export const Leads = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="text-lg font-semibold text-gray-900">{lead.name}</h3>
-                  <Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>
+                  <Badge className={getStatusColor(lead.status || 'Frio')}>{lead.status || 'Frio'}</Badge>
                 </div>
                 <p className="text-gray-600 mb-2">{lead.company}</p>
                 <div className="flex flex-col sm:flex-row gap-2 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Mail className="w-4 h-4" />
-                    {lead.email}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Phone className="w-4 h-4" />
-                    {lead.phone}
-                  </div>
+                  {lead.email && (
+                    <div className="flex items-center gap-1">
+                      <Mail className="w-4 h-4" />
+                      {lead.email}
+                    </div>
+                  )}
+                  {lead.phone && (
+                    <div className="flex items-center gap-1">
+                      <Phone className="w-4 h-4" />
+                      {lead.phone}
+                    </div>
+                  )}
                 </div>
               </div>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="text-right">
-                  <p className="text-xl font-bold text-gray-900">{lead.value}</p>
-                  <p className="text-sm text-gray-500">Origem: {lead.source}</p>
-                  <p className="text-sm text-gray-500">{lead.date}</p>
+                  <p className="text-xl font-bold text-gray-900">{formatValue(lead.value)}</p>
+                  <p className="text-sm text-gray-500">Origem: {lead.source || 'N/A'}</p>
+                  <p className="text-sm text-gray-500">{formatDate(lead.created_at)}</p>
                 </div>
                 
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm">
                     <Edit2 className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDelete(lead.id)}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

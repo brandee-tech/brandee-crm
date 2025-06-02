@@ -5,61 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-
-const companiesData = [
-  {
-    id: 1,
-    name: 'Tech Corp',
-    industry: 'Tecnologia',
-    size: '100-500',
-    revenue: 'R$ 10M+',
-    contacts: 5,
-    deals: 3,
-    status: 'Ativo',
-    location: 'São Paulo, SP',
-    website: 'techcorp.com'
-  },
-  {
-    id: 2,
-    name: 'Inovação Ltda',
-    industry: 'Consultoria',
-    size: '50-100',
-    revenue: 'R$ 5M-10M',
-    contacts: 3,
-    deals: 2,
-    status: 'Prospect',
-    location: 'Rio de Janeiro, RJ',
-    website: 'inovacao.com'
-  },
-  {
-    id: 3,
-    name: 'StartUp XYZ',
-    industry: 'FinTech',
-    size: '10-50',
-    revenue: 'R$ 1M-5M',
-    contacts: 2,
-    deals: 1,
-    status: 'Ativo',
-    location: 'Belo Horizonte, MG',
-    website: 'startup.com'
-  },
-  {
-    id: 4,
-    name: 'Digital Solutions',
-    industry: 'Marketing Digital',
-    size: '20-50',
-    revenue: 'R$ 2M-5M',
-    contacts: 4,
-    deals: 2,
-    status: 'Inativo',
-    location: 'Porto Alegre, RS',
-    website: 'digital.com'
-  }
-];
+import { useCompanies } from '@/hooks/useCompanies';
 
 export const Companies = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
+  const { companies, loading, deleteCompany } = useCompanies();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -74,12 +25,26 @@ export const Companies = () => {
     }
   };
 
-  const filteredCompanies = companiesData.filter(company => {
+  const filteredCompanies = companies.filter(company => {
     const matchesSearch = company.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         company.industry.toLowerCase().includes(searchTerm.toLowerCase());
+                         (company.industry || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'Todos' || company.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta empresa?')) {
+      await deleteCompany(id);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <div className="text-lg">Carregando empresas...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 space-y-6">
@@ -142,12 +107,17 @@ export const Companies = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className={getStatusColor(company.status)}>{company.status}</Badge>
+                <Badge className={getStatusColor(company.status || 'Prospect')}>{company.status || 'Prospect'}</Badge>
                 <div className="flex gap-1">
                   <Button variant="ghost" size="sm">
                     <Edit2 className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDelete(company.id)}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -158,11 +128,11 @@ export const Companies = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500">Tamanho</p>
-                  <p className="font-medium text-gray-900">{company.size} funcionários</p>
+                  <p className="font-medium text-gray-900">{company.size || 'N/A'} funcionários</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Receita</p>
-                  <p className="font-medium text-gray-900">{company.revenue}</p>
+                  <p className="font-medium text-gray-900">{company.revenue || 'N/A'}</p>
                 </div>
               </div>
 
@@ -170,11 +140,11 @@ export const Companies = () => {
                 <div className="flex gap-4 text-sm">
                   <div className="flex items-center gap-1 text-gray-600">
                     <Users className="w-4 h-4" />
-                    <span>{company.contacts} contatos</span>
+                    <span>0 contatos</span>
                   </div>
                   <div className="flex items-center gap-1 text-gray-600">
                     <DollarSign className="w-4 h-4" />
-                    <span>{company.deals} negócios</span>
+                    <span>0 negócios</span>
                   </div>
                 </div>
               </div>

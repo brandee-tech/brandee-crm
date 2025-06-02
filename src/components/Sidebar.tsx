@@ -9,7 +9,9 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  LogOut
+  LogOut,
+  FileText,
+  Kanban
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,6 +28,8 @@ const menuItems = [
   { id: 'contacts', label: 'Contatos', icon: Users },
   { id: 'companies', label: 'Empresas', icon: Building2 },
   { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
+  { id: 'kanban', label: 'Kanban', icon: Kanban },
+  { id: 'scripts', label: 'Scripts', icon: FileText },
   { id: 'reports', label: 'Relatórios', icon: BarChart3 },
 ];
 

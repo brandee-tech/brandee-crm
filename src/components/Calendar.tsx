@@ -4,13 +4,40 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAppointments } from '@/hooks/useAppointments';
+import { ViewAppointmentDialog } from './ViewAppointmentDialog';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+interface Appointment {
+  id: string;
+  title: string;
+  description: string | null;
+  date: string;
+  time: string;
+  duration: number;
+  lead_id: string | null;
+  contact_id: string | null;
+  scheduled_by: string;
+  assigned_to: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  leads?: {
+    name: string;
+    company: string | null;
+  };
+  contacts?: {
+    name: string;
+    company_id: string | null;
+  };
+}
+
 export const CalendarView = () => {
   const { appointments, loading } = useAppointments();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -39,6 +66,11 @@ export const CalendarView = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleAppointmentClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setViewDialogOpen(true);
   };
 
   if (loading) {
@@ -111,7 +143,8 @@ export const CalendarView = () => {
                   {dayAppointments.map((appointment) => (
                     <div
                       key={appointment.id}
-                      className="text-xs p-1 rounded bg-blue-100 text-blue-800 border border-blue-200"
+                      className="text-xs p-1 rounded bg-blue-100 text-blue-800 border border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors"
+                      onClick={() => handleAppointmentClick(appointment)}
                     >
                       <div className="flex items-center gap-1 mb-1">
                         <Clock className="w-3 h-3" />
@@ -150,6 +183,12 @@ export const CalendarView = () => {
           <p className="text-gray-500">Os agendamentos aparecerão aqui quando forem criados</p>
         </div>
       )}
+
+      <ViewAppointmentDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        appointment={selectedAppointment}
+      />
     </div>
   );
 };

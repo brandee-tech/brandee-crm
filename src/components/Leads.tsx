@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useLeads } from '@/hooks/useLeads';
+import { EditLeadDialog } from './EditLeadDialog';
 
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
+  const [editingLead, setEditingLead] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { leads, loading, deleteLead } = useLeads();
 
   const getStatusColor = (status: string) => {
@@ -48,6 +51,11 @@ export const Leads = () => {
     if (window.confirm('Tem certeza que deseja excluir este lead?')) {
       await deleteLead(id);
     }
+  };
+
+  const handleEdit = (lead: any) => {
+    setEditingLead(lead);
+    setEditDialogOpen(true);
   };
 
   if (loading) {
@@ -139,7 +147,11 @@ export const Leads = () => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEdit(lead)}
+                  >
                     <Edit2 className="w-4 h-4" />
                   </Button>
                   <Button 
@@ -163,6 +175,12 @@ export const Leads = () => {
           <p className="text-gray-400 mt-2">Tente ajustar os filtros ou adicionar novos leads</p>
         </Card>
       )}
+
+      <EditLeadDialog
+        lead={editingLead}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   );
 };

@@ -6,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useContacts } from '@/hooks/useContacts';
+import { EditContactDialog } from './EditContactDialog';
 
 export const Contacts = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingContact, setEditingContact] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { contacts, loading, deleteContact } = useContacts();
 
   const filteredContacts = contacts.filter(contact =>
@@ -30,6 +33,11 @@ export const Contacts = () => {
     if (window.confirm('Tem certeza que deseja excluir este contato?')) {
       await deleteContact(id);
     }
+  };
+
+  const handleEdit = (contact: any) => {
+    setEditingContact(contact);
+    setEditDialogOpen(true);
   };
 
   if (loading) {
@@ -92,7 +100,11 @@ export const Contacts = () => {
                 </div>
               </div>
               <div className="flex gap-1">
-                <Button variant="ghost" size="sm">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => handleEdit(contact)}
+                >
                   <Edit2 className="w-4 h-4" />
                 </Button>
                 <Button 
@@ -163,6 +175,12 @@ export const Contacts = () => {
           <p className="text-gray-400 mt-2">Tente ajustar a busca ou adicionar novos contatos</p>
         </Card>
       )}
+
+      <EditContactDialog
+        contact={editingContact}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   );
 };

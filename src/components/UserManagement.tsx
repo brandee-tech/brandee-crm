@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useRoles } from '@/hooks/useRoles';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Edit, Building2, Mail, Crown } from 'lucide-react';
 import {
   Dialog,
@@ -34,9 +34,25 @@ export const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Verificar se o usuário atual é admin
-  const isAdmin = profiles.find(p => p.id === user?.id)?.roles?.name === 'Admin';
+  // Verificar se o usuário atual é admin usando a função do banco
+  useEffect(() => {
+    const checkAdminPermission = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase.rpc('is_current_user_admin');
+          if (error) throw error;
+          setIsAdmin(data || false);
+        } catch (error) {
+          console.error('Erro ao verificar permissões de admin:', error);
+          setIsAdmin(false);
+        }
+      }
+    };
+
+    checkAdminPermission();
+  }, [user]);
 
   const handleRoleChange = async () => {
     if (!editingUser || !selectedRole) return;
@@ -53,8 +69,7 @@ export const UserManagement = () => {
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o cargo",
-        variant: "destructive"
+        description: "Não foi possível atualizar o cargo"
       });
     }
   };

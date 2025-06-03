@@ -9,7 +9,6 @@ interface Lead {
   name: string;
   email: string | null;
   phone: string | null;
-  company: string | null;
   value: number | null;
   status: string | null;
   source: string | null;

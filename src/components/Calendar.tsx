@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,28 +7,7 @@ import { ViewAppointmentDialog } from './ViewAppointmentDialog';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-interface Appointment {
-  id: string;
-  title: string;
-  description: string | null;
-  date: string;
-  time: string;
-  duration: number;
-  lead_id: string | null;
-  scheduled_by: string;
-  assigned_to: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  leads?: {
-    name: string;
-  };
-  assigned_closer?: {
-    full_name: string | null;
-    email: string | null;
-  };
-}
+import { Appointment } from '@/types/appointment';
 
 export const CalendarView = () => {
   const { appointments, loading } = useAppointments();

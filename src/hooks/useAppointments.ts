@@ -1,29 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-
-interface Appointment {
-  id: string;
-  title: string;
-  description: string | null;
-  date: string;
-  time: string;
-  duration: number;
-  lead_id: string | null;
-  scheduled_by: string;
-  assigned_to: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  leads?: {
-    name: string;
-  };
-  assigned_closer?: {
-    full_name: string | null;
-    email: string | null;
-  };
-}
+import { Appointment } from '@/types/appointment';
 
 export const useAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -191,7 +171,6 @@ export const useAppointments = () => {
         description: "Não foi possível remover o agendamento",
         variant: "destructive"
       });
-      throw error;
     }
   };
 

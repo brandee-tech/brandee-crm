@@ -17,7 +17,6 @@ interface Lead {
   name: string;
   email: string | null;
   phone: string | null;
-  company: string | null;
   value: number | null;
   status: string | null;
   source: string | null;
@@ -62,7 +61,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
-      company: null,
       value: formData.value ? parseFloat(formData.value) : null,
       status: formData.status,
       source: formData.source || null

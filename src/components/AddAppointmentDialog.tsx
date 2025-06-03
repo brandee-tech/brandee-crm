@@ -149,7 +149,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
               <SelectContent>
                 {leads.map((lead) => (
                   <SelectItem key={lead.id} value={lead.id}>
-                    {lead.name} {lead.company && `- ${lead.company}`}
+                    {lead.name}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -35,7 +35,6 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
-      company: null,
       value: formData.value ? parseFloat(formData.value) : null,
       status: formData.status,
       source: formData.source || null

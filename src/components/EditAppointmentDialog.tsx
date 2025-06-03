@@ -26,7 +26,6 @@ interface Appointment {
   updated_at: string;
   leads?: {
     name: string;
-    company: string | null;
   };
   assigned_closer?: {
     full_name: string | null;
@@ -205,7 +204,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
                   <SelectItem value="">Nenhum lead</SelectItem>
                   {leads.map((lead) => (
                     <SelectItem key={lead.id} value={lead.id}>
-                      {lead.name} {lead.company && `(${lead.company})`}
+                      {lead.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

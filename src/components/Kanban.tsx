@@ -122,7 +122,6 @@ export const Kanban = () => {
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <h3 className="font-medium text-gray-900">{lead.name}</h3>
-                        <p className="text-sm text-gray-600">{lead.company}</p>
                       </div>
                       <div className="flex gap-1">
                         <Button 

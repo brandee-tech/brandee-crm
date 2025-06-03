@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { Plus, Edit2, Trash2, Phone, Mail } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -26,10 +25,9 @@ export const Leads = () => {
 
   const filteredLeads = useMemo(() => {
     return leads.filter(lead => {
-      // Busca por texto (nome, empresa, email)
+      // Busca por texto (nome, email)
       const searchMatch = !filters.searchTerm || 
         lead.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-        (lead.company || '').toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         (lead.email || '').toLowerCase().includes(filters.searchTerm.toLowerCase());
 
       // Filtro por status
@@ -37,10 +35,6 @@ export const Leads = () => {
 
       // Filtro por origem
       const sourceMatch = filters.source === 'todas' || lead.source === filters.source;
-
-      // Filtro por empresa
-      const companyMatch = !filters.company || 
-        (lead.company || '').toLowerCase().includes(filters.company.toLowerCase());
 
       // Filtro por faixa de valor
       const valueMatch = (() => {
@@ -61,7 +55,7 @@ export const Leads = () => {
         return leadDate >= fromDate && leadDate <= toDate;
       })();
 
-      return searchMatch && statusMatch && sourceMatch && companyMatch && valueMatch && dateMatch;
+      return searchMatch && statusMatch && sourceMatch && valueMatch && dateMatch;
     });
   }, [leads, filters]);
 
@@ -140,7 +134,6 @@ export const Leads = () => {
                   <h3 className="text-lg font-semibold text-gray-900">{lead.name}</h3>
                   <Badge className={getStatusColor(lead.status || 'Frio')}>{lead.status || 'Frio'}</Badge>
                 </div>
-                <p className="text-gray-600 mb-2">{lead.company}</p>
                 <div className="flex flex-col sm:flex-row gap-2 text-sm text-gray-500">
                   {lead.email && (
                     <div className="flex items-center gap-1">

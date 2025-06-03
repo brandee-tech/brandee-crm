@@ -36,7 +36,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     name: '',
     email: '',
     phone: '',
-    company: '',
     value: '',
     status: 'Frio',
     source: ''
@@ -48,7 +47,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         name: lead.name || '',
         email: lead.email || '',
         phone: lead.phone || '',
-        company: lead.company || '',
         value: lead.value?.toString() || '',
         status: lead.status || 'Frio',
         source: lead.source || ''
@@ -64,7 +62,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
-      company: formData.company || null,
+      company: null,
       value: formData.value ? parseFloat(formData.value) : null,
       status: formData.status,
       source: formData.source || null
@@ -106,15 +104,6 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="company">Empresa</Label>
-            <Input
-              id="company"
-              value={formData.company}
-              onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
             />
           </div>
           

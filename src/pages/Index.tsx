@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,6 +13,7 @@ import { Scripts } from '@/components/Scripts';
 import { Appointments } from '@/components/Appointments';
 import { CalendarView } from '@/components/Calendar';
 import { UserManagement } from '@/components/UserManagement';
+import { Companies } from '@/components/Companies';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -42,6 +44,8 @@ const Index = () => {
         return <Dashboard />;
       case 'leads':
         return <Leads />;
+      case 'companies':
+        return <Companies />;
       case 'tasks':
         return <Tasks />;
       case 'reports':

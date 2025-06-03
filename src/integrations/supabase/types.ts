@@ -76,10 +76,12 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          domain: string | null
           id: string
           industry: string | null
           location: string | null
           name: string
+          plan: string | null
           revenue: string | null
           size: string | null
           status: string | null
@@ -89,10 +91,12 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          domain?: string | null
           id?: string
           industry?: string | null
           location?: string | null
           name: string
+          plan?: string | null
           revenue?: string | null
           size?: string | null
           status?: string | null
@@ -102,10 +106,12 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          domain?: string | null
           id?: string
           industry?: string | null
           location?: string | null
           name?: string
+          plan?: string | null
           revenue?: string | null
           size?: string | null
           status?: string | null
@@ -208,6 +214,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          company_id: string | null
           created_at: string
           email: string | null
           full_name: string | null
@@ -216,6 +223,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -224,6 +232,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           email?: string | null
           full_name?: string | null
@@ -232,6 +241,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_role_id_fkey"
             columns: ["role_id"]

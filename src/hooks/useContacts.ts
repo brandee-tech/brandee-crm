@@ -14,6 +14,8 @@ interface Contact {
   company_id: string | null;
   last_contact: string | null;
   created_at: string;
+  created_by: string | null;
+  updated_at: string;
   companies?: {
     name: string;
   };
@@ -27,6 +29,19 @@ export const useContacts = () => {
 
   const fetchContacts = async () => {
     try {
+      // Primeiro obter o company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileError || !profileData?.company_id) {
+        console.error('Erro ao buscar company_id:', profileError);
+        setContacts([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('contacts')
         .select(`
@@ -35,6 +50,7 @@ export const useContacts = () => {
             name
           )
         `)
+        .eq('company_id', profileData.company_id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -51,11 +67,31 @@ export const useContacts = () => {
     }
   };
 
-  const createContact = async (contactData: Omit<Contact, 'id' | 'created_at' | 'companies'>) => {
+  const createContact = async (contactData: Omit<Contact, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'companies'>) => {
     try {
+      // Obter o company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileError || !profileData?.company_id) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível identificar sua empresa",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('contacts')
-        .insert([{ ...contactData, created_by: user?.id }])
+        .insert([{ 
+          ...contactData, 
+          created_by: user?.id,
+          company_id: profileData.company_id
+        }])
         .select(`
           *,
           companies (
@@ -81,7 +117,7 @@ export const useContacts = () => {
     }
   };
 
-  const updateContact = async (id: string, updates: Partial<Contact>) => {
+  const updateContact = async (id: string, updates: Partial<Omit<Contact, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'companies'>>) => {
     try {
       const { data, error } = await supabase
         .from('contacts')

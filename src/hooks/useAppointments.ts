@@ -36,7 +36,32 @@ export const useAppointments = () => {
 
   const fetchAppointments = async () => {
     try {
-      const { data, error } = await supabase
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      // Primeiro, obter o role do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select(`
+          role_id,
+          roles (
+            name,
+            permissions
+          )
+        `)
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const userRole = profileData?.roles?.name;
+      console.log('User role:', userRole);
+
+      let query = supabase
         .from('appointments')
         .select(`
           *,
@@ -52,7 +77,17 @@ export const useAppointments = () => {
         .order('date', { ascending: true })
         .order('time', { ascending: true });
 
+      // Aplicar filtros baseados no role
+      if (userRole === 'Closer') {
+        // Closers só veem agendamentos onde eles são assigned_to
+        query = query.eq('assigned_to', user.id);
+      }
+      // SDRs e Admins veem todos os agendamentos (sem filtro adicional)
+
+      const { data, error } = await query;
+
       if (error) throw error;
+      console.log('Agendamentos carregados:', data);
       setAppointments(data || []);
     } catch (error) {
       console.error('Erro ao buscar agendamentos:', error);
@@ -165,7 +200,7 @@ export const useAppointments = () => {
 
   useEffect(() => {
     if (user) {
-      fetchAppointments();
+      fetchInvitations();
     }
   }, [user]);
 

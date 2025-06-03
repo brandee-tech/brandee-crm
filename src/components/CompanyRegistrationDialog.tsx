@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -56,6 +56,7 @@ export const CompanyRegistrationDialog = ({ open, onOpenChange }: CompanyRegistr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createCompany } = useCompanies();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<CompanyFormData>({
     resolver: zodResolver(companySchema),
@@ -89,11 +90,14 @@ export const CompanyRegistrationDialog = ({ open, onOpenChange }: CompanyRegistr
 
       toast({
         title: "Sucesso!",
-        description: "Empresa cadastrada com sucesso. Em breve entraremos em contato.",
+        description: "Empresa cadastrada com sucesso. Redirecionando para o dashboard...",
       });
 
       form.reset();
       onOpenChange(false);
+      
+      // Redirecionar para o dashboard após cadastro
+      navigate('/');
     } catch (error) {
       console.error('Erro ao cadastrar empresa:', error);
       toast({

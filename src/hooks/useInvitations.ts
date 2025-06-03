@@ -43,7 +43,9 @@ export const useInvitations = () => {
         .single();
 
       if (profileError) {
-        throw profileError;
+        console.error('Erro ao buscar perfil:', profileError);
+        setInvitations([]);
+        return;
       }
 
       if (!profileData?.company_id) {
@@ -95,16 +97,22 @@ export const useInvitations = () => {
         .single();
 
       if (profileError) {
+        console.error('Erro ao buscar perfil:', profileError);
+        toast({
+          title: "Erro",
+          description: "Não foi possível identificar seu perfil. Verifique se você está logado corretamente.",
+          variant: "destructive"
+        });
         throw profileError;
       }
 
       if (!profileData?.company_id) {
         toast({
-          title: "Erro",
-          description: "Não foi possível identificar sua empresa",
+          title: "Configuração Necessária",
+          description: "Seu perfil não está associado a uma empresa. Entre em contato com o administrador do sistema.",
           variant: "destructive"
         });
-        throw new Error('Company ID not found');
+        throw new Error('Company ID not found - user profile not properly configured');
       }
 
       const { data, error } = await supabase
@@ -135,13 +143,22 @@ export const useInvitations = () => {
       return data;
     } catch (error: any) {
       console.error('Erro ao criar convite:', error);
-      toast({
-        title: "Erro",
-        description: error.message.includes('duplicate key') 
-          ? "Este email já foi convidado para esta empresa" 
-          : "Não foi possível enviar o convite",
-        variant: "destructive"
-      });
+      
+      if (error.message.includes('duplicate key')) {
+        toast({
+          title: "Erro",
+          description: "Este email já foi convidado para esta empresa",
+          variant: "destructive"
+        });
+      } else if (error.message.includes('Company ID not found')) {
+        // Já tratado acima, não precisa mostrar toast novamente
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível enviar o convite. Tente novamente.",
+          variant: "destructive"
+        });
+      }
       throw error;
     }
   };

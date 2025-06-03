@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/useAuth';
 interface DashboardStats {
   totalLeads: number;
   totalContacts: number;
-  totalCompanies: number;
   totalTasks: number;
   recentLeads: any[];
   tasksByStatus: Record<string, number>;
@@ -16,7 +15,6 @@ export const useDashboard = () => {
   const [stats, setStats] = useState<DashboardStats>({
     totalLeads: 0,
     totalContacts: 0,
-    totalCompanies: 0,
     totalTasks: 0,
     recentLeads: [],
     tasksByStatus: {}
@@ -29,10 +27,9 @@ export const useDashboard = () => {
 
     try {
       // Buscar estatísticas gerais
-      const [leadsResult, contactsResult, companiesResult, tasksResult] = await Promise.all([
+      const [leadsResult, contactsResult, tasksResult] = await Promise.all([
         supabase.from('leads').select('*', { count: 'exact' }),
         supabase.from('contacts').select('*', { count: 'exact' }),
-        supabase.from('companies').select('*', { count: 'exact' }),
         supabase.from('tasks').select('*', { count: 'exact' })
       ]);
 
@@ -57,7 +54,6 @@ export const useDashboard = () => {
       setStats({
         totalLeads: leadsResult.count || 0,
         totalContacts: contactsResult.count || 0,
-        totalCompanies: companiesResult.count || 0,
         totalTasks: tasksResult.count || 0,
         recentLeads: recentLeads || [],
         tasksByStatus

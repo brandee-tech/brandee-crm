@@ -2,7 +2,6 @@
 import { 
   TrendingUp, 
   Users, 
-  Building2, 
   CheckSquare,
   ArrowUpRight,
   ArrowDownRight
@@ -30,14 +29,6 @@ export const Dashboard = () => {
       trend: 'up',
       icon: Users,
       color: 'text-orange-600'
-    },
-    {
-      title: 'Total de Empresas',
-      value: stats.totalCompanies.toString(),
-      change: '+8.2%',
-      trend: 'up',
-      icon: Building2,
-      color: 'text-purple-600'
     },
     {
       title: 'Total de Tarefas',
@@ -79,7 +70,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Métricas principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (

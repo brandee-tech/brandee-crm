@@ -61,7 +61,7 @@ interface EditTaskDialogProps {
   task: Task | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEditTask: (id: string, data: any) => Promise<void>;
+  onEditTask: (id: string, data: Partial<Task>) => Promise<void>;
   users: Array<{ id: string; full_name: string | null; email: string | null }>;
 }
 

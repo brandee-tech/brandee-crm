@@ -48,7 +48,7 @@ const taskSchema = z.object({
 type TaskFormData = z.infer<typeof taskSchema>;
 
 interface AddTaskDialogProps {
-  onAddTask: (data: any) => Promise<void>;
+  onAddTask: (data: Omit<TaskFormData, 'due_date'> & { due_date: string | null }) => Promise<void>;
   users: Array<{ id: string; full_name: string | null; email: string | null }>;
 }
 

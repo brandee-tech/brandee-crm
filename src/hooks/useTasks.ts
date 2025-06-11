@@ -20,7 +20,7 @@ interface Task {
     id: string;
     full_name: string | null;
     email: string | null;
-  };
+  } | null;
 }
 
 interface User {
@@ -98,7 +98,7 @@ export const useTasks = () => {
     }
   };
 
-  const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'company_id' | 'created_by' | 'assignee'>) => {
+  const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'company_id' | 'created_by' | 'assignee'>): Promise<void> => {
     try {
       // Buscar company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
@@ -127,12 +127,14 @@ export const useTasks = () => {
         .single();
 
       if (error) throw error;
-      setTasks(prev => [data, ...prev]);
-      toast({
-        title: "Sucesso",
-        description: "Tarefa criada com sucesso"
-      });
-      return data;
+      
+      if (data) {
+        setTasks(prev => [data, ...prev]);
+        toast({
+          title: "Sucesso",
+          description: "Tarefa criada com sucesso"
+        });
+      }
     } catch (error) {
       console.error('Erro ao criar tarefa:', error);
       toast({
@@ -143,7 +145,7 @@ export const useTasks = () => {
     }
   };
 
-  const updateTask = async (id: string, updates: Partial<Task>) => {
+  const updateTask = async (id: string, updates: Partial<Task>): Promise<void> => {
     try {
       const { data, error } = await supabase
         .from('tasks')
@@ -160,12 +162,14 @@ export const useTasks = () => {
         .single();
 
       if (error) throw error;
-      setTasks(prev => prev.map(task => task.id === id ? data : task));
-      toast({
-        title: "Sucesso",
-        description: "Tarefa atualizada com sucesso"
-      });
-      return data;
+      
+      if (data) {
+        setTasks(prev => prev.map(task => task.id === id ? data : task));
+        toast({
+          title: "Sucesso",
+          description: "Tarefa atualizada com sucesso"
+        });
+      }
     } catch (error) {
       console.error('Erro ao atualizar tarefa:', error);
       toast({

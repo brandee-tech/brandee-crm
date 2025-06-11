@@ -22,7 +22,7 @@ export const useSaasMetrics = () => {
       if (error) throw error;
       
       // Type cast the Json response to our SaasMetrics interface
-      setMetrics(data as SaasMetrics);
+      setMetrics(data as unknown as SaasMetrics);
     } catch (error) {
       console.error('Erro ao buscar métricas SaaS:', error);
       toast({

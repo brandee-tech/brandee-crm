@@ -1,7 +1,9 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
 import {
   LayoutDashboard,
   Users,
@@ -24,6 +26,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { signOut } = useAuth();
+  const { company, isLoading } = useCompanySettings();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -42,7 +45,19 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   return (
     <div className="w-64 bg-white shadow-lg flex flex-col">
       <div className="p-6 border-b">
-        <h1 className="text-xl font-bold text-gray-900">CRM System</h1>
+        <div className="flex items-center gap-3">
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={company?.logo_url} alt={company?.name} />
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              {company?.name?.charAt(0) || 'C'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-semibold text-gray-900 truncate">
+              {isLoading ? 'Carregando...' : company?.name || 'CRM System'}
+            </h1>
+          </div>
+        </div>
       </div>
       
       <nav className="flex-1 p-4 space-y-2">

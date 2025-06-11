@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,7 +94,7 @@ export const Landing = () => {
                   <Button variant="outline" onClick={() => navigate('/')}>
                     Dashboard
                   </Button>
-                  <Button onClick={() => navigate('/company-registration')}>
+                  <Button onClick={() => navigate('/register-company')}>
                     Cadastrar Empresa
                   </Button>
                 </>
@@ -102,7 +103,7 @@ export const Landing = () => {
                   <Button variant="ghost" onClick={() => navigate('/auth')}>
                     Entrar
                   </Button>
-                  <Button onClick={() => navigate('/company-registration')}>
+                  <Button onClick={() => navigate('/register-company')}>
                     Cadastrar Empresa
                   </Button>
                 </>
@@ -130,13 +131,13 @@ export const Landing = () => {
                   Ir para Dashboard
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
-                <Button variant="outline" size="lg" onClick={() => navigate('/company-registration')}>
+                <Button variant="outline" size="lg" onClick={() => navigate('/register-company')}>
                   Cadastrar Nova Empresa
                 </Button>
               </>
             ) : (
               <>
-                <Button size="lg" onClick={() => navigate('/company-registration')}>
+                <Button size="lg" onClick={() => navigate('/register-company')}>
                   Começar Gratuitamente
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
@@ -219,7 +220,7 @@ export const Landing = () => {
                   <Button 
                     className="w-full" 
                     variant={plan.popular ? "default" : "outline"}
-                    onClick={() => navigate('/company-registration')}
+                    onClick={() => navigate('/register-company')}
                   >
                     Escolher Plano
                   </Button>
@@ -245,7 +246,7 @@ export const Landing = () => {
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           ) : (
-            <Button size="lg" variant="secondary" onClick={() => navigate('/company-registration')}>
+            <Button size="lg" variant="secondary" onClick={() => navigate('/register-company')}>
               Começar Agora - É Grátis
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>

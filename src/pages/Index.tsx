@@ -14,7 +14,6 @@ import { Reports } from '@/components/Reports';
 import { UserManagement } from '@/components/UserManagement';
 import { Settings } from '@/components/Settings';
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -28,10 +27,9 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
+  // Este componente agora só é renderizado quando o usuário está logado
+  // (a lógica de verificação foi movida para Home.tsx)
+  
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':

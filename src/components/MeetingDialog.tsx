@@ -46,6 +46,9 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
 
   const currentUserProfile = profiles.find(p => p.id === user?.id);
 
+  console.log('Dialog - Current user:', user?.id);
+  console.log('Dialog - Current user profile:', currentUserProfile);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -78,6 +81,20 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
   }, [meeting, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log('Submitting form with values:', values);
+    console.log('Company ID:', currentUserProfile?.company_id);
+    console.log('User ID:', user?.id);
+
+    if (!currentUserProfile?.company_id) {
+      console.error('No company_id found for user');
+      return;
+    }
+
+    if (!user?.id) {
+      console.error('No user ID found');
+      return;
+    }
+
     try {
       if (meeting) {
         await updateMeeting.mutateAsync({
@@ -95,8 +112,8 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
           date: values.date,
           time: values.time,
           duration: values.duration,
-          company_id: currentUserProfile?.company_id || '',
-          created_by: user?.id || '',
+          company_id: currentUserProfile.company_id,
+          created_by: user.id,
           status: 'Agendada',
         });
       }

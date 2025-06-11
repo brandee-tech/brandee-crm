@@ -11,25 +11,37 @@ export const useMeetings = () => {
   const { data: meetings = [], isLoading } = useQuery({
     queryKey: ['meetings'],
     queryFn: async () => {
+      console.log('Fetching meetings...');
       const { data, error } = await supabase
         .from('meetings')
         .select('*')
         .order('date', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching meetings:', error);
+        throw error;
+      }
+      console.log('Meetings fetched:', data);
       return data as Meeting[];
     },
   });
 
   const createMeeting = useMutation({
     mutationFn: async (meeting: Omit<Meeting, 'id' | 'created_at' | 'updated_at'>) => {
+      console.log('Creating meeting with data:', meeting);
+      
       const { data, error } = await supabase
         .from('meetings')
         .insert([meeting])
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating meeting:', error);
+        throw error;
+      }
+      
+      console.log('Meeting created successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -37,6 +49,7 @@ export const useMeetings = () => {
       toast({ title: 'Reunião criada com sucesso!' });
     },
     onError: (error) => {
+      console.error('Mutation error:', error);
       toast({ 
         title: 'Erro ao criar reunião', 
         description: error.message,
@@ -47,6 +60,8 @@ export const useMeetings = () => {
 
   const updateMeeting = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Meeting> & { id: string }) => {
+      console.log('Updating meeting:', id, updates);
+      
       const { data, error } = await supabase
         .from('meetings')
         .update(updates)
@@ -54,7 +69,12 @@ export const useMeetings = () => {
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating meeting:', error);
+        throw error;
+      }
+      
+      console.log('Meeting updated successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -62,6 +82,7 @@ export const useMeetings = () => {
       toast({ title: 'Reunião atualizada com sucesso!' });
     },
     onError: (error) => {
+      console.error('Update mutation error:', error);
       toast({ 
         title: 'Erro ao atualizar reunião', 
         description: error.message,

@@ -20,8 +20,21 @@ export const Meetings = () => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
 
   const currentUserProfile = profiles.find(p => p.id === user?.id);
-  const currentUserRole = profiles.find(p => p.role_id === currentUserProfile?.role_id)?.roles;
-  const isAdmin = currentUserRole?.permissions && (currentUserRole.permissions as any).admin;
+  
+  // Log para debug
+  console.log('Current user:', user?.id);
+  console.log('Current user profile:', currentUserProfile);
+  console.log('All profiles:', profiles);
+  
+  // Verificar se é admin através das permissões do cargo
+  const userRole = currentUserProfile?.roles;
+  const isAdmin = userRole?.permissions && 
+    typeof userRole.permissions === 'object' && 
+    (userRole.permissions as any).admin === true;
+  
+  console.log('User role:', userRole);
+  console.log('Is admin:', isAdmin);
+  console.log('Role permissions:', userRole?.permissions);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -52,12 +65,10 @@ export const Meetings = () => {
           <h1 className="text-2xl font-bold text-gray-900">Reuniões</h1>
           <p className="text-gray-600">Gerencie suas reuniões, pautas e atas</p>
         </div>
-        {isAdmin && (
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nova Reunião
-          </Button>
-        )}
+        <Button onClick={() => setDialogOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Nova Reunião
+        </Button>
       </div>
 
       {isLoading ? (
@@ -72,17 +83,12 @@ export const Meetings = () => {
               Nenhuma reunião encontrada
             </h3>
             <p className="text-gray-600 text-center mb-4">
-              {isAdmin 
-                ? "Comece criando sua primeira reunião." 
-                : "Aguarde um administrador criar uma reunião."
-              }
+              Comece criando sua primeira reunião.
             </p>
-            {isAdmin && (
-              <Button onClick={() => setDialogOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Criar Primeira Reunião
-              </Button>
-            )}
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Primeira Reunião
+            </Button>
           </CardContent>
         </Card>
       ) : (

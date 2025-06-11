@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AgendaItem } from './AgendaItem';
 import { MeetingStatusSelector } from './MeetingStatusSelector';
+import { MeetingParticipants } from './MeetingParticipants';
 
 interface MeetingDetailsProps {
   meetingId: string;
@@ -202,6 +203,11 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
         </Card>
       )}
 
+      {/* Seção de Participantes */}
+      <div className="mb-6">
+        <MeetingParticipants meetingId={meetingId} />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pauta */}
         <Card>
@@ -280,7 +286,6 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
               ))}
             </div>
 
-            {/* Upload de arquivo */}
             <div className="space-y-2">
               <input
                 type="file"
@@ -301,7 +306,6 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
               </Button>
             </div>
 
-            {/* Adicionar link */}
             <div className="space-y-2">
               <Input
                 placeholder="Nome do link"

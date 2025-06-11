@@ -30,19 +30,33 @@ export const useMeetings = () => {
     mutationFn: async (meeting: Omit<Meeting, 'id' | 'created_at' | 'updated_at'>) => {
       console.log('Creating meeting with data:', meeting);
       
-      const { data, error } = await supabase
+      const { data: meetingData, error: meetingError } = await supabase
         .from('meetings')
         .insert([meeting])
         .select()
         .single();
       
-      if (error) {
-        console.error('Error creating meeting:', error);
-        throw error;
+      if (meetingError) {
+        console.error('Error creating meeting:', meetingError);
+        throw meetingError;
       }
       
-      console.log('Meeting created successfully:', data);
-      return data;
+      // Adicionar o criador como organizador automaticamente
+      const { error: participantError } = await supabase
+        .from('meeting_participants')
+        .insert([{
+          meeting_id: meetingData.id,
+          user_id: meeting.created_by,
+          role: 'organizer'
+        }]);
+      
+      if (participantError) {
+        console.error('Error adding organizer as participant:', participantError);
+        // Não vamos falhar a criação da reunião por isso, apenas logar o erro
+      }
+      
+      console.log('Meeting created successfully:', meetingData);
+      return meetingData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meetings'] });

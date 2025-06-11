@@ -39,20 +39,37 @@ export const useTasks = () => {
 
   const fetchTasks = async () => {
     try {
-      const { data, error } = await supabase
+      // First fetch tasks without the assignee join
+      const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
-        .select(`
-          *,
-          assignee:profiles(
-            id,
-            full_name,
-            email
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setTasks(data || []);
+      if (tasksError) throw tasksError;
+
+      // Then fetch assignee data separately and merge it
+      const tasksWithAssignees = await Promise.all(
+        (tasksData || []).map(async (task) => {
+          if (task.assignee_id) {
+            const { data: assigneeData } = await supabase
+              .from('profiles')
+              .select('id, full_name, email')
+              .eq('id', task.assignee_id)
+              .single();
+            
+            return {
+              ...task,
+              assignee: assigneeData || null
+            };
+          }
+          return {
+            ...task,
+            assignee: null
+          };
+        })
+      );
+
+      setTasks(tasksWithAssignees);
     } catch (error) {
       console.error('Erro ao buscar tarefas:', error);
       toast({
@@ -116,20 +133,29 @@ export const useTasks = () => {
           created_by: user?.id,
           company_id: profileData.company_id 
         }])
-        .select(`
-          *,
-          assignee:profiles(
-            id,
-            full_name,
-            email
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
       
       if (data) {
-        setTasks(prev => [data, ...prev]);
+        // Fetch assignee data if there is one
+        let assigneeData = null;
+        if (data.assignee_id) {
+          const { data: assignee } = await supabase
+            .from('profiles')
+            .select('id, full_name, email')
+            .eq('id', data.assignee_id)
+            .single();
+          assigneeData = assignee;
+        }
+
+        const taskWithAssignee = {
+          ...data,
+          assignee: assigneeData
+        };
+
+        setTasks(prev => [taskWithAssignee, ...prev]);
         toast({
           title: "Sucesso",
           description: "Tarefa criada com sucesso"
@@ -151,20 +177,29 @@ export const useTasks = () => {
         .from('tasks')
         .update(updates)
         .eq('id', id)
-        .select(`
-          *,
-          assignee:profiles(
-            id,
-            full_name,
-            email
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
       
       if (data) {
-        setTasks(prev => prev.map(task => task.id === id ? data : task));
+        // Fetch assignee data if there is one
+        let assigneeData = null;
+        if (data.assignee_id) {
+          const { data: assignee } = await supabase
+            .from('profiles')
+            .select('id, full_name, email')
+            .eq('id', data.assignee_id)
+            .single();
+          assigneeData = assignee;
+        }
+
+        const taskWithAssignee = {
+          ...data,
+          assignee: assigneeData
+        };
+
+        setTasks(prev => prev.map(task => task.id === id ? taskWithAssignee : task));
         toast({
           title: "Sucesso",
           description: "Tarefa atualizada com sucesso"

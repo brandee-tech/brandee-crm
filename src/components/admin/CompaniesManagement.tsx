@@ -1,9 +1,11 @@
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAllCompanies } from '@/hooks/useAllCompanies';
-import { Building2, Users, Phone, Globe, MapPin, Calendar } from 'lucide-react';
+import { CompanyFormDialog } from './CompanyFormDialog';
+import { Building2, Users, Phone, Globe, MapPin, Calendar, Plus, Edit } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -12,8 +14,27 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface CompanyData {
+  id: string;
+  name: string;
+  domain: string | null;
+  industry: string | null;
+  size: string | null;
+  location: string | null;
+  website: string | null;
+  phone: string | null;
+  plan: string | null;
+  status: string | null;
+  user_count: number;
+  leads_count: number;
+  appointments_count: number;
+  created_at: string;
+}
+
 export const CompaniesManagement = () => {
-  const { companies, loading, updateCompanyStatus } = useAllCompanies();
+  const { companies, loading, updateCompanyStatus, refetch } = useAllCompanies();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingCompany, setEditingCompany] = useState<CompanyData | null>(null);
 
   if (loading) {
     return (
@@ -49,13 +70,33 @@ export const CompaniesManagement = () => {
     }
   };
 
+  const handleAddCompany = () => {
+    setEditingCompany(null);
+    setDialogOpen(true);
+  };
+
+  const handleEditCompany = (company: CompanyData) => {
+    setEditingCompany(company);
+    setDialogOpen(true);
+  };
+
+  const handleDialogSuccess = () => {
+    refetch();
+  };
+
   return (
     <div className="p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Empresas</h1>
-        <p className="text-gray-600 mt-2">
-          Visualize e gerencie todas as empresas cadastradas no sistema
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Empresas</h1>
+          <p className="text-gray-600 mt-2">
+            Visualize e gerencie todas as empresas cadastradas no sistema
+          </p>
+        </div>
+        <Button onClick={handleAddCompany} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          Adicionar Empresa
+        </Button>
       </div>
 
       {/* Estatísticas Rápidas */}
@@ -166,7 +207,7 @@ export const CompaniesManagement = () => {
                 Criada em {new Date(company.created_at).toLocaleDateString('pt-BR')}
               </div>
 
-              <div className="pt-2 border-t">
+              <div className="pt-2 border-t space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Status:</span>
                   <Select 
@@ -183,6 +224,16 @@ export const CompaniesManagement = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => handleEditCompany(company)}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar Empresa
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -195,6 +246,13 @@ export const CompaniesManagement = () => {
           <p className="text-gray-400 mt-2">As empresas aparecerão aqui quando se cadastrarem no sistema</p>
         </Card>
       )}
+
+      <CompanyFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        company={editingCompany}
+        onSuccess={handleDialogSuccess}
+      />
     </div>
   );
 };

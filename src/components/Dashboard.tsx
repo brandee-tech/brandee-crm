@@ -1,4 +1,3 @@
-
 import { 
   TrendingUp, 
   Users, 
@@ -100,8 +99,8 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center px-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1">Visão geral do seu negócio</p>
@@ -113,7 +112,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Métricas principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
@@ -143,7 +142,7 @@ export const Dashboard = () => {
       </div>
 
       {/* KPIs Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
@@ -162,7 +161,7 @@ export const Dashboard = () => {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-8">
         {/* Status das Tarefas */}
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Status das Tarefas</h3>
@@ -229,7 +228,7 @@ export const Dashboard = () => {
 
       {/* Status dos Agendamentos */}
       {Object.keys(stats.appointmentsByStatus).length > 0 && (
-        <Card className="p-6">
+        <Card className="p-6 mx-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">Status dos Agendamentos</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Object.entries(stats.appointmentsByStatus).map(([status, count]) => (

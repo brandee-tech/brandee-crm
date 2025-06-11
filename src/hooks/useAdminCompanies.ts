@@ -53,27 +53,12 @@ export const useAdminCompanies = () => {
 
       if (error) {
         console.error('useAdminCompanies: Error creating company:', error);
-        
-        // Log security event for unauthorized create attempt
-        if (error.code === 'PGRST116' || error.message?.includes('RLS')) {
-          await supabase.rpc('log_security_event', {
-            event_type: 'unauthorized_company_create_attempt',
-            details: { company_data: data, error: error.message }
-          });
-        }
-        
         throw error;
       }
 
       toast({
         title: "Sucesso",
         description: "Empresa criada com sucesso"
-      });
-
-      // Log successful company creation
-      await supabase.rpc('log_security_event', {
-        event_type: 'company_created',
-        details: { company_name: data.name, plan: data.plan }
       });
 
       return true;
@@ -130,27 +115,12 @@ export const useAdminCompanies = () => {
 
       if (error) {
         console.error('useAdminCompanies: Error updating company:', error);
-        
-        // Log security event for unauthorized update attempt
-        if (error.code === 'PGRST116' || error.message?.includes('RLS')) {
-          await supabase.rpc('log_security_event', {
-            event_type: 'unauthorized_company_update_attempt',
-            details: { company_id: data.id, company_data: data, error: error.message }
-          });
-        }
-        
         throw error;
       }
 
       toast({
         title: "Sucesso",
         description: "Empresa atualizada com sucesso"
-      });
-
-      // Log successful company update
-      await supabase.rpc('log_security_event', {
-        event_type: 'company_updated',
-        details: { company_id: data.id, company_name: data.name }
       });
 
       return true;

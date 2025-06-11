@@ -37,13 +37,9 @@ export const useAllCompanies = () => {
       if (error) {
         console.error('useAllCompanies: Error fetching companies:', error);
         
-        // Log security event for unauthorized access attempt
+        // Log error for debugging
         if (error.code === 'PGRST116' || error.message?.includes('RLS')) {
           console.log('useAllCompanies: RLS policy blocked access - user may not be SaaS admin');
-          await supabase.rpc('log_security_event', {
-            event_type: 'unauthorized_company_access_attempt',
-            details: { error: error.message, code: error.code }
-          });
         }
         
         throw error;
@@ -83,15 +79,6 @@ export const useAllCompanies = () => {
 
       if (error) {
         console.error('useAllCompanies: Error updating company status:', error);
-        
-        // Log security event for unauthorized update attempt
-        if (error.code === 'PGRST116' || error.message?.includes('RLS')) {
-          await supabase.rpc('log_security_event', {
-            event_type: 'unauthorized_company_update_attempt',
-            details: { company_id: id, attempted_status: status, error: error.message }
-          });
-        }
-        
         throw error;
       }
       
@@ -104,12 +91,6 @@ export const useAllCompanies = () => {
       toast({
         title: "Sucesso",
         description: "Status da empresa atualizado com sucesso"
-      });
-
-      // Log successful status update
-      await supabase.rpc('log_security_event', {
-        event_type: 'company_status_updated',
-        details: { company_id: id, new_status: status }
       });
       
     } catch (error: any) {

@@ -60,26 +60,10 @@ export const useSaasAdmin = () => {
           console.log('useSaasAdmin: Primary RPC result:', data);
           setIsSaasAdmin(data || false);
         }
-
-        // Log admin check for security audit
-        await supabase.rpc('log_security_event', {
-          event_type: 'admin_status_check',
-          details: { is_admin: data || false }
-        }).catch(console.error); // Don't fail if logging fails
         
       } catch (error) {
         console.error('Erro ao verificar admin SaaS:', error);
         setIsSaasAdmin(false);
-        
-        // Try to log the failed admin check
-        try {
-          await supabase.rpc('log_security_event', {
-            event_type: 'admin_check_failed',
-            details: { error: error.message }
-          });
-        } catch (logError) {
-          console.error('Failed to log security event:', logError);
-        }
       } finally {
         setLoading(false);
       }

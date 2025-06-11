@@ -96,21 +96,21 @@ export const Leads = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="p-4 md:p-8 flex items-center justify-center">
         <div className="text-lg">Carregando leads...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Leads</h1>
           <p className="text-gray-600 mt-1">Gerencie seus prospects e oportunidades</p>
         </div>
         <Button 
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
           onClick={() => setAddDialogOpen(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -126,10 +126,10 @@ export const Leads = () => {
 
       <div className="grid gap-4">
         {filteredLeads.map((lead) => (
-          <Card key={lead.id} className="p-6 hover:shadow-lg transition-shadow duration-200">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <Card key={lead.id} className="p-4 md:p-6 hover:shadow-lg transition-shadow duration-200">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                   <h3 className="text-lg font-semibold text-gray-900">{lead.name}</h3>
                   <Badge className={getStatusColor(lead.status || 'Frio')}>{lead.status || 'Frio'}</Badge>
                 </div>
@@ -137,7 +137,7 @@ export const Leads = () => {
                   {lead.email && (
                     <div className="flex items-center gap-1">
                       <Mail className="w-4 h-4" />
-                      {lead.email}
+                      <span className="break-all">{lead.email}</span>
                     </div>
                   )}
                   {lead.phone && (
@@ -150,29 +150,31 @@ export const Leads = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div className="text-right">
+                <div className="text-left sm:text-right">
                   <p className="text-xl font-bold text-gray-900">{formatValue(lead.value)}</p>
                   <p className="text-sm text-gray-500">Origem: {lead.source || 'N/A'}</p>
-                  <p className="text-sm text-gray-500">{formatDate(lead.created_at)}</p>
+                  <p className="text-xs text-gray-400 mt-1">Criado: {formatDate(lead.created_at)}</p>
                 </div>
                 
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleEdit(lead)}
+                    className="flex-1 sm:flex-none"
                   >
-                    <Edit2 className="w-4 h-4" />
+                    <Edit2 className="w-4 h-4 mr-1" />
+                    <span className="sm:hidden">Editar</span>
                   </Button>
-                  
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-red-600 hover:text-red-700"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 flex-1 sm:flex-none"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        <span className="sm:hidden">Excluir</span>
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -184,10 +186,7 @@ export const Leads = () => {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction 
-                          onClick={() => handleDelete(lead.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
+                        <AlertDialogAction onClick={() => handleDelete(lead.id)}>
                           Excluir
                         </AlertDialogAction>
                       </AlertDialogFooter>
@@ -201,10 +200,15 @@ export const Leads = () => {
       </div>
 
       {filteredLeads.length === 0 && (
-        <Card className="p-12 text-center">
-          <p className="text-gray-500 text-lg">Nenhum lead encontrado</p>
-          <p className="text-gray-400 mt-2">Tente ajustar os filtros ou adicionar novos leads</p>
-        </Card>
+        <div className="text-center py-12">
+          <div className="text-lg font-medium text-gray-900 mb-2">Nenhum lead encontrado</div>
+          <p className="text-gray-600">
+            {leads.length === 0 
+              ? 'Comece criando seu primeiro lead.'
+              : 'Tente ajustar os filtros para encontrar leads.'
+            }
+          </p>
+        </div>
       )}
 
       <EditLeadDialog

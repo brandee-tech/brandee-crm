@@ -84,21 +84,21 @@ export const CalendarView = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="p-4 md:p-8 flex items-center justify-center">
         <div className="text-lg">Carregando calendário...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Calendário</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Calendário</h1>
           <p className="text-gray-600 mt-1">Visualize todos os agendamentos e reuniões</p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <Button
             variant="outline"
             size="sm"
@@ -107,7 +107,7 @@ export const CalendarView = () => {
             <ChevronLeft className="w-4 h-4" />
           </Button>
           
-          <h2 className="text-xl font-semibold min-w-[200px] text-center">
+          <h2 className="text-lg md:text-xl font-semibold min-w-[150px] md:min-w-[200px] text-center">
             {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
           </h2>
           
@@ -122,7 +122,7 @@ export const CalendarView = () => {
       </div>
 
       {/* Legenda */}
-      <div className="flex flex-wrap gap-4 text-sm">
+      <div className="flex flex-wrap gap-3 md:gap-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-blue-500"></div>
           <span>Agendamentos</span>
@@ -133,16 +133,18 @@ export const CalendarView = () => {
         </div>
       </div>
 
-      <Card className="p-6">
-        <div className="grid grid-cols-7 gap-4 mb-4">
+      <Card className="p-3 md:p-6">
+        {/* Header dos dias da semana */}
+        <div className="grid grid-cols-7 gap-1 md:gap-4 mb-4">
           {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => (
-            <div key={day} className="text-center font-medium text-gray-500 py-2">
+            <div key={day} className="text-center font-medium text-gray-500 py-2 text-xs md:text-sm">
               {day}
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-4">
+        {/* Grid do calendário */}
+        <div className="grid grid-cols-7 gap-1 md:gap-4">
           {daysInMonth.map((day) => {
             const dayAppointments = getAppointmentsForDay(day);
             const dayMeetings = getMeetingsForDay(day);
@@ -151,11 +153,11 @@ export const CalendarView = () => {
             return (
               <div
                 key={day.toISOString()}
-                className={`min-h-[140px] p-2 border rounded-lg ${
+                className={`min-h-[80px] md:min-h-[140px] p-1 md:p-2 border rounded-lg ${
                   isToday ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'
                 }`}
               >
-                <div className={`text-sm font-medium mb-2 ${
+                <div className={`text-xs md:text-sm font-medium mb-1 md:mb-2 ${
                   isToday ? 'text-blue-600' : 'text-gray-900'
                 }`}>
                   {format(day, 'd')}
@@ -163,58 +165,65 @@ export const CalendarView = () => {
 
                 <div className="space-y-1">
                   {/* Agendamentos */}
-                  {dayAppointments.map((appointment) => (
+                  {dayAppointments.slice(0, 2).map((appointment) => (
                     <div
                       key={appointment.id}
                       className="text-xs p-1 rounded bg-blue-100 text-blue-800 border border-blue-200 cursor-pointer hover:bg-blue-200 transition-colors"
                       onClick={() => handleAppointmentClick(appointment)}
                     >
                       <div className="flex items-center gap-1 mb-1">
-                        <Clock className="w-3 h-3" />
-                        <span className="font-medium">{formatTime(appointment.time)}</span>
+                        <Clock className="w-2 h-2 md:w-3 md:h-3" />
+                        <span className="font-medium text-[10px] md:text-xs">{formatTime(appointment.time)}</span>
                       </div>
                       
-                      <div className="font-medium truncate" title={appointment.title}>
+                      <div className="font-medium truncate text-[10px] md:text-xs" title={appointment.title}>
                         {appointment.title}
                       </div>
                       
                       {appointment.leads && (
-                        <div className="flex items-center gap-1 text-gray-600">
-                          <User className="w-3 h-3" />
-                          <span className="truncate" title={appointment.leads.name}>
+                        <div className="flex items-center gap-1 text-gray-600 hidden md:flex">
+                          <User className="w-2 h-2 md:w-3 md:h-3" />
+                          <span className="truncate text-[10px]" title={appointment.leads.name}>
                             {appointment.leads.name}
                           </span>
                         </div>
                       )}
                       
-                      <Badge className={`${getAppointmentStatusColor(appointment.status)} text-xs mt-1`}>
+                      <Badge className={`${getAppointmentStatusColor(appointment.status)} text-[10px] mt-1 hidden md:inline-flex`}>
                         {appointment.status}
                       </Badge>
                     </div>
                   ))}
 
                   {/* Reuniões */}
-                  {dayMeetings.map((meeting) => (
+                  {dayMeetings.slice(0, 2).map((meeting) => (
                     <div
                       key={meeting.id}
                       className="text-xs p-1 rounded bg-purple-100 text-purple-800 border border-purple-200 cursor-pointer hover:bg-purple-200 transition-colors"
                       onClick={() => handleMeetingClick(meeting)}
                     >
                       <div className="flex items-center gap-1 mb-1">
-                        <Clock className="w-3 h-3" />
-                        <span className="font-medium">{formatTime(meeting.time)}</span>
+                        <Clock className="w-2 h-2 md:w-3 md:h-3" />
+                        <span className="font-medium text-[10px] md:text-xs">{formatTime(meeting.time)}</span>
                       </div>
                       
-                      <div className="font-medium truncate" title={meeting.title}>
-                        <Users className="w-3 h-3 inline mr-1" />
+                      <div className="font-medium truncate text-[10px] md:text-xs" title={meeting.title}>
+                        <Users className="w-2 h-2 md:w-3 md:h-3 inline mr-1" />
                         {meeting.title}
                       </div>
                       
-                      <Badge className={`${getMeetingStatusColor(meeting.status)} text-xs mt-1`}>
+                      <Badge className={`${getMeetingStatusColor(meeting.status)} text-[10px] mt-1 hidden md:inline-flex`}>
                         {meeting.status}
                       </Badge>
                     </div>
                   ))}
+
+                  {/* Indicador de mais eventos */}
+                  {(dayAppointments.length + dayMeetings.length) > 2 && (
+                    <div className="text-[10px] text-gray-500 font-medium">
+                      +{(dayAppointments.length + dayMeetings.length) - 2} mais
+                    </div>
+                  )}
                 </div>
               </div>
             );

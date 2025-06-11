@@ -43,7 +43,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   ];
 
   return (
-    <div className="w-64 bg-white shadow-lg flex flex-col">
+    <div className="hidden md:flex w-64 bg-white shadow-lg flex-col">
       <div className="p-6 border-b">
         <div className="flex items-center gap-3">
           <Avatar className="w-10 h-10">

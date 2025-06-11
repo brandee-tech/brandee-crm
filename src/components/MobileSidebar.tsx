@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
 import { useCompanySettings } from '@/hooks/useCompanySettings';
+import { useSaasAdmin } from '@/hooks/useSaasAdmin';
 import { Menu, X } from 'lucide-react';
 import {
   LayoutDashboard,
@@ -19,6 +19,7 @@ import {
   Calendar,
   CalendarDays,
   Video,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +32,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
   const [isOpen, setIsOpen] = useState(false);
   const { signOut } = useAuth();
   const { company, isLoading } = useCompanySettings();
+  const { isSaasAdmin } = useSaasAdmin();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -48,6 +50,11 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
 
   const handleItemClick = (tab: string) => {
     setActiveTab(tab);
+    setIsOpen(false);
+  };
+
+  const handleAdminSaasClick = () => {
+    window.location.href = '/admin';
     setIsOpen(false);
   };
 
@@ -94,6 +101,22 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
                 </Button>
               );
             })}
+
+            {isSaasAdmin && (
+              <>
+                <div className="border-t pt-2 mt-2">
+                  <p className="text-xs text-gray-500 px-3 pb-2">Administração SaaS</p>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={handleAdminSaasClick}
+                  >
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin SaaS
+                  </Button>
+                </div>
+              </>
+            )}
           </nav>
 
           <div className="p-4 border-t">

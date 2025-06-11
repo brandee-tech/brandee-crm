@@ -1,38 +1,37 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AdminSaas from "./pages/AdminSaas";
 import Landing from "./pages/Landing";
 import CompanyRegistration from "./pages/CompanyRegistration";
 import NotFound from "./pages/NotFound";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { WhatsAppButton } from "./components/WhatsAppButton";
+import "./App.css";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <div className="min-h-screen bg-background">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/admin" element={<AdminSaas />} />
             <Route path="/landing" element={<Landing />} />
-            <Route path="/company-registration" element={<CompanyRegistration />} />
+            <Route path="/register-company" element={<CompanyRegistration />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppButton />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+          <Toaster />
+        </div>
+      </Router>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

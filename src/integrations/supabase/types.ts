@@ -67,6 +67,13 @@ export type Database = {
             foreignKeyName: "appointments_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -127,6 +134,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "audit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "audit_logs_company_id_fkey"
             columns: ["company_id"]
@@ -241,6 +255,13 @@ export type Database = {
             foreignKeyName: "company_settings_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -291,6 +312,13 @@ export type Database = {
             foreignKeyName: "contacts_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -337,6 +365,13 @@ export type Database = {
           value?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_company_id_fkey"
             columns: ["company_id"]
@@ -534,6 +569,13 @@ export type Database = {
             foreignKeyName: "meetings_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meetings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -572,6 +614,13 @@ export type Database = {
             foreignKeyName: "pipeline_columns_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pipeline_columns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -606,6 +655,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_company_id_fkey"
             columns: ["company_id"]
@@ -658,6 +714,13 @@ export type Database = {
             foreignKeyName: "roles_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -698,6 +761,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "scripts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "scripts_company_id_fkey"
             columns: ["company_id"]
@@ -755,6 +825,13 @@ export type Database = {
             foreignKeyName: "tasks_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -799,6 +876,13 @@ export type Database = {
             foreignKeyName: "user_invitations_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -813,7 +897,90 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_companies_view: {
+        Row: {
+          address: string | null
+          appointments_count: number | null
+          billing_settings: Json | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          date_format: string | null
+          domain: string | null
+          id: string | null
+          industry: string | null
+          leads_count: number | null
+          location: string | null
+          logo_url: string | null
+          name: string | null
+          notification_settings: Json | null
+          phone: string | null
+          plan: string | null
+          revenue: string | null
+          size: string | null
+          status: string | null
+          timezone: string | null
+          updated_at: string | null
+          user_count: number | null
+          website: string | null
+          whatsapp_support: Json | null
+        }
+        Insert: {
+          address?: string | null
+          appointments_count?: never
+          billing_settings?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          date_format?: string | null
+          domain?: string | null
+          id?: string | null
+          industry?: string | null
+          leads_count?: never
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notification_settings?: Json | null
+          phone?: string | null
+          plan?: string | null
+          revenue?: string | null
+          size?: string | null
+          status?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_count?: never
+          website?: string | null
+          whatsapp_support?: Json | null
+        }
+        Update: {
+          address?: string | null
+          appointments_count?: never
+          billing_settings?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          date_format?: string | null
+          domain?: string | null
+          id?: string | null
+          industry?: string | null
+          leads_count?: never
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notification_settings?: Json | null
+          phone?: string | null
+          plan?: string | null
+          revenue?: string | null
+          size?: string | null
+          status?: string | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_count?: never
+          website?: string | null
+          whatsapp_support?: Json | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_invitation: {
@@ -828,11 +995,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_saas_metrics: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       has_permission: {
         Args: { user_id: string; permission: string }
         Returns: boolean
       }
       is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_saas_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }

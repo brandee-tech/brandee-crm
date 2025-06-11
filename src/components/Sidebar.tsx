@@ -1,9 +1,9 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
+import { useSaasAdmin } from "@/hooks/useSaasAdmin";
 import {
   LayoutDashboard,
   Users,
@@ -17,6 +17,7 @@ import {
   Calendar,
   CalendarDays,
   Video,
+  Shield,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -27,6 +28,7 @@ interface SidebarProps {
 export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { signOut } = useAuth();
   const { company, isLoading } = useCompanySettings();
+  const { isSaasAdmin } = useSaasAdmin();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -41,6 +43,10 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'users', label: 'Usuários', icon: Users },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
+
+  const handleAdminSaasClick = () => {
+    window.location.href = '/admin';
+  };
 
   return (
     <div className="hidden md:flex w-64 bg-white shadow-lg flex-col">
@@ -78,6 +84,22 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
             </Button>
           );
         })}
+
+        {isSaasAdmin && (
+          <>
+            <div className="border-t pt-2 mt-2">
+              <p className="text-xs text-gray-500 px-3 pb-2">Administração SaaS</p>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                onClick={handleAdminSaasClick}
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                Admin SaaS
+              </Button>
+            </div>
+          </>
+        )}
       </nav>
 
       <div className="p-4 border-t">

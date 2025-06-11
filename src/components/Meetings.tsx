@@ -20,7 +20,8 @@ export const Meetings = () => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
 
   const currentUserProfile = profiles.find(p => p.id === user?.id);
-  const isAdmin = currentUserProfile?.role_id && profiles.find(p => p.role_id === currentUserProfile.role_id)?.roles?.permissions?.admin;
+  const currentUserRole = profiles.find(p => p.role_id === currentUserProfile?.role_id)?.roles;
+  const isAdmin = currentUserRole?.permissions && (currentUserRole.permissions as any).admin;
 
   const getStatusColor = (status: string) => {
     switch (status) {

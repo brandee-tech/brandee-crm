@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Calendar, Clock, Plus, FileText, Upload, Link as LinkIcon, Image, File } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +29,7 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
   // Inicializar conteúdo das atas quando carregado
-  useState(() => {
+  useEffect(() => {
     if (minutes?.content) {
       setMinutesContent(minutes.content);
     }

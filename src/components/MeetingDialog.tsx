@@ -82,11 +82,19 @@ export const MeetingDialog = ({ open, onOpenChange, meeting }: MeetingDialogProp
       if (meeting) {
         await updateMeeting.mutateAsync({
           id: meeting.id,
-          ...values,
+          title: values.title,
+          description: values.description || '',
+          date: values.date,
+          time: values.time,
+          duration: values.duration,
         });
       } else {
         await createMeeting.mutateAsync({
-          ...values,
+          title: values.title,
+          description: values.description || '',
+          date: values.date,
+          time: values.time,
+          duration: values.duration,
           company_id: currentUserProfile?.company_id || '',
           created_by: user?.id || '',
           status: 'Agendada',

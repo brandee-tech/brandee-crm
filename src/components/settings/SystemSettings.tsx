@@ -1,170 +1,229 @@
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Settings, Plus, X, Palette } from 'lucide-react';
+import { Plus, Trash2, Edit2 } from 'lucide-react';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
-import { useCompanySettings } from '@/hooks/useCompanySettings';
+import { useToast } from '@/hooks/use-toast';
 
 export const SystemSettings = () => {
-  const { columns, createColumn, updateColumn, deleteColumn } = usePipelineColumns();
-  const { getSetting, updateSetting } = useCompanySettings();
-  
-  const [newColumn, setNewColumn] = useState({ name: '', color: '#3B82F6' });
-  const [leadSources, setLeadSources] = useState(
-    getSetting('lead_sources') || ['Website', 'Telefone', 'Email', 'Indicação', 'Redes Sociais']
-  );
-  const [leadStatuses, setLeadStatuses] = useState(
-    getSetting('lead_statuses') || ['Frio', 'Morno', 'Quente', 'Qualificado']
-  );
+  const { toast } = useToast();
+  const { columns, createColumn, deleteColumn } = usePipelineColumns();
+  const [newColumnName, setNewColumnName] = useState('');
+  const [isAddingColumn, setIsAddingColumn] = useState(false);
 
-  const handleAddColumn = () => {
-    if (newColumn.name.trim()) {
-      createColumn.mutateAsync({
-        name: newColumn.name,
-        color: newColumn.color,
+  const handleAddColumn = async () => {
+    if (!newColumnName.trim()) return;
+    
+    setIsAddingColumn(true);
+    try {
+      await createColumn({
+        name: newColumnName,
+        color: '#3B82F6',
         order_index: columns.length,
       });
-      setNewColumn({ name: '', color: '#3B82F6' });
+      setNewColumnName('');
+      toast({
+        title: 'Coluna adicionada',
+        description: 'Nova coluna do pipeline criada com sucesso.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível adicionar a coluna.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAddingColumn(false);
     }
   };
 
-  const handleAddLeadSource = () => {
-    const newSource = prompt('Nova fonte de lead:');
-    if (newSource && !leadSources.includes(newSource)) {
-      const updated = [...leadSources, newSource];
-      setLeadSources(updated);
-      updateSetting.mutateAsync({ key: 'lead_sources', value: updated });
+  const handleDeleteColumn = async (columnId: string) => {
+    try {
+      await deleteColumn(columnId);
+      toast({
+        title: 'Coluna removida',
+        description: 'Coluna do pipeline removida com sucesso.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível remover a coluna.',
+        variant: 'destructive',
+      });
     }
   };
 
-  const handleRemoveLeadSource = (source: string) => {
-    const updated = leadSources.filter(s => s !== source);
-    setLeadSources(updated);
-    updateSetting.mutateAsync({ key: 'lead_sources', value: updated });
-  };
+  const leadStatuses = [
+    { name: 'Novo Lead', color: '#10B981' },
+    { name: 'Contactado', color: '#3B82F6' },
+    { name: 'Qualificado', color: '#F59E0B' },
+    { name: 'Proposta Enviada', color: '#8B5CF6' },
+    { name: 'Negociação', color: '#F97316' },
+    { name: 'Fechado', color: '#059669' },
+    { name: 'Perdido', color: '#EF4444' },
+  ];
 
-  const handleAddLeadStatus = () => {
-    const newStatus = prompt('Novo status de lead:');
-    if (newStatus && !leadStatuses.includes(newStatus)) {
-      const updated = [...leadStatuses, newStatus];
-      setLeadStatuses(updated);
-      updateSetting.mutateAsync({ key: 'lead_statuses', value: updated });
-    }
-  };
-
-  const handleRemoveLeadStatus = (status: string) => {
-    const updated = leadStatuses.filter(s => s !== status);
-    setLeadStatuses(updated);
-    updateSetting.mutateAsync({ key: 'lead_statuses', value: updated });
-  };
+  const leadSources = [
+    'Website',
+    'Redes Sociais',
+    'Google Ads',
+    'Facebook Ads',
+    'Indicação',
+    'Cold Email',
+    'Telefone',
+    'Evento',
+    'Outros'
+  ];
 
   return (
     <div className="space-y-6">
+      {/* Pipeline Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Configurações do Sistema
-          </CardTitle>
+          <CardTitle>Configurações do Pipeline</CardTitle>
+          <CardDescription>
+            Gerencie as colunas do seu pipeline de vendas
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {columns.map((column) => (
+              <div
+                key={column.id}
+                className="p-4 border rounded-lg flex items-center justify-between"
+              >
+                <div className="flex items-center space-x-3">
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: column.color }}
+                  />
+                  <span className="font-medium">{column.name}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm">
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteColumn(column.id)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center space-x-2">
+            <Input
+              placeholder="Nome da nova coluna"
+              value={newColumnName}
+              onChange={(e) => setNewColumnName(e.target.value)}
+              className="flex-1"
+            />
+            <Button 
+              onClick={handleAddColumn}
+              disabled={isAddingColumn || !newColumnName.trim()}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Adicionar Coluna
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Lead Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Configurações de Leads</CardTitle>
+          <CardDescription>
+            Status e fontes de leads disponíveis
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Pipeline Configuration */}
           <div>
-            <h3 className="text-lg font-medium mb-4">Configuração do Pipeline</h3>
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Nome da nova coluna"
-                  value={newColumn.name}
-                  onChange={(e) => setNewColumn(prev => ({ ...prev, name: e.target.value }))}
-                />
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4" />
-                  <input
-                    type="color"
-                    value={newColumn.color}
-                    onChange={(e) => setNewColumn(prev => ({ ...prev, color: e.target.value }))}
-                    className="w-10 h-10 border rounded cursor-pointer"
-                  />
-                </div>
-                <Button onClick={handleAddColumn} size="sm">
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {columns.map((column) => (
-                  <div key={column.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-4 h-4 rounded-full" 
-                        style={{ backgroundColor: column.color }}
-                      />
-                      <span className="font-medium">{column.name}</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteColumn.mutateAsync(column.id)}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
+            <Label className="text-base font-medium">Status de Leads</Label>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {leadStatuses.map((status, index) => (
+                <Badge
+                  key={index}
+                  style={{ backgroundColor: status.color }}
+                  className="text-white"
+                >
+                  {status.name}
+                </Badge>
+              ))}
             </div>
           </div>
 
           <Separator />
 
-          {/* Lead Sources */}
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Fontes de Leads</h3>
-              <Button onClick={handleAddLeadSource} size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Fonte
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {leadSources.map((source) => (
-                <Badge key={source} variant="secondary" className="flex items-center gap-2">
+            <Label className="text-base font-medium">Fontes de Leads</Label>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {leadSources.map((source, index) => (
+                <Badge key={index} variant="outline">
                   {source}
-                  <X 
-                    className="w-3 h-3 cursor-pointer hover:text-red-500" 
-                    onClick={() => handleRemoveLeadSource(source)}
-                  />
                 </Badge>
               ))}
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <Separator />
-
-          {/* Lead Statuses */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">Status de Leads</h3>
-              <Button onClick={handleAddLeadStatus} size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Status
+      {/* Workflow Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Configurações de Workflow</CardTitle>
+          <CardDescription>
+            Automatizações e fluxos de trabalho
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <h4 className="font-medium">Auto-seguimento de leads</h4>
+                <p className="text-sm text-gray-600">
+                  Criar tarefas automáticas de seguimento para novos leads
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Configurar
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {leadStatuses.map((status) => (
-                <Badge key={status} variant="secondary" className="flex items-center gap-2">
-                  {status}
-                  <X 
-                    className="w-3 h-3 cursor-pointer hover:text-red-500" 
-                    onClick={() => handleRemoveLeadStatus(status)}
-                  />
-                </Badge>
-              ))}
+
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <h4 className="font-medium">Notificações de pipeline</h4>
+                <p className="text-sm text-gray-600">
+                  Receber notificações quando leads mudarem de estágio
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Configurar
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div>
+                <h4 className="font-medium">Relatórios automáticos</h4>
+                <p className="text-sm text-gray-600">
+                  Enviar relatórios de desempenho por email semanalmente
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Configurar
+              </Button>
             </div>
           </div>
         </CardContent>

@@ -43,7 +43,7 @@ export const useTasks = () => {
         .from('tasks')
         .select(`
           *,
-          assignee:assignee_id (
+          assignee:profiles!assignee_id (
             id,
             full_name,
             email
@@ -118,7 +118,7 @@ export const useTasks = () => {
         }])
         .select(`
           *,
-          assignee:assignee_id (
+          assignee:profiles!assignee_id (
             id,
             full_name,
             email
@@ -153,7 +153,7 @@ export const useTasks = () => {
         .eq('id', id)
         .select(`
           *,
-          assignee:assignee_id (
+          assignee:profiles!assignee_id (
             id,
             full_name,
             email

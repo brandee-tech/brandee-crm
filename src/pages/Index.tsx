@@ -14,6 +14,7 @@ import { Appointments } from '@/components/Appointments';
 import { CalendarView } from '@/components/Calendar';
 import { UserManagement } from '@/components/UserManagement';
 import { Companies } from '@/components/Companies';
+import { Meetings } from '@/components/Meetings';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -60,6 +61,8 @@ const Index = () => {
         return <Scripts />;
       case 'appointments':
         return <Appointments />;
+      case 'meetings':
+        return <Meetings />;
       case 'calendar':
         return <CalendarView />;
       default:

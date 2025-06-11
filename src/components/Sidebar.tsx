@@ -14,6 +14,7 @@ import {
   FileText,
   Calendar,
   CalendarDays,
+  Video,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'leads', label: 'Leads', icon: UserPlus },
     { id: 'kanban', label: 'Pipeline', icon: Kanban },
     { id: 'appointments', label: 'Agendamentos', icon: Calendar },
+    { id: 'meetings', label: 'Reuniões', icon: Video },
     { id: 'calendar', label: 'Calendário', icon: CalendarDays },
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'scripts', label: 'Scripts', icon: FileText },

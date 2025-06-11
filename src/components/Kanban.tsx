@@ -72,15 +72,15 @@ export const Kanban = () => {
 
   if (loading || columnsLoading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="py-8 flex items-center justify-center">
         <div className="text-lg">Carregando kanban...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="py-8 space-y-6">
+      <div className="flex justify-between items-center px-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Pipeline de Vendas</h1>
           <p className="text-gray-600 mt-1">Visualize seus leads por status - arraste para mover entre colunas</p>
@@ -101,7 +101,7 @@ export const Kanban = () => {
         </Dialog>
       </div>
 
-      <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(300px, 1fr))` }}>
+      <div className="grid gap-6 px-8" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(300px, 1fr))` }}>
         {columns.map((column) => {
           const columnLeads = getLeadsByStatus(column.name);
           const totalValue = columnLeads.reduce((sum, lead) => sum + (lead.value || 0), 0);

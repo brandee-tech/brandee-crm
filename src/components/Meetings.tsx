@@ -59,8 +59,8 @@ export const Meetings = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="py-6">
+      <div className="flex justify-between items-center mb-6 px-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Reuniões</h1>
           <p className="text-gray-600">Gerencie suas reuniões, pautas e atas</p>
@@ -76,23 +76,25 @@ export const Meetings = () => {
           <div className="text-lg">Carregando reuniões...</div>
         </div>
       ) : meetings.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <Calendar className="w-12 h-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Nenhuma reunião encontrada
-            </h3>
-            <p className="text-gray-600 text-center mb-4">
-              Comece criando sua primeira reunião.
-            </p>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Criar Primeira Reunião
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="px-6">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-8">
+              <Calendar className="w-12 h-12 text-gray-400 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhuma reunião encontrada
+              </h3>
+              <p className="text-gray-600 text-center mb-4">
+                Comece criando sua primeira reunião.
+              </p>
+              <Button onClick={() => setDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Criar Primeira Reunião
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4 px-6">
           {meetings.map((meeting) => (
             <Card 
               key={meeting.id} 

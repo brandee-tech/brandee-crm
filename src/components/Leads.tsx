@@ -96,15 +96,15 @@ export const Leads = () => {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-8 flex items-center justify-center">
+      <div className="py-4 md:py-8 flex items-center justify-center">
         <div className="text-lg">Carregando leads...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="py-4 md:py-8 space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-4 md:px-8">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Leads</h1>
           <p className="text-gray-600 mt-1">Gerencie seus prospects e oportunidades</p>
@@ -118,13 +118,15 @@ export const Leads = () => {
         </Button>
       </div>
 
-      <LeadFilters 
-        onFiltersChange={setFilters}
-        totalLeads={leads.length}
-        filteredCount={filteredLeads.length}
-      />
+      <div className="px-4 md:px-8">
+        <LeadFilters 
+          onFiltersChange={setFilters}
+          totalLeads={leads.length}
+          filteredCount={filteredLeads.length}
+        />
+      </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 px-4 md:px-8">
         {filteredLeads.map((lead) => (
           <Card key={lead.id} className="p-4 md:p-6 hover:shadow-lg transition-shadow duration-200">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -200,7 +202,7 @@ export const Leads = () => {
       </div>
 
       {filteredLeads.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-12 px-4 md:px-8">
           <div className="text-lg font-medium text-gray-900 mb-2">Nenhum lead encontrado</div>
           <p className="text-gray-600">
             {leads.length === 0 

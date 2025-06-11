@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Plus, Search, Filter, Edit2, Trash2, Phone, Mail, MapPin } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -43,15 +44,15 @@ export const Contacts = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="py-8 flex items-center justify-center">
         <div className="text-lg">Carregando contatos...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="py-8 space-y-6">
+      <div className="flex justify-between items-center px-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Contatos</h1>
           <p className="text-gray-600 mt-1">Gerencie sua rede de contatos</p>
@@ -65,27 +66,29 @@ export const Contacts = () => {
         </Button>
       </div>
 
-      <Card className="p-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar contatos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+      <div className="px-8">
+        <Card className="p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Buscar contatos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
+            <Button variant="outline">
+              <Filter className="w-4 h-4 mr-2" />
+              Filtros Avançados
+            </Button>
           </div>
-          <Button variant="outline">
-            <Filter className="w-4 h-4 mr-2" />
-            Filtros Avançados
-          </Button>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-8">
         {filteredContacts.map((contact) => (
           <Card key={contact.id} className="p-6 hover:shadow-lg transition-shadow duration-200">
             <div className="flex items-start justify-between mb-4">
@@ -172,10 +175,12 @@ export const Contacts = () => {
       </div>
 
       {filteredContacts.length === 0 && (
-        <Card className="p-12 text-center">
-          <p className="text-gray-500 text-lg">Nenhum contato encontrado</p>
-          <p className="text-gray-400 mt-2">Tente ajustar a busca ou adicionar novos contatos</p>
-        </Card>
+        <div className="px-8">
+          <Card className="p-12 text-center">
+            <p className="text-gray-500 text-lg">Nenhum contato encontrado</p>
+            <p className="text-gray-400 mt-2">Tente ajustar a busca ou adicionar novos contatos</p>
+          </Card>
+        </div>
       )}
 
       <EditContactDialog

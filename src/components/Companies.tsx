@@ -40,15 +40,15 @@ export const Companies = () => {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
+      <div className="py-8 flex items-center justify-center">
         <div className="text-lg">Carregando empresas...</div>
       </div>
     );
   }
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="py-8 space-y-6">
+      <div className="flex justify-between items-center px-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Empresas</h1>
           <p className="text-gray-600 mt-1">Gerencie suas contas empresariais</p>
@@ -60,40 +60,42 @@ export const Companies = () => {
       </div>
 
       {/* Filtros */}
-      <Card className="p-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Buscar empresas..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+      <div className="px-8">
+        <Card className="p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Buscar empresas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Todos">Todos os Status</option>
+                <option value="Ativo">Ativo</option>
+                <option value="Prospect">Prospect</option>
+                <option value="Inativo">Inativo</option>
+              </select>
+              <Button variant="outline">
+                <Filter className="w-4 h-4 mr-2" />
+                Filtros
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Todos">Todos os Status</option>
-              <option value="Ativo">Ativo</option>
-              <option value="Prospect">Prospect</option>
-              <option value="Inativo">Inativo</option>
-            </select>
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Filtros
-            </Button>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </div>
 
       {/* Grid de Empresas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-8">
         {filteredCompanies.map((company) => (
           <Card key={company.id} className="p-6 hover:shadow-lg transition-shadow duration-200">
             <div className="flex items-start justify-between mb-4">
@@ -159,10 +161,12 @@ export const Companies = () => {
       </div>
 
       {filteredCompanies.length === 0 && (
-        <Card className="p-12 text-center">
-          <p className="text-gray-500 text-lg">Nenhuma empresa encontrada</p>
-          <p className="text-gray-400 mt-2">Tente ajustar os filtros ou adicionar novas empresas</p>
-        </Card>
+        <div className="px-8">
+          <Card className="p-12 text-center">
+            <p className="text-gray-500 text-lg">Nenhuma empresa encontrada</p>
+            <p className="text-gray-400 mt-2">Tente ajustar os filtros ou adicionar novas empresas</p>
+          </Card>
+        </div>
       )}
     </div>
   );

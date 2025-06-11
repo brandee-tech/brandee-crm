@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,6 +46,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   ];
 
   const handleAdminSaasClick = () => {
+    console.log('Sidebar: Navigating to admin panel');
     window.location.href = '/admin';
   };
 

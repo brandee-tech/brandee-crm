@@ -13,7 +13,17 @@ const AdminSaas = () => {
   const { isSaasAdmin, loading: adminLoading } = useSaasAdmin();
   const { user, loading: authLoading } = useAuth();
 
+  // Debug logs
+  useEffect(() => {
+    console.log('AdminSaas: Component mounted');
+    console.log('AdminSaas: Auth loading:', authLoading);
+    console.log('AdminSaas: Admin loading:', adminLoading);
+    console.log('AdminSaas: User:', user);
+    console.log('AdminSaas: Is SaaS Admin:', isSaasAdmin);
+  }, [authLoading, adminLoading, user, isSaasAdmin]);
+
   if (authLoading || adminLoading) {
+    console.log('AdminSaas: Still loading...');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -22,12 +32,16 @@ const AdminSaas = () => {
   }
 
   if (!user) {
+    console.log('AdminSaas: No user, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
   if (!isSaasAdmin) {
+    console.log('AdminSaas: User is not SaaS admin, redirecting to home');
     return <Navigate to="/" replace />;
   }
+
+  console.log('AdminSaas: Access granted, rendering admin interface');
 
   const handleBackToCrm = () => {
     window.location.href = '/';

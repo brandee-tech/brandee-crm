@@ -130,21 +130,16 @@ export const useDashboard = () => {
         return acc;
       }, {} as Record<string, number>) || {};
 
-      // Calcular valor total do pipeline
-      const totalPipelineValue = allLeads?.reduce((total, lead) => {
-        return total + (lead.value || 0);
-      }, 0) || 0;
+      // Como removemos o campo valor, o pipeline agora é baseado apenas na quantidade
+      const totalPipelineValue = allLeads?.length || 0;
 
       // Calcular taxa de conversão (leads qualificados vs total)
       const qualifiedLeads = allLeads?.filter(lead => lead.status === 'Quente').length || 0;
       const totalLeadsCount = allLeads?.length || 0;
       const conversionRate = totalLeadsCount > 0 ? (qualifiedLeads / totalLeadsCount) * 100 : 0;
 
-      // Calcular ticket médio
-      const leadsWithValue = allLeads?.filter(lead => lead.value && lead.value > 0) || [];
-      const avgDealValue = leadsWithValue.length > 0 
-        ? leadsWithValue.reduce((sum, lead) => sum + (lead.value || 0), 0) / leadsWithValue.length 
-        : 0;
+      // Como não temos mais valores monetários, definimos o ticket médio como 0
+      const avgDealValue = 0;
 
       // Calcular mudanças percentuais
       const calculateChange = (current: number, previous: number) => {

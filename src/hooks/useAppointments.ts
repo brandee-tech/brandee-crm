@@ -192,9 +192,10 @@ export const useAppointments = () => {
     if (user) {
       fetchAppointments();
 
-      // Configurar listeners para mudanças em tempo real
+      // Configurar listeners para mudanças em tempo real com um nome único baseado no user ID
+      const channelName = `appointments_changes_${user.id}_${Date.now()}`;
       const channel = supabase
-        .channel('appointments_changes')
+        .channel(channelName)
         .on(
           'postgres_changes',
           {
@@ -222,7 +223,12 @@ export const useAppointments = () => {
               .single();
 
             if (!error && data) {
-              setAppointments(prev => [data, ...prev]);
+              setAppointments(prev => {
+                // Verificar se o agendamento já existe para evitar duplicatas
+                const exists = prev.some(apt => apt.id === data.id);
+                if (exists) return prev;
+                return [data, ...prev];
+              });
             }
           }
         )
@@ -279,6 +285,7 @@ export const useAppointments = () => {
 
       // Cleanup function
       return () => {
+        console.log('Cleaning up appointments channel:', channelName);
         supabase.removeChannel(channel);
       };
     }

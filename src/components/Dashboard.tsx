@@ -1,3 +1,4 @@
+
 import { 
   TrendingUp, 
   Users, 
@@ -5,7 +6,6 @@ import {
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
-  DollarSign,
   Target,
   Percent
 } from 'lucide-react';
@@ -15,13 +15,6 @@ import { useDashboard } from '@/hooks/useDashboard';
 
 export const Dashboard = () => {
   const { stats, loading } = useDashboard();
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
 
   const formatPercentage = (value: number) => {
     const sign = value >= 0 ? '+' : '';
@@ -71,14 +64,8 @@ export const Dashboard = () => {
       color: 'text-green-600'
     },
     {
-      title: 'Ticket Médio',
-      value: formatCurrency(stats.avgDealValue),
-      icon: DollarSign,
-      color: 'text-blue-600'
-    },
-    {
-      title: 'Pipeline Total',
-      value: formatCurrency(stats.totalPipelineValue),
+      title: 'Total no Pipeline',
+      value: stats.totalPipelineValue.toString(),
       icon: TrendingUp,
       color: 'text-purple-600'
     },
@@ -87,6 +74,12 @@ export const Dashboard = () => {
       value: (stats.leadsByStatus['Quente'] || 0).toString(),
       icon: Percent,
       color: 'text-orange-600'
+    },
+    {
+      title: 'Leads Ativos',
+      value: ((stats.leadsByStatus['Quente'] || 0) + (stats.leadsByStatus['Morno'] || 0)).toString(),
+      icon: Users,
+      color: 'text-blue-600'
     }
   ];
 
@@ -99,7 +92,7 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="py-8 space-y-8">
       <div className="flex justify-between items-center px-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -172,7 +165,7 @@ export const Dashboard = () => {
                   <span className="text-sm font-medium text-gray-700">{status}</span>
                   <span className="text-sm text-gray-500">{count} tarefas</span>
                 </div>
-                <Progress value={(count / stats.totalTasks) * 100} className="h-2" />
+                <Progress value={stats.totalTasks > 0 ? (count / stats.totalTasks) * 100 : 0} className="h-2" />
               </div>
             ))}
           </div>
@@ -188,7 +181,7 @@ export const Dashboard = () => {
                   <span className="text-sm font-medium text-gray-700">{status}</span>
                   <span className="text-sm text-gray-500">{count} leads</span>
                 </div>
-                <Progress value={(count / stats.totalLeads) * 100} className="h-2" />
+                <Progress value={stats.totalLeads > 0 ? (count / stats.totalLeads) * 100 : 0} className="h-2" />
               </div>
             ))}
           </div>
@@ -206,7 +199,6 @@ export const Dashboard = () => {
                     <p className="text-sm text-gray-500">{lead.email || 'Sem email'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">{formatCurrency(lead.value || 0)}</p>
                     <span className={`inline-block px-2 py-1 text-xs rounded-full ${
                       lead.status === 'Quente' 
                         ? 'bg-red-100 text-red-700'

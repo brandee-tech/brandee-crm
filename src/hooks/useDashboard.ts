@@ -55,7 +55,20 @@ export const useDashboard = () => {
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-      // Buscar dados do mês atual
+      // Buscar totais gerais (não apenas do mês atual)
+      const [
+        allLeadsResult,
+        allContactsResult,
+        allTasksResult,
+        allAppointmentsResult,
+      ] = await Promise.all([
+        supabase.from('leads').select('*', { count: 'exact' }),
+        supabase.from('contacts').select('*', { count: 'exact' }),
+        supabase.from('tasks').select('*', { count: 'exact' }),
+        supabase.from('appointments').select('*', { count: 'exact' }),
+      ]);
+
+      // Buscar dados do mês atual para comparação
       const [
         currentLeadsResult,
         currentContactsResult,
@@ -96,20 +109,10 @@ export const useDashboard = () => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      // Buscar todos os leads para calcular estatísticas
-      const { data: allLeads } = await supabase
-        .from('leads')
-        .select('*');
-
-      // Buscar todas as tarefas para estatísticas
-      const { data: allTasks } = await supabase
-        .from('tasks')
-        .select('status');
-
-      // Buscar todos os agendamentos para estatísticas
-      const { data: allAppointments } = await supabase
-        .from('appointments')
-        .select('status');
+      // Buscar todos os dados para estatísticas
+      const { data: allLeads } = await supabase.from('leads').select('*');
+      const { data: allTasks } = await supabase.from('tasks').select('status');
+      const { data: allAppointments } = await supabase.from('appointments').select('status');
 
       // Calcular estatísticas por status
       const tasksByStatus = allTasks?.reduce((acc, task) => {
@@ -130,7 +133,7 @@ export const useDashboard = () => {
         return acc;
       }, {} as Record<string, number>) || {};
 
-      // Como removemos o campo valor, o pipeline agora é baseado apenas na quantidade
+      // Pipeline baseado na quantidade total de leads
       const totalPipelineValue = allLeads?.length || 0;
 
       // Calcular taxa de conversão (leads qualificados vs total)
@@ -138,7 +141,7 @@ export const useDashboard = () => {
       const totalLeadsCount = allLeads?.length || 0;
       const conversionRate = totalLeadsCount > 0 ? (qualifiedLeads / totalLeadsCount) * 100 : 0;
 
-      // Como não temos mais valores monetários, definimos o ticket médio como 0
+      // Não temos valores monetários, então definimos como 0
       const avgDealValue = 0;
 
       // Calcular mudanças percentuais
@@ -156,9 +159,9 @@ export const useDashboard = () => {
 
       setStats({
         totalLeads: totalLeadsCount,
-        totalContacts: currentContactsResult.count || 0,
-        totalTasks: currentTasksResult.count || 0,
-        totalAppointments: currentAppointmentsResult.count || 0,
+        totalContacts: allContactsResult.count || 0,
+        totalTasks: allTasksResult.count || 0,
+        totalAppointments: allAppointmentsResult.count || 0,
         recentLeads: recentLeads || [],
         tasksByStatus,
         leadsByStatus,

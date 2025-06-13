@@ -46,7 +46,7 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
     email: '',
     phone: '',
     status: 'Frio',
-    source: undefined as string | undefined
+    source: '' as string
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,7 +66,7 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
       email: '',
       phone: '',
       status: 'Frio',
-      source: undefined
+      source: ''
     });
     
     onOpenChange(false);
@@ -125,8 +125,8 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
           <div className="space-y-2">
             <Label htmlFor="source">Origem</Label>
             <Select
-              value={formData.source}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value }))}
+              value={formData.source || undefined}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value || '' }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma origem" />

@@ -57,7 +57,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     email: '',
     phone: '',
     status: 'Frio',
-    source: undefined as string | undefined
+    source: '' as string
   });
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         email: lead.email || '',
         phone: lead.phone || '',
         status: lead.status || 'Frio',
-        source: lead.source || undefined
+        source: lead.source || ''
       });
     }
   }, [lead]);
@@ -140,8 +140,8 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
           <div className="space-y-2">
             <Label htmlFor="source">Origem</Label>
             <Select
-              value={formData.source}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value }))}
+              value={formData.source || undefined}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value || '' }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma origem" />

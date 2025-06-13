@@ -4,6 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -16,6 +23,21 @@ interface AddLeadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const LEAD_SOURCES = [
+  'Instagram',
+  'Facebook',
+  'TikTok',
+  'Google Ads',
+  'YouTube',
+  'LinkedIn',
+  'WhatsApp',
+  'Indicação',
+  'Site',
+  'E-mail marketing',
+  'Telefone',
+  'Outros'
+];
 
 export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
   const { createLead } = useLeads();
@@ -102,11 +124,21 @@ export const AddLeadDialog = ({ open, onOpenChange }: AddLeadDialogProps) => {
           
           <div className="space-y-2">
             <Label htmlFor="source">Origem</Label>
-            <Input
-              id="source"
+            <Select
               value={formData.source}
-              onChange={(e) => setFormData(prev => ({ ...prev, source: e.target.value }))}
-            />
+              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma origem" />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_SOURCES.map((source) => (
+                  <SelectItem key={source} value={source}>
+                    {source}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <DialogFooter>

@@ -9,17 +9,22 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export const Dashboard = () => {
   const { user } = useAuth();
-  const { 
-    totalLeads, 
-    totalAppointments, 
-    completedAppointments, 
-    conversionRate,
-    todayAppointments,
-    pendingTasks,
-    loading 
-  } = useDashboard();
+  const { stats, loading } = useDashboard();
 
-  const stats = [
+  // Extract stats with safe defaults
+  const {
+    totalLeads = 0,
+    totalAppointments = 0,
+    conversionRate = 0,
+    totalTasks = 0
+  } = stats;
+
+  // Calculate derived metrics
+  const completedAppointments = stats.appointmentsByStatus?.['Realizado'] || 0;
+  const todayAppointments = 0; // This would need to be calculated from appointments data
+  const pendingTasks = stats.tasksByStatus?.['Pendente'] || 0;
+
+  const dashboardStats = [
     {
       title: 'Total de Leads',
       value: totalLeads,
@@ -96,7 +101,7 @@ export const Dashboard = () => {
 
       {/* Grid de KPIs - Responsivo */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-8">
-        {stats.map((stat, index) => (
+        {dashboardStats.map((stat, index) => (
           <Card key={index} className="hover:shadow-md transition-all duration-200 group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">

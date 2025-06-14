@@ -153,9 +153,12 @@ export const useFollowUps = () => {
     if (user) {
       fetchFollowUps();
 
+      // Create unique channel name using user ID and timestamp
+      const channelName = `follow-ups-changes-${user.id}-${Date.now()}`;
+
       // Setup realtime subscription
       const channel = supabase
-        .channel('follow-ups-changes')
+        .channel(channelName)
         .on(
           'postgres_changes',
           {
@@ -176,6 +179,7 @@ export const useFollowUps = () => {
         .subscribe();
 
       return () => {
+        console.log('Cleaning up follow-ups channel:', channelName);
         supabase.removeChannel(channel);
       };
     }

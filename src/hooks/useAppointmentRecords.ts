@@ -140,9 +140,12 @@ export const useAppointmentRecords = () => {
     if (user) {
       fetchRecords();
 
+      // Create unique channel name using user ID and timestamp
+      const channelName = `appointment-records-changes-${user.id}-${Date.now()}`;
+
       // Setup realtime subscription
       const channel = supabase
-        .channel('appointment-records-changes')
+        .channel(channelName)
         .on(
           'postgres_changes',
           {
@@ -163,6 +166,7 @@ export const useAppointmentRecords = () => {
         .subscribe();
 
       return () => {
+        console.log('Cleaning up appointment records channel:', channelName);
         supabase.removeChannel(channel);
       };
     }

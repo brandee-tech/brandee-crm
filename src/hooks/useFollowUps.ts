@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +12,7 @@ export const useFollowUps = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchFollowUps = async () => {
     try {
@@ -156,10 +158,11 @@ export const useFollowUps = () => {
 
     // Cleanup function to remove channel
     const cleanup = () => {
-      if (channelRef.current) {
+      if (channelRef.current && isSubscribedRef.current) {
         console.log('Cleaning up follow-ups channel');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
+        isSubscribedRef.current = false;
       }
     };
 
@@ -170,8 +173,9 @@ export const useFollowUps = () => {
     const channelName = `follow-ups-changes-${user.id}-${Date.now()}`;
 
     // Setup realtime subscription
-    const channel = supabase
-      .channel(channelName)
+    const channel = supabase.channel(channelName);
+    
+    channel
       .on(
         'postgres_changes',
         {
@@ -189,7 +193,12 @@ export const useFollowUps = () => {
           }, 500);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Follow-ups subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
 
     channelRef.current = channel;
 
@@ -291,9 +300,18 @@ export const useFollowUps = () => {
         });
       }
     },
-    getFollowUpsByAppointment,
-    getPendingFollowUps,
-    getNextSequenceNumber,
+    getFollowUpsByAppointment: (appointmentId: string) => {
+      return followUps.filter(followUp => followUp.appointment_id === appointmentId);
+    },
+    getPendingFollowUps: () => {
+      return followUps.filter(followUp => !followUp.completed);
+    },
+    getNextSequenceNumber: (appointmentId: string) => {
+      const appointmentFollowUps = followUps.filter(followUp => followUp.appointment_id === appointmentId);
+      return appointmentFollowUps.length > 0 
+        ? Math.max(...appointmentFollowUps.map(f => f.sequence_number)) + 1 
+        : 1;
+    },
     refetch: fetchFollowUps
   };
 };

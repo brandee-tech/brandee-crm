@@ -12,6 +12,7 @@ export const useRealtimeAppointments = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchAppointments = async () => {
     if (!user) {
@@ -75,10 +76,11 @@ export const useRealtimeAppointments = () => {
 
     // Cleanup function to remove channel
     const cleanup = () => {
-      if (channelRef.current) {
+      if (channelRef.current && isSubscribedRef.current) {
         console.log('Cleaning up appointments channel');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
+        isSubscribedRef.current = false;
       }
     };
 
@@ -89,8 +91,9 @@ export const useRealtimeAppointments = () => {
     const channelName = `appointments-changes-${user.id}-${Date.now()}`;
     
     // Setup realtime subscription
-    const channel = supabase
-      .channel(channelName)
+    const channel = supabase.channel(channelName);
+    
+    channel
       .on(
         'postgres_changes',
         {
@@ -108,7 +111,12 @@ export const useRealtimeAppointments = () => {
           }, 500);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Appointments subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
 
     channelRef.current = channel;
 

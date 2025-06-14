@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,6 +12,7 @@ export const useAppointmentRecords = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchRecords = async () => {
     try {
@@ -144,10 +146,11 @@ export const useAppointmentRecords = () => {
 
     // Cleanup function to remove channel
     const cleanup = () => {
-      if (channelRef.current) {
+      if (channelRef.current && isSubscribedRef.current) {
         console.log('Cleaning up appointment records channel');
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
+        isSubscribedRef.current = false;
       }
     };
 
@@ -158,8 +161,9 @@ export const useAppointmentRecords = () => {
     const channelName = `appointment-records-changes-${user.id}-${Date.now()}`;
 
     // Setup realtime subscription
-    const channel = supabase
-      .channel(channelName)
+    const channel = supabase.channel(channelName);
+    
+    channel
       .on(
         'postgres_changes',
         {
@@ -177,7 +181,12 @@ export const useAppointmentRecords = () => {
           }, 500);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Appointment records subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
 
     channelRef.current = channel;
 
@@ -279,7 +288,9 @@ export const useAppointmentRecords = () => {
         });
       }
     },
-    getRecordsByAppointment,
+    getRecordsByAppointment: (appointmentId: string) => {
+      return records.filter(record => record.appointment_id === appointmentId);
+    },
     refetch: fetchRecords
   };
 };

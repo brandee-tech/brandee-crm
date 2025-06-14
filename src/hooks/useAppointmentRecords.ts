@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +11,7 @@ export const useAppointmentRecords = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
 
   const fetchRecords = async () => {
     try {
@@ -140,6 +142,13 @@ export const useAppointmentRecords = () => {
     if (user) {
       fetchRecords();
 
+      // Clean up any existing channel first
+      if (channelRef.current) {
+        console.log('Cleaning up existing appointment records channel');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+
       // Create unique channel name using user ID and timestamp
       const channelName = `appointment-records-changes-${user.id}-${Date.now()}`;
 
@@ -165,9 +174,14 @@ export const useAppointmentRecords = () => {
         )
         .subscribe();
 
+      channelRef.current = channel;
+
       return () => {
-        console.log('Cleaning up appointment records channel:', channelName);
-        supabase.removeChannel(channel);
+        if (channelRef.current) {
+          console.log('Cleaning up appointment records channel:', channelName);
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
       };
     }
   }, [user]);

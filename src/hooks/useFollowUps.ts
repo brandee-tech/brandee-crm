@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,7 @@ export const useFollowUps = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
 
   const fetchFollowUps = async () => {
     try {
@@ -153,6 +154,13 @@ export const useFollowUps = () => {
     if (user) {
       fetchFollowUps();
 
+      // Clean up any existing channel first
+      if (channelRef.current) {
+        console.log('Cleaning up existing follow-ups channel');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+
       // Create unique channel name using user ID and timestamp
       const channelName = `follow-ups-changes-${user.id}-${Date.now()}`;
 
@@ -178,9 +186,14 @@ export const useFollowUps = () => {
         )
         .subscribe();
 
+      channelRef.current = channel;
+
       return () => {
-        console.log('Cleaning up follow-ups channel:', channelName);
-        supabase.removeChannel(channel);
+        if (channelRef.current) {
+          console.log('Cleaning up follow-ups channel:', channelName);
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
       };
     }
   }, [user]);

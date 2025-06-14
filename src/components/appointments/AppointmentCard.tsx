@@ -77,14 +77,14 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
               </Badge>
             </div>
             
-            {/* Mobile Dropdown Menu */}
+            {/* Mobile Dropdown Menu - visible only on small screens */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:hidden">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 md:hidden">
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48 bg-white z-50">
                 <DropdownMenuItem onClick={() => setViewDialogOpen(true)}>
                   <Eye className="w-4 h-4 mr-2" />
                   Ver Detalhes
@@ -117,20 +117,18 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
             </DropdownMenu>
           </div>
           
-          {/* Indicadores visuais - Responsivos */}
+          {/* Indicadores visuais */}
           <div className="flex flex-wrap gap-1 mt-2">
             {hasRecord && (
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                <span className="hidden sm:inline">Registrado</span>
-                <span className="sm:hidden">✓</span>
+                Registrado
               </Badge>
             )}
             {hasPendingFollowUps && (
               <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
                 <MessageSquare className="w-3 h-3 mr-1" />
-                <span className="hidden sm:inline">{pendingFollowUps.length} Follow-up{pendingFollowUps.length > 1 ? 's' : ''}</span>
-                <span className="sm:hidden">{pendingFollowUps.length}</span>
+                {pendingFollowUps.length} Follow-up{pendingFollowUps.length > 1 ? 's' : ''}
               </Badge>
             )}
           </div>
@@ -173,71 +171,76 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
             )}
           </div>
 
-          {/* Botões de Ação - Desktop */}
-          <div className="hidden sm:flex flex-wrap gap-2 pt-4 border-t">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewDialogOpen(true)}
-              className="flex-1 min-w-0"
-            >
-              <Eye className="w-4 h-4 mr-1" />
-              <span className="truncate">Ver</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setEditDialogOpen(true)}
-              className="flex-1 min-w-0"
-            >
-              <Edit className="w-4 h-4 mr-1" />
-              <span className="truncate">Editar</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setTimelineDialogOpen(true)}
-              className="flex-1 min-w-0"
-            >
-              <History className="w-4 h-4 mr-1" />
-              <span className="truncate hidden lg:inline">Timeline</span>
-              <span className="truncate lg:hidden">Linha</span>
-            </Button>
-
-            {shouldShowRecordButton && (
+          {/* Botões de Ação - Desktop - visible from medium screens up */}
+          <div className="hidden md:block pt-4 border-t space-y-2">
+            {/* Primeira linha de botões */}
+            <div className="grid grid-cols-3 gap-2">
               <Button
-                size="sm"
-                onClick={() => setRecordDialogOpen(true)}
-                className="bg-green-600 hover:bg-green-700 flex-1 min-w-0"
-              >
-                <CheckCircle className="w-4 h-4 mr-1" />
-                <span className="truncate">Registrar</span>
-              </Button>
-            )}
-
-            {shouldShowFollowUpButton && (
-              <Button
-                size="sm"
                 variant="outline"
-                onClick={() => setFollowUpDialogOpen(true)}
-                className="flex-1 min-w-0"
+                size="sm"
+                onClick={() => setViewDialogOpen(true)}
+                className="text-xs"
               >
-                <MessageSquare className="w-4 h-4 mr-1" />
-                <span className="truncate">Follow-up</span>
+                <Eye className="w-3 h-3 mr-1" />
+                Ver
               </Button>
-            )}
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDelete}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 flex-1 min-w-0"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              <span className="truncate">Excluir</span>
-            </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditDialogOpen(true)}
+                className="text-xs"
+              >
+                <Edit className="w-3 h-3 mr-1" />
+                Editar
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setTimelineDialogOpen(true)}
+                className="text-xs"
+              >
+                <History className="w-3 h-3 mr-1" />
+                Timeline
+              </Button>
+            </div>
+
+            {/* Segunda linha de botões - condicionais */}
+            <div className="grid grid-cols-2 gap-2">
+              {shouldShowRecordButton && (
+                <Button
+                  size="sm"
+                  onClick={() => setRecordDialogOpen(true)}
+                  className="bg-green-600 hover:bg-green-700 text-xs"
+                >
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Registrar
+                </Button>
+              )}
+
+              {shouldShowFollowUpButton && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setFollowUpDialogOpen(true)}
+                  className="text-xs"
+                >
+                  <MessageSquare className="w-3 h-3 mr-1" />
+                  Follow-up
+                </Button>
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDelete}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+              >
+                <Trash2 className="w-3 h-3 mr-1" />
+                Excluir
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

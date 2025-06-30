@@ -15,20 +15,20 @@ export const RealtimeBadge = ({ isUpdating, className }: RealtimeBadgeProps) => 
       className={cn(
         "transition-all duration-300",
         isUpdating 
-          ? "bg-green-50 text-green-700 border-green-200" 
-          : "bg-gray-50 text-gray-600 border-gray-200",
+          ? "bg-green-50 text-green-700 border-green-200 animate-pulse" 
+          : "bg-blue-50 text-blue-700 border-blue-200",
         className
       )}
     >
       {isUpdating ? (
         <>
-          <Wifi className="w-3 h-3 mr-1 animate-pulse" />
-          Atualizando...
+          <Wifi className="w-3 h-3 mr-1 animate-bounce" />
+          Sincronizando...
         </>
       ) : (
         <>
-          <WifiOff className="w-3 h-3 mr-1" />
-          Conectado
+          <Wifi className="w-3 h-3 mr-1" />
+          Online
         </>
       )}
     </Badge>

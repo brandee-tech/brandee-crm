@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,8 @@ export const useRealtimeAppointments = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchAppointments = async () => {
     if (!user) {
@@ -69,7 +71,88 @@ export const useRealtimeAppointments = () => {
 
   useEffect(() => {
     if (!user) return;
+    
     fetchAppointments();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
+      if (channelRef.current && isSubscribedRef.current) {
+        console.log('Cleaning up realtime appointments channel');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+        isSubscribedRef.current = false;
+      }
+    };
+
+    // Clean up any existing channel first
+    cleanup();
+
+    // Create unique channel name using user ID and timestamp
+    const channelName = `realtime-appointments-${user.id}-${Date.now()}`;
+    
+    // Setup realtime subscription
+    const channel = supabase.channel(channelName);
+    
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments'
+        },
+        (payload) => {
+          console.log('Realtime appointment change detected:', payload);
+          setIsUpdating(true);
+          
+          // Remove artificial delay - fetch immediately
+          fetchAppointments().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads'
+        },
+        (payload) => {
+          console.log('Realtime lead change detected:', payload);
+          setIsUpdating(true);
+          
+          fetchAppointments().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          console.log('Realtime profile change detected:', payload);
+          setIsUpdating(true);
+          
+          fetchAppointments().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime appointments subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
+
+    channelRef.current = channel;
+
+    return cleanup;
   }, [user]);
 
   return {

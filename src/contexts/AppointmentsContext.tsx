@@ -135,6 +135,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         title: "Sucesso",
         description: "Agendamento criado com sucesso"
       });
+      
+      // Realtime will handle the update automatically
       return data;
     } catch (error) {
       console.error('Erro ao criar agendamento:', error);
@@ -171,6 +173,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         title: "Sucesso",
         description: "Agendamento atualizado com sucesso"
       });
+      
+      // Realtime will handle the update automatically
       return data;
     } catch (error) {
       console.error('Erro ao atualizar agendamento:', error);
@@ -186,6 +190,7 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
   const updateAppointmentOptimistic = async (id: string, updates: Partial<Appointment>) => {
     const previousAppointments = [...appointments];
     
+    // Immediate UI update
     setAppointments(prev => 
       prev.map(appointment => 
         appointment.id === id ? { ...appointment, ...updates } : appointment
@@ -199,8 +204,11 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         .eq('id', id);
 
       if (error) throw error;
+      
+      // Realtime will handle the final update
     } catch (error) {
       console.error('Erro ao atualizar agendamento via drag & drop:', error);
+      // Rollback on error
       setAppointments(previousAppointments);
       
       toast({
@@ -226,6 +234,8 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
         title: "Sucesso",
         description: "Agendamento removido com sucesso"
       });
+      
+      // Realtime will handle the update automatically
     } catch (error) {
       console.error('Erro ao deletar agendamento:', error);
       toast({
@@ -272,10 +282,42 @@ export const AppointmentsProvider = ({ children }: AppointmentsProviderProps) =>
           console.log('Appointment change detected in context:', payload);
           setIsUpdating(true);
           
-          setTimeout(() => {
-            fetchAppointments();
+          // Remove artificial delay - fetch immediately
+          fetchAppointments().finally(() => {
             setIsUpdating(false);
-          }, 500);
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads'
+        },
+        (payload) => {
+          console.log('Lead change detected in context:', payload);
+          setIsUpdating(true);
+          
+          fetchAppointments().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        (payload) => {
+          console.log('Profile change detected in context:', payload);
+          setIsUpdating(true);
+          
+          fetchAppointments().finally(() => {
+            setIsUpdating(false);
+          });
         }
       )
       .subscribe((status) => {

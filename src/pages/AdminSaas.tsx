@@ -6,6 +6,7 @@ import { AdminMobileSidebar } from '@/components/admin/AdminMobileSidebar';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { CompaniesManagement } from '@/components/admin/CompaniesManagement';
 import { SaasUserManagement } from '@/components/admin/SaasUserManagement';
+import { SaasAnalytics } from '@/components/admin/SaasAnalytics';
 import { useSaasAdmin } from '@/hooks/useSaasAdmin';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -62,7 +63,7 @@ const AdminSaas = () => {
       case 'users':
         return <SaasUserManagement />;
       case 'analytics':
-        return <div className="p-8"><h1 className="text-2xl font-bold">Analytics Avançado</h1><p className="text-gray-600 mt-2">Em desenvolvimento...</p></div>;
+        return <SaasAnalytics />;
       case 'settings':
         return <div className="p-8"><h1 className="text-2xl font-bold">Configurações do Sistema</h1><p className="text-gray-600 mt-2">Em desenvolvimento...</p></div>;
       default:

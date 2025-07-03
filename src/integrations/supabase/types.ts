@@ -1162,6 +1162,10 @@ export type Database = {
         Args: { target_company_id: string }
         Returns: undefined
       }
+      get_advanced_saas_analytics: {
+        Args: { period_days?: number; company_filter?: string }
+        Returns: Json
+      }
       get_current_user_company_id: {
         Args: Record<PropertyKey, never>
         Returns: string

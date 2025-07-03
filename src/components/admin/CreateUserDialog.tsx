@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAllCompanies } from '@/hooks/useAllCompanies';
-import { useRoles } from '@/hooks/useRoles';
+import { useSaasRoles } from '@/hooks/useSaasRoles';
 import { useSaasProfiles } from '@/hooks/useSaasProfiles';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,7 +26,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
   const [loading, setLoading] = useState(false);
 
   const { companies } = useAllCompanies();
-  const { roles } = useRoles();
+  const { roles } = useSaasRoles(formData.company_id);
   const { createUserInvitation } = useSaasProfiles();
   const { toast } = useToast();
 
@@ -100,7 +100,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
             <Label htmlFor="company">Empresa *</Label>
             <Select 
               value={formData.company_id} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, company_id: value }))}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, company_id: value, role_id: '' }))}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma empresa" />

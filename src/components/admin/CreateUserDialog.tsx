@@ -50,7 +50,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
 
     setLoading(true);
     try {
-      await createUserInvitation(formData.email, formData.company_id, formData.role_id);
+      await createUserInvitation(formData.email, formData.company_id, formData.role_id, formData.full_name);
       onSuccess();
       onOpenChange(false);
       setFormData({

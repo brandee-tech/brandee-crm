@@ -129,11 +129,12 @@ export const useSaasProfiles = () => {
     }
   };
 
-  const createUserInvitation = async (email: string, company_id: string, role_id: string) => {
+  const createUserInvitation = async (email: string, company_id: string, role_id: string, full_name: string) => {
     const webhookData = {
       email,
       company_id,
-      role_id
+      role_id,
+      full_name
     };
 
     const webhookUrl = 'https://n8n.sparkassessoria.com/webhook-test/7fa656f4-29ca-486a-9151-e37dc4860090';

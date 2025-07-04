@@ -147,11 +147,15 @@ export const useSaasProfiles = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'no-cors',
         body: JSON.stringify(webhookData)
       });
 
-      console.log('📡 Requisição enviada para n8n');
+      console.log('📡 Status da resposta:', response.status);
+      console.log('📡 Response OK:', response.ok);
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+      }
       
       toast({
         title: "Sucesso",

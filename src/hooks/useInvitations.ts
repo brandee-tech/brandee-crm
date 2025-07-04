@@ -170,8 +170,11 @@ export const useInvitations = () => {
       throw new Error('Usuário não autenticado');
     }
 
+    console.log('🚀 Iniciando convite via n8n:', { email, roleId, sendEmail });
+
     try {
       // Obter dados do usuário atual e empresa
+      console.log('📋 Buscando dados do perfil...');
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select(`
@@ -191,16 +194,27 @@ export const useInvitations = () => {
         .eq('id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('❌ Erro ao buscar perfil:', profileError);
+        throw profileError;
+      }
+
+      console.log('✅ Dados do perfil obtidos:', profileData);
 
       // Obter dados do cargo selecionado
+      console.log('🎯 Buscando dados do cargo...');
       const { data: roleData, error: roleError } = await supabase
         .from('roles')
         .select('id, name, description, permissions')
         .eq('id', roleId)
         .single();
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('❌ Erro ao buscar cargo:', roleError);
+        throw roleError;
+      }
+
+      console.log('✅ Dados do cargo obtidos:', roleData);
 
       // Preparar dados para enviar ao n8n
       const webhookData = {
@@ -232,8 +246,13 @@ export const useInvitations = () => {
         }
       };
 
+      console.log('📝 Dados preparados para n8n:', webhookData);
+
       // Enviar para n8n
-      const response = await fetch('https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf', {
+      console.log('🌐 Enviando requisição para n8n...');
+      const webhookUrl = 'https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf';
+      
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,11 +260,38 @@ export const useInvitations = () => {
         body: JSON.stringify(webhookData)
       });
 
+      console.log('📡 Resposta do n8n:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error(`Erro no webhook: ${response.status}`);
+        let errorText = 'Resposta não disponível';
+        try {
+          errorText = await response.text();
+        } catch (e) {
+          console.warn('⚠️ Não foi possível ler texto do erro');
+        }
+        
+        console.error('❌ Webhook n8n falhou:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText,
+          url: webhookUrl
+        });
+        
+        throw new Error(`Webhook n8n falhou: ${response.status} - ${errorText}`);
       }
 
-      // Criar registro local na tabela de convites para controle
+      // Tentar ler resposta JSON se possível
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('📊 Resposta JSON do n8n:', responseData);
+      } catch {
+        console.log('ℹ️ N8n retornou sem JSON, mas status OK');
+      }
+
+      console.log('✅ N8n processou com sucesso! Criando registro local...');
+
+      // SÓ AGORA criar registro local na tabela de convites para controle
       const { data: invitationData, error: invitationError } = await supabase
         .from('user_invitations')
         .insert({
@@ -264,23 +310,35 @@ export const useInvitations = () => {
         `)
         .single();
 
-      if (invitationError) throw invitationError;
+      if (invitationError) {
+        console.error('❌ Erro ao criar registro local:', invitationError);
+        throw invitationError;
+      }
+
+      console.log('✅ Registro local criado:', invitationData);
 
       // Atualizar lista local
       setInvitations(prev => [invitationData, ...prev]);
       
       toast({
         title: "Sucesso",
-        description: "Convite enviado para processamento na automação"
+        description: "Convite enviado e processado pela automação"
       });
       
+      console.log('🎉 Processo completo! Convite criado com sucesso.');
       return invitationData;
     } catch (error: any) {
-      console.error('Erro ao criar convite via n8n:', error);
+      console.error('❌ Erro detalhado no processo:', {
+        message: error.message,
+        stack: error.stack,
+        url: 'https://n8n.weplataforma.com.br/webhook-test/c8c855c0-30be-4644-9996-6c208e58ecdf',
+        userData: { email, roleId, sendEmail }
+      });
       
+      // NÃO criar registro local se n8n falhar
       toast({
-        title: "Erro",
-        description: error.message || "Não foi possível enviar o convite. Tente novamente.",
+        title: "Erro na Automação",
+        description: `Falha ao processar convite: ${error.message}`,
         variant: "destructive"
       });
       throw error;

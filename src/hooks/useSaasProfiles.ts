@@ -130,32 +130,44 @@ export const useSaasProfiles = () => {
   };
 
   const createUserInvitation = async (email: string, company_id: string, role_id: string, full_name: string) => {
-    const webhookData = {
-      email,
-      company_id,
-      role_id,
-      full_name
-    };
+    try {
+      const webhookData = {
+        email,
+        company_id,
+        role_id,
+        full_name
+      };
 
-    const webhookUrl = 'https://n8n.sparkassessoria.com/webhook-test/7fa656f4-29ca-486a-9151-e37dc4860090';
-    
-    console.log('🚀 Enviando para n8n (Admin SaaS):', webhookData);
+      const webhookUrl = 'https://n8n.sparkassessoria.com/webhook-test/7fa656f4-29ca-486a-9151-e37dc4860090';
+      
+      console.log('🚀 Enviando para n8n (Admin SaaS):', webhookData);
 
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(webhookData)
-    });
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'no-cors',
+        body: JSON.stringify(webhookData)
+      });
 
-    console.log('📡 Status:', response.status);
-    
-    if (!response.ok) {
-      throw new Error(`Erro ${response.status}`);
+      console.log('📡 Requisição enviada para n8n');
+      
+      toast({
+        title: "Sucesso",
+        description: "Convite enviado com sucesso"
+      });
+
+      console.log('✅ Enviado com sucesso para n8n');
+    } catch (error) {
+      console.error('❌ Erro ao enviar para n8n:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível enviar o convite",
+        variant: "destructive"
+      });
+      throw error;
     }
-
-    console.log('✅ Enviado com sucesso para n8n');
   };
 
   useEffect(() => {

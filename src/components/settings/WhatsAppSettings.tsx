@@ -42,7 +42,10 @@ export const WhatsAppSettings = () => {
     }
 
     updateCompany.mutate({
-      whatsapp_support: whatsappConfig,
+      whatsapp_support: {
+        ...whatsappConfig,
+        phone_number: whatsappConfig.phone,
+      },
     });
   };
 

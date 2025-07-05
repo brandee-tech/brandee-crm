@@ -73,9 +73,11 @@ export const CompanyRegistration = () => {
         name: data.name,
         industry: data.industry,
         size: data.size,
-        revenue: data.revenue || null,
         location: data.location,
         website: data.website || null,
+        phone: data.contactPhone || null,
+        domain: null,
+        plan: 'basic',
         status: 'Prospect'
       });
       toast({

@@ -61,10 +61,7 @@ export const useSaasAnalytics = (filters: AnalyticsFilters = { period_days: 30 }
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.rpc('get_advanced_saas_analytics', {
-        period_days: filters.period_days,
-        company_filter: filters.company_filter || null
-      });
+      const { data, error } = await supabase.rpc('get_saas_metrics');
 
       if (error) throw error;
       

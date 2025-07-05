@@ -76,7 +76,7 @@ export const Tasks = () => {
                          (task.description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'Todos' || task.status === filterStatus;
     const matchesPriority = filterPriority === 'Todos' || task.priority === filterPriority;
-    const matchesAssignee = filterAssignee === 'Todos' || task.assignee_id === filterAssignee;
+    const matchesAssignee = filterAssignee === 'Todos' || task.assigned_to === filterAssignee;
     
     return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
   });
@@ -211,12 +211,6 @@ export const Tasks = () => {
                       <Calendar className="w-4 h-4" />
                       <span>{formatDate(task.due_date)}</span>
                     </div>
-                    {task.task_type && (
-                      <>
-                        <span>•</span>
-                        <span>{task.task_type}</span>
-                      </>
-                    )}
                     {task.assignee && (
                       <>
                         <span>•</span>

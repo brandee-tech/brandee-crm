@@ -123,22 +123,7 @@ export const AssignExistingUserDialog = ({
                 ) : (
                   availableUsers.map(user => (
                     <SelectItem key={user.id} value={user.id}>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <span className="font-medium">
-                            {user.full_name || 'Nome não informado'}
-                          </span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            ({user.email})
-                          </span>
-                          {user.companies?.name && (
-                            <span className="text-xs text-muted-foreground ml-1">
-                              - {user.companies.name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                      {user.full_name || 'Nome não informado'}
                     </SelectItem>
                   ))
                 )}

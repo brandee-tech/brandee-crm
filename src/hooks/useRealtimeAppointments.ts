@@ -70,7 +70,7 @@ export const useRealtimeAppointments = () => {
   }, [user, toast]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
     
     fetchAppointments();
 
@@ -86,6 +86,9 @@ export const useRealtimeAppointments = () => {
 
     // Clean up any existing channel first
     cleanup();
+
+    // Guard: Only create subscription if user is still available
+    if (!user?.id) return cleanup;
 
     // Create unique channel name using user ID and timestamp
     const channelName = `realtime-appointments-${user.id}-${Date.now()}`;
@@ -105,10 +108,11 @@ export const useRealtimeAppointments = () => {
           console.log('Realtime appointment change detected:', payload);
           setIsUpdating(true);
           
-          // Remove artificial delay - fetch immediately
-          fetchAppointments().finally(() => {
-            setIsUpdating(false);
-          });
+          setTimeout(() => {
+            fetchAppointments().finally(() => {
+              setIsUpdating(false);
+            });
+          }, 100);
         }
       )
       .on(
@@ -122,9 +126,11 @@ export const useRealtimeAppointments = () => {
           console.log('Realtime lead change detected:', payload);
           setIsUpdating(true);
           
-          fetchAppointments().finally(() => {
-            setIsUpdating(false);
-          });
+          setTimeout(() => {
+            fetchAppointments().finally(() => {
+              setIsUpdating(false);
+            });
+          }, 100);
         }
       )
       .on(
@@ -138,22 +144,26 @@ export const useRealtimeAppointments = () => {
           console.log('Realtime profile change detected:', payload);
           setIsUpdating(true);
           
-          fetchAppointments().finally(() => {
-            setIsUpdating(false);
-          });
+          setTimeout(() => {
+            fetchAppointments().finally(() => {
+              setIsUpdating(false);
+            });
+          }, 100);
         }
       )
       .subscribe((status) => {
         console.log('Realtime appointments subscription status:', status);
         if (status === 'SUBSCRIBED') {
           isSubscribedRef.current = true;
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Realtime appointments subscription failed:', status);
         }
       });
 
     channelRef.current = channel;
 
     return cleanup;
-  }, [user]);
+  }, [user?.id, fetchAppointments]);
 
   return {
     appointments,

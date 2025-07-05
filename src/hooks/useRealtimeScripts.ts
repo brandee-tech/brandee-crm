@@ -66,7 +66,7 @@ export const useRealtimeScripts = () => {
   }, [user, toast]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
     
     fetchScripts();
 
@@ -82,6 +82,9 @@ export const useRealtimeScripts = () => {
 
     // Clean up any existing channel first
     cleanup();
+
+    // Guard: Only create subscription if user is still available
+    if (!user?.id) return cleanup;
 
     // Create unique channel name using user ID and timestamp
     const channelName = `realtime-scripts-${user.id}-${Date.now()}`;
@@ -101,22 +104,26 @@ export const useRealtimeScripts = () => {
           console.log('Realtime script change detected:', payload);
           setIsUpdating(true);
           
-          fetchScripts().finally(() => {
-            setIsUpdating(false);
-          });
+          setTimeout(() => {
+            fetchScripts().finally(() => {
+              setIsUpdating(false);
+            });
+          }, 100);
         }
       )
       .subscribe((status) => {
         console.log('Realtime scripts subscription status:', status);
         if (status === 'SUBSCRIBED') {
           isSubscribedRef.current = true;
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Realtime scripts subscription failed:', status);
         }
       });
 
     channelRef.current = channel;
 
     return cleanup;
-  }, [user]);
+  }, [user?.id, fetchScripts]);
 
   return {
     scripts,

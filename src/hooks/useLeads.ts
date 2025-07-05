@@ -90,10 +90,10 @@ export const useLeads = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user?.id, toast]);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
     
     fetchLeads();
 
@@ -109,6 +109,9 @@ export const useLeads = () => {
 
     // Clean up any existing channel first
     cleanup();
+
+    // Guard: Only create subscription if user is still available
+    if (!user?.id) return cleanup;
 
     // Create unique channel name using user ID and timestamp
     const channelName = `realtime-leads-${user.id}-${Date.now()}`;
@@ -128,22 +131,28 @@ export const useLeads = () => {
           console.log('Realtime lead change detected:', payload);
           setIsUpdating(true);
           
-          fetchLeads().finally(() => {
-            setIsUpdating(false);
-          });
+          // Use a small delay to prevent excessive calls
+          setTimeout(() => {
+            fetchLeads().finally(() => {
+              setIsUpdating(false);
+            });
+          }, 100);
         }
       )
       .subscribe((status) => {
         console.log('Realtime leads subscription status:', status);
         if (status === 'SUBSCRIBED') {
           isSubscribedRef.current = true;
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('Realtime subscription failed:', status);
+          // Don't retry immediately to avoid infinite loops
         }
       });
 
     channelRef.current = channel;
 
     return cleanup;
-  }, [user, fetchLeads]);
+  }, [user?.id, fetchLeads]);
 
   const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'>) => {
     if (!user) {

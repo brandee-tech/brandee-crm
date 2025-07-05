@@ -34,14 +34,33 @@ export class ErrorBoundary extends Component<Props, State> {
             <AlertTitle>Oops! Algo deu errado</AlertTitle>
             <AlertDescription className="mt-4">
               <p className="mb-4">
-                Ocorreu um erro inesperado. Tente recarregar a página.
+                {this.state.error?.message?.includes('realtime') || this.state.error?.message?.includes('subscription')
+                  ? 'Ocorreu um erro na conexão em tempo real. Tente recarregar a página.'
+                  : 'Ocorreu um erro inesperado. Tente recarregar a página.'}
               </p>
-              <Button 
-                onClick={() => window.location.reload()}
-                className="w-full"
-              >
-                Recarregar Página
-              </Button>
+              {process.env.NODE_ENV === 'development' && this.state.error && (
+                <details className="mb-4 text-sm bg-gray-100 p-2 rounded">
+                  <summary>Detalhes do erro (desenvolvimento)</summary>
+                  <pre className="mt-2 text-xs">{this.state.error.stack}</pre>
+                </details>
+              )}
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => {
+                    this.setState({ hasError: false, error: undefined });
+                  }}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Tentar Novamente
+                </Button>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="flex-1"
+                >
+                  Recarregar Página
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
         </div>

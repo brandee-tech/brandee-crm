@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -17,8 +17,11 @@ interface Lead {
 export const useLeads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchLeads = async () => {
     if (!user) {
@@ -310,9 +313,56 @@ export const useLeads = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchLeads();
-    }
+    if (!user) return;
+    
+    fetchLeads();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
+      if (channelRef.current && isSubscribedRef.current) {
+        console.log('Cleaning up realtime leads channel');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+        isSubscribedRef.current = false;
+      }
+    };
+
+    // Clean up any existing channel first
+    cleanup();
+
+    // Create unique channel name using user ID and timestamp
+    const channelName = `realtime-leads-${user.id}-${Date.now()}`;
+    
+    // Setup realtime subscription
+    const channel = supabase.channel(channelName);
+    
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads'
+        },
+        (payload) => {
+          console.log('Realtime lead change detected:', payload);
+          setIsUpdating(true);
+          
+          fetchLeads().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime leads subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
+
+    channelRef.current = channel;
+
+    return cleanup;
   }, [user]);
 
   const importLeadsFromCSV = async (
@@ -429,6 +479,7 @@ export const useLeads = () => {
   return {
     leads,
     loading,
+    isUpdating,
     createLead,
     updateLead,
     deleteLead,

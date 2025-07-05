@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import {
   Select,
   SelectContent,
@@ -28,7 +29,7 @@ export const Tasks = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
-  const { tasks, users, loading, createTask, updateTask, deleteTask } = useTasks();
+  const { tasks, users, loading, isUpdating, createTask, updateTask, deleteTask } = useTasks();
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -107,7 +108,10 @@ export const Tasks = () => {
           <h1 className="text-3xl font-bold text-gray-900">Tarefas</h1>
           <p className="text-gray-600 mt-1">Gerencie suas atividades e compromissos</p>
         </div>
-        <AddTaskDialog onAddTask={createTask} users={users} />
+        <div className="flex items-center gap-4">
+          <RealtimeBadge isUpdating={isUpdating} />
+          <AddTaskDialog onAddTask={createTask} users={users} />
+        </div>
       </div>
 
       {/* Filtros */}

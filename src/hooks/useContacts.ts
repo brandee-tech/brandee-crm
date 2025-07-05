@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -26,8 +26,11 @@ interface Contact {
 export const useContacts = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchContacts = async () => {
     try {
@@ -173,14 +176,62 @@ export const useContacts = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchContacts();
-    }
+    if (!user) return;
+    
+    fetchContacts();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
+      if (channelRef.current && isSubscribedRef.current) {
+        console.log('Cleaning up realtime contacts channel');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+        isSubscribedRef.current = false;
+      }
+    };
+
+    // Clean up any existing channel first
+    cleanup();
+
+    // Create unique channel name using user ID and timestamp
+    const channelName = `realtime-contacts-${user.id}-${Date.now()}`;
+    
+    // Setup realtime subscription
+    const channel = supabase.channel(channelName);
+    
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'contacts'
+        },
+        (payload) => {
+          console.log('Realtime contact change detected:', payload);
+          setIsUpdating(true);
+          
+          fetchContacts().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime contacts subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
+
+    channelRef.current = channel;
+
+    return cleanup;
   }, [user]);
 
   return {
     contacts,
     loading,
+    isUpdating,
     createContact,
     updateContact,
     deleteContact,

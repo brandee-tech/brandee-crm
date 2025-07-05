@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import { useContacts } from '@/hooks/useContacts';
 import { EditContactDialog } from './EditContactDialog';
 import { AddContactDialog } from './AddContactDialog';
@@ -14,7 +15,7 @@ export const Contacts = () => {
   const [editingContact, setEditingContact] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const { contacts, loading, deleteContact } = useContacts();
+  const { contacts, loading, isUpdating, deleteContact } = useContacts();
 
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -57,13 +58,16 @@ export const Contacts = () => {
           <h1 className="text-3xl font-bold text-gray-900">Contatos</h1>
           <p className="text-gray-600 mt-1">Gerencie sua rede de contatos</p>
         </div>
-        <Button 
-          className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => setAddDialogOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Contato
-        </Button>
+        <div className="flex items-center gap-4">
+          <RealtimeBadge isUpdating={isUpdating} />
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Contato
+          </Button>
+        </div>
       </div>
 
       <div className="px-8">

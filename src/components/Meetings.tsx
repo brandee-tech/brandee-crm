@@ -4,7 +4,8 @@ import { Plus, Calendar, Clock, Users, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useMeetings } from '@/hooks/useMeetings';
+import { RealtimeBadge } from '@/components/ui/realtime-badge';
+import { useRealtimeMeetings } from '@/hooks/useRealtimeMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
 import { MeetingDialog } from './MeetingDialog';
@@ -13,7 +14,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export const Meetings = () => {
-  const { meetings, isLoading } = useMeetings();
+  const { meetings, loading, isUpdating } = useRealtimeMeetings();
   const { user } = useAuth();
   const { profiles } = useProfiles();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,13 +66,16 @@ export const Meetings = () => {
           <h1 className="text-2xl font-bold text-gray-900">Reuniões</h1>
           <p className="text-gray-600">Gerencie suas reuniões, pautas e atas</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nova Reunião
-        </Button>
+        <div className="flex items-center gap-4">
+          <RealtimeBadge isUpdating={isUpdating} />
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nova Reunião
+          </Button>
+        </div>
       </div>
 
-      {isLoading ? (
+      {loading ? (
         <div className="flex justify-center py-8">
           <div className="text-lg">Carregando reuniões...</div>
         </div>

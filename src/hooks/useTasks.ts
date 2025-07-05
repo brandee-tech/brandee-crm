@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -32,9 +32,12 @@ export const useTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const channelRef = useRef<any>(null);
+  const isSubscribedRef = useRef(false);
 
   const fetchTasks = async () => {
     if (!user) return;
@@ -263,16 +266,64 @@ export const useTasks = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchTasks();
-      fetchUsers();
-    }
+    if (!user) return;
+    
+    fetchTasks();
+    fetchUsers();
+
+    // Cleanup function to remove channel
+    const cleanup = () => {
+      if (channelRef.current && isSubscribedRef.current) {
+        console.log('Cleaning up realtime tasks channel');
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+        isSubscribedRef.current = false;
+      }
+    };
+
+    // Clean up any existing channel first
+    cleanup();
+
+    // Create unique channel name using user ID and timestamp
+    const channelName = `realtime-tasks-${user.id}-${Date.now()}`;
+    
+    // Setup realtime subscription
+    const channel = supabase.channel(channelName);
+    
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tasks'
+        },
+        (payload) => {
+          console.log('Realtime task change detected:', payload);
+          setIsUpdating(true);
+          
+          fetchTasks().finally(() => {
+            setIsUpdating(false);
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime tasks subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribedRef.current = true;
+        }
+      });
+
+    channelRef.current = channel;
+
+    return cleanup;
   }, [user]);
 
   return {
     tasks,
     users,
     loading,
+    isUpdating,
     usersLoading,
     createTask,
     updateTask,

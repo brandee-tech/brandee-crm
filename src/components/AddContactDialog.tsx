@@ -24,8 +24,9 @@ export const AddContactDialog = ({ open, onOpenChange }: AddContactDialogProps) 
     email: '',
     phone: '',
     position: '',
-    location: '',
-    last_contact: ''
+    notes: '',
+    company_name: '',
+    source: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,8 +51,9 @@ export const AddContactDialog = ({ open, onOpenChange }: AddContactDialogProps) 
       email: '',
       phone: '',
       position: '',
-      location: '',
-      last_contact: ''
+      notes: '',
+      company_name: '',
+      source: ''
     });
     
     onOpenChange(false);
@@ -103,21 +105,29 @@ export const AddContactDialog = ({ open, onOpenChange }: AddContactDialogProps) 
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="location">Localização</Label>
+            <Label htmlFor="notes">Notas</Label>
             <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="last_contact">Último Contato</Label>
+            <Label htmlFor="company_name">Empresa</Label>
             <Input
-              id="last_contact"
-              type="date"
-              value={formData.last_contact}
-              onChange={(e) => setFormData(prev => ({ ...prev, last_contact: e.target.value }))}
+              id="company_name"
+              value={formData.company_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, company_name: e.target.value }))}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="source">Origem</Label>
+            <Input
+              id="source"
+              value={formData.source}
+              onChange={(e) => setFormData(prev => ({ ...prev, source: e.target.value }))}
             />
           </div>
           

@@ -85,6 +85,9 @@ export const CompanyRegistrationDialog = ({ open, onOpenChange }: CompanyRegistr
         location: data.location,
         website: data.website || null,
         status: 'Prospect',
+        domain: null,
+        phone: null,
+        plan: 'basic',
       });
 
       toast({

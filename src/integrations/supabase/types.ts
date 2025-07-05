@@ -997,6 +997,18 @@ export type Database = {
           active_companies: number
         }[]
       }
+      get_current_user_info: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          email: string
+          full_name: string
+          company_id: string
+          company_name: string
+          role_name: string
+          has_company: boolean
+        }[]
+      }
       get_saas_metrics: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1018,6 +1030,10 @@ export type Database = {
       is_saas_admin_for_company_management: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      setup_company_admin: {
+        Args: { user_id: string; company_id: string }
+        Returns: undefined
       }
       sync_appointment_status_with_pipeline: {
         Args: Record<PropertyKey, never>

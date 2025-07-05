@@ -61,14 +61,15 @@ export const CompanyRegistration = () => {
     setIsSubmitting(true);
     try {
       // Primeiro, criar o usuário
-      const {
-        error: signUpError
-      } = await signUp(data.contactEmail, data.contactPassword, data.contactName);
+      const { error: signUpError } = await signUp(data.contactEmail, data.contactPassword, data.contactName);
       if (signUpError) {
         throw new Error(signUpError.message);
       }
 
-      // Após criar o usuário, criar a empresa
+      // Aguardar um pouco para o trigger criar o perfil
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Criar a empresa (que automaticamente associará o usuário atual como admin)
       await createCompany({
         name: data.name,
         industry: data.industry,
@@ -78,15 +79,18 @@ export const CompanyRegistration = () => {
         phone: data.contactPhone || null,
         domain: null,
         plan: 'basic',
-        status: 'Prospect'
-      });
-      toast({
-        title: "Sucesso!",
-        description: "Empresa e usuário cadastrados com sucesso. Redirecionando para o dashboard..."
+        status: 'Ativo'
       });
 
-      // Redirecionar para o dashboard após cadastro
-      navigate('/');
+      toast({
+        title: "Sucesso!",
+        description: "Empresa e usuário cadastrados com sucesso. Redirecionando para o dashboard...",
+      });
+
+      // Aguardar um pouco e redirecionar
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
     } catch (error) {
       console.error('Erro ao cadastrar empresa:', error);
       toast({

@@ -37,7 +37,22 @@ export const useTasks = () => {
   const { toast } = useToast();
 
   const fetchTasks = async () => {
+    if (!user) return;
+
     try {
+      // Verificar se o usuário tem company_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) {
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+
       // First fetch tasks without the assignee join
       const { data: tasksData, error: tasksError } = await supabase
         .from('tasks')
@@ -82,6 +97,8 @@ export const useTasks = () => {
   };
 
   const fetchUsers = async () => {
+    if (!user) return;
+
     try {
       setUsersLoading(true);
       
@@ -89,10 +106,14 @@ export const useTasks = () => {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('company_id')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError || !profileData?.company_id) {
+        setUsers([]);
+        setUsersLoading(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('profiles')
@@ -115,25 +136,29 @@ export const useTasks = () => {
   };
 
   const createTask = async (taskData: Omit<Task, 'id' | 'created_at' | 'company_id' | 'created_by' | 'assignee'>): Promise<void> => {
+    if (!user) return;
+
     try {
       // Buscar company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('company_id')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError || !profileData?.company_id) {
+        throw new Error('Usuário não está associado a uma empresa');
+      }
 
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert([{ 
-          ...taskData, 
-          created_by: user?.id,
-          company_id: profileData.company_id 
-        }])
-        .select('*')
-        .single();
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert([{ 
+            ...taskData, 
+            created_by: user.id,
+            company_id: profileData.company_id 
+          }])
+          .select('*')
+          .single();
 
       if (error) throw error;
       

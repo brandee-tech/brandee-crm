@@ -13,6 +13,7 @@ import { Scripts } from '@/components/Scripts';
 import { Reports } from '@/components/Reports';
 import { UserManagement } from '@/components/UserManagement';
 import { Settings } from '@/components/Settings';
+import { OnboardingCheck } from '@/components/OnboardingCheck';
 import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
@@ -60,24 +61,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex w-full">
-      {/* Desktop Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      
-      <main className="flex-1 overflow-auto">
-        {/* Mobile Header */}
-        <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
-          <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-          <h1 className="font-semibold text-lg">We CRM</h1>
-          <div className="w-10"></div> {/* Spacer for balance */}
-        </div>
+    <OnboardingCheck>
+      <div className="min-h-screen bg-gray-50 flex w-full">
+        {/* Desktop Sidebar */}
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        {/* Main Content */}
-        <div className="w-full">
-          {renderContent()}
-        </div>
-      </main>
-    </div>
+        <main className="flex-1 overflow-auto">
+          {/* Mobile Header */}
+          <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
+            <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+            <h1 className="font-semibold text-lg">We CRM</h1>
+            <div className="w-10"></div> {/* Spacer for balance */}
+          </div>
+          
+          {/* Main Content */}
+          <div className="w-full">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
+    </OnboardingCheck>
   );
 };
 

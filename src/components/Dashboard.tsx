@@ -1,6 +1,8 @@
 
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { WelcomeMessage } from '@/components/WelcomeMessage';
 import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +11,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const { userInfo } = useCurrentUser();
   const { stats, loading } = useDashboard();
+
+  // Se não há dados ainda (empresa nova), mostrar mensagem de boas-vindas
+  const isNewCompany = stats.totalLeads === 0 && stats.totalAppointments === 0 && stats.totalTasks === 0;
 
   // Extract stats with safe defaults
   const {
@@ -92,7 +98,12 @@ export const Dashboard = () => {
             Dashboard
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
-            Bem-vindo de volta, {user?.email?.split('@')[0]}!
+            Bem-vindo de volta, {userInfo?.full_name || user?.email?.split('@')[0]}!
+            {userInfo?.company_name && (
+              <span className="block text-xs text-gray-500 mt-1">
+                Empresa: {userInfo.company_name}
+              </span>
+            )}
           </p>
         </div>
         
@@ -126,65 +137,69 @@ export const Dashboard = () => {
       </div>
 
       {/* Seções Principais - Layout Responsivo */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-        {/* Agendamentos Recentes */}
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Próximos Agendamentos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {loading ? (
-                [...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center space-x-3">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-3 w-2/3" />
+      {isNewCompany ? (
+        <WelcomeMessage />
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          {/* Agendamentos Recentes */}
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                Próximos Agendamentos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {loading ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center space-x-3">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-3 w-2/3" />
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>Nenhum agendamento próximo</p>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>Nenhum agendamento próximo</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Atividades Recentes */}
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900">
-              Atividades Recentes
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {loading ? (
-                [...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-start space-x-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-3 w-1/2" />
+          {/* Atividades Recentes */}
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-900">
+                Atividades Recentes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {loading ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-start space-x-3">
+                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-3 w-1/2" />
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Target className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>Nenhuma atividade recente</p>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <Target className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>Nenhuma atividade recente</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

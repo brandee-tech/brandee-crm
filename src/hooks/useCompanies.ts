@@ -50,24 +50,35 @@ export const useCompanies = () => {
     try {
       const { data, error } = await supabase
         .from('companies')
-        .insert([{ ...companyData }])
+        .insert([companyData])
         .select()
         .single();
 
       if (error) throw error;
+
+      // Se há usuário logado, associar à empresa como admin
+      if (user) {
+        await supabase.rpc('setup_company_admin', {
+          user_id: user.id,
+          company_id: data.id
+        });
+      }
+
       setCompanies(prev => [data, ...prev]);
       toast({
-        title: "Sucesso",
-        description: "Empresa criada com sucesso"
+        title: "Empresa criada com sucesso!",
+        description: `A empresa ${data.name} foi adicionada.`
       });
+
       return data;
     } catch (error) {
       console.error('Erro ao criar empresa:', error);
       toast({
-        title: "Erro",
-        description: "Não foi possível criar a empresa",
+        title: "Erro ao criar empresa",
+        description: "Não foi possível criar a empresa. Tente novamente.",
         variant: "destructive"
       });
+      throw error;
     }
   };
 

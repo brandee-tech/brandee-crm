@@ -27,6 +27,7 @@ function App() {
               <Route path="/admin" element={<AdminSaas />} />
               <Route path="/landing" element={<Landing />} />
               <Route path="/register-company" element={<CompanyRegistration />} />
+              <Route path="/company-registration" element={<CompanyRegistration />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <WhatsAppButton />

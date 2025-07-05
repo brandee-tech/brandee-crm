@@ -50,6 +50,38 @@ export const useDashboard = () => {
 
     try {
       setLoading(true);
+      
+      // Verificar se o usuário tem company_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) {
+        // Se não tem empresa, retornar dados vazios
+        setStats({
+          totalLeads: 0,
+          totalContacts: 0,
+          totalTasks: 0,
+          totalAppointments: 0,
+          recentLeads: [],
+          tasksByStatus: {},
+          leadsByStatus: {},
+          appointmentsByStatus: {},
+          totalPipelineValue: 0,
+          trendsData: {
+            leadsChange: 0,
+            contactsChange: 0,
+            tasksChange: 0,
+            appointmentsChange: 0,
+          },
+          conversionRate: 0,
+          avgDealValue: 0,
+        });
+        setLoading(false);
+        return;
+      }
       const now = new Date();
       const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);

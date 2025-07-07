@@ -12,6 +12,7 @@ import { AddLeadDialog } from './AddLeadDialog';
 import { ImportLeadsDialog } from './ImportLeadsDialog';
 import { LeadFilters, LeadFilterState } from './LeadFilters';
 import { TagBadge } from './TagBadge';
+import { WhatsAppLeadButton } from './WhatsAppLeadButton';
 
 export const Leads = () => {
   const [editingLead, setEditingLead] = useState(null);
@@ -151,7 +152,8 @@ export const Leads = () => {
                   {lead.phone && (
                     <div className="flex items-center gap-1">
                       <Phone className="w-4 h-4" />
-                      {lead.phone}
+                      <span className="break-all">{lead.phone}</span>
+                      <WhatsAppLeadButton phone={lead.phone} leadName={lead.name} />
                     </div>
                   )}
                 </div>

@@ -6,12 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useRoles } from '@/hooks/useRoles';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { RolePermissionsDialog } from './RolePermissionsDialog';
+import { Plus, Edit, Trash2, Settings, Shield } from 'lucide-react';
 
 export const RoleManagement = () => {
-  const { roles, loading, createRole, updateRole, deleteRole } = useRoles();
+  const { roles, loading, createRole, updateRole, updateRolePermissions, deleteRole } = useRoles();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -74,6 +76,26 @@ export const RoleManagement = () => {
 
   // Filtrar apenas cargos da empresa (os cargos do sistema agora são controlados pelo RLS)
   const companyRoles = roles.filter(role => !role.is_system_role);
+
+  const getPermissionsSummary = (role: any) => {
+    if (!role.permissions || Object.keys(role.permissions).length === 0) {
+      return 'Permissões padrão';
+    }
+    
+    let totalPermissions = 0;
+    let enabledPermissions = 0;
+    
+    Object.values(role.permissions).forEach((category: any) => {
+      Object.values(category).forEach((permission: any) => {
+        totalPermissions++;
+        if (permission === true) {
+          enabledPermissions++;
+        }
+      });
+    });
+    
+    return `${enabledPermissions}/${totalPermissions} permissões`;
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -160,6 +182,11 @@ export const RoleManagement = () => {
                     <Edit className="w-4 h-4" />
                   </Button>
                   
+                  <RolePermissionsDialog
+                    role={role}
+                    onUpdatePermissions={updateRolePermissions}
+                  />
+                  
                   <Button
                     variant="ghost"
                     size="sm"
@@ -171,8 +198,14 @@ export const RoleManagement = () => {
               </div>
             </CardHeader>
             
-            <CardContent>
+            <CardContent className="space-y-2">
               <CardDescription>{role.description || 'Sem descrição'}</CardDescription>
+              <div className="flex items-center gap-2">
+                <Shield className="w-3 h-3 text-gray-400" />
+                <Badge variant="outline" className="text-xs">
+                  {getPermissionsSummary(role)}
+                </Badge>
+              </div>
             </CardContent>
           </Card>
         ))}

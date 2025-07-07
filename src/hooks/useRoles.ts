@@ -105,7 +105,7 @@ export const useRoles = () => {
     }
   };
 
-  const updateRole = async (id: string, updates: { name?: string; description?: string }) => {
+  const updateRole = async (id: string, updates: { name?: string; description?: string; permissions?: any }) => {
     try {
       const { data, error } = await supabase
         .from('roles')
@@ -172,11 +172,16 @@ export const useRoles = () => {
     }
   }, [user]);
 
+  const updateRolePermissions = async (id: string, permissions: any) => {
+    await updateRole(id, { permissions });
+  };
+
   return {
     roles,
     loading,
     createRole,
     updateRole,
+    updateRolePermissions,
     deleteRole,
     refetch: fetchRoles
   };

@@ -11,6 +11,7 @@ import AdminSaas from "./pages/AdminSaas";
 import Landing from "./pages/Landing";
 import CompanyRegistration from "./pages/CompanyRegistration";
 import NotFound from "./pages/NotFound";
+import { CompanyEditPage } from "./pages/admin/CompanyEditPage";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 import "./App.css";
 
@@ -27,6 +28,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<AdminSaas />} />
+                <Route path="/admin/companies/:id/edit" element={<CompanyEditPage />} />
                 <Route path="/landing" element={<Landing />} />
                 <Route path="/register-company" element={<CompanyRegistration />} />
                 <Route path="/company-registration" element={<CompanyRegistration />} />

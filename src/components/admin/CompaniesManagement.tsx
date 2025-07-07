@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,9 +34,9 @@ interface CompanyData {
 }
 
 export const CompaniesManagement = () => {
+  const navigate = useNavigate();
   const { companies, loading, updateCompanyStatus, refetch } = useAllCompanies();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingCompany, setEditingCompany] = useState<CompanyData | null>(null);
   const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false);
   const [selectedCompanyForUser, setSelectedCompanyForUser] = useState<{ id: string; name: string } | null>(null);
 
@@ -74,13 +75,11 @@ export const CompaniesManagement = () => {
   };
 
   const handleAddCompany = () => {
-    setEditingCompany(null);
     setDialogOpen(true);
   };
 
   const handleEditCompany = (company: CompanyData) => {
-    setEditingCompany(company);
-    setDialogOpen(true);
+    navigate(`/admin/companies/${company.id}/edit`);
   };
 
   const handleDialogSuccess = () => {
@@ -277,7 +276,7 @@ export const CompaniesManagement = () => {
       <CompanyFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        company={editingCompany}
+        company={null}
         onSuccess={handleDialogSuccess}
       />
 

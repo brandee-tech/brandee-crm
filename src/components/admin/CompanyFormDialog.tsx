@@ -273,20 +273,6 @@ export const CompanyFormDialog = ({
                     <span className="hidden sm:inline">WhatsApp</span>
                     <span className="sm:hidden">WA</span>
                   </TabsTrigger>
-                  {isEditing && (
-                    <>
-                      <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Usuários & Cargos</span>
-                        <span className="sm:hidden">Users</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="stats" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                        <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline">Estatísticas</span>
-                        <span className="sm:hidden">Stats</span>
-                      </TabsTrigger>
-                    </>
-                  )}
                 </TabsList>
               </div>
 

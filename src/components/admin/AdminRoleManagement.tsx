@@ -26,6 +26,7 @@ export const AdminRoleManagement = ({ companyId, companyName }: AdminRoleManagem
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
     try {
       if (editingRole) {

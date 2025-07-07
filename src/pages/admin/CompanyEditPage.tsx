@@ -337,8 +337,7 @@ export const CompanyEditPage = () => {
         {/* Content */}
         <div className="flex-1 px-4 py-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="basic" className="flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
@@ -361,6 +360,7 @@ export const CompanyEditPage = () => {
 
               {/* Basic Tab */}
               <TabsContent value="basic">
+                <form onSubmit={form.handleSubmit(onSubmit)}>
                 <Card>
                   <CardHeader>
                     <CardTitle>Informações Básicas</CardTitle>
@@ -531,6 +531,7 @@ export const CompanyEditPage = () => {
                     </div>
                   </CardContent>
                 </Card>
+                </form>
               </TabsContent>
 
               {/* Users Tab */}
@@ -663,6 +664,7 @@ export const CompanyEditPage = () => {
               </TabsContent>
 
               <TabsContent value="whatsapp">
+                <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="space-y-6">
                   <Card>
                     <CardHeader>
@@ -768,6 +770,7 @@ export const CompanyEditPage = () => {
                     </CardContent>
                   </Card>
                 </div>
+                </form>
               </TabsContent>
 
               <TabsContent value="stats">
@@ -797,7 +800,6 @@ export const CompanyEditPage = () => {
                 </Card>
               </TabsContent>
             </Tabs>
-            </form>
           </Form>
         </div>
       </div>

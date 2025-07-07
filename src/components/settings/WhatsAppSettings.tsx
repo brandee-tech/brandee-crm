@@ -7,11 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageCircle } from 'lucide-react';
-import { useCompanySettings } from '@/hooks/useCompanySettings';
+import { useCurrentCompany } from '@/hooks/useCurrentCompany';
 import { useToast } from '@/hooks/use-toast';
 
 export const WhatsAppSettings = () => {
-  const { company, updateCompany } = useCompanySettings();
+  const { company, updateCompany, updating } = useCurrentCompany();
   const { toast } = useToast();
   
   const [whatsappConfig, setWhatsappConfig] = useState({
@@ -21,16 +21,16 @@ export const WhatsAppSettings = () => {
   });
 
   useEffect(() => {
-    if (company?.whatsapp_support) {
+    if (company) {
       setWhatsappConfig({
-        enabled: company.whatsapp_support.enabled || false,
-        phone: company.whatsapp_support.phone || '',
-        message: company.whatsapp_support.message || 'Olá! Preciso de ajuda.',
+        enabled: company.whatsapp_enabled || false,
+        phone: company.whatsapp_phone || '',
+        message: company.whatsapp_message || 'Olá! Preciso de ajuda.',
       });
     }
   }, [company]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validar número de telefone se estiver habilitado
     if (whatsappConfig.enabled && !whatsappConfig.phone.trim()) {
       toast({
@@ -41,12 +41,15 @@ export const WhatsAppSettings = () => {
       return;
     }
 
-    updateCompany.mutate({
-      whatsapp_support: {
-        ...whatsappConfig,
-        phone_number: whatsappConfig.phone,
-      },
-    });
+    try {
+      await updateCompany({
+        whatsapp_enabled: whatsappConfig.enabled,
+        whatsapp_phone: whatsappConfig.phone,
+        whatsapp_message: whatsappConfig.message,
+      });
+    } catch (error) {
+      // Error is already handled in the hook
+    }
   };
 
   const handleConfigChange = (field: string, value: string | boolean) => {
@@ -123,8 +126,8 @@ export const WhatsAppSettings = () => {
         )}
 
         <div className="flex justify-end pt-4">
-          <Button onClick={handleSave} disabled={updateCompany.isPending}>
-            {updateCompany.isPending ? 'Salvando...' : 'Salvar Configurações'}
+          <Button onClick={handleSave} disabled={updating}>
+            {updating ? 'Salvando...' : 'Salvar Configurações'}
           </Button>
         </div>
       </CardContent>

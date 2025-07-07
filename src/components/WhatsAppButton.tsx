@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { MessageCircle, X } from 'lucide-react';
-import { useCompanySettings } from '@/hooks/useCompanySettings';
+import { useCurrentCompany } from '@/hooks/useCurrentCompany';
 
 export const WhatsAppButton = () => {
-  const { company } = useCompanySettings();
+  const { company } = useCurrentCompany();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -16,13 +16,13 @@ export const WhatsAppButton = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (!company?.whatsapp_support?.enabled || !company?.whatsapp_support?.phone) {
+  if (!company?.whatsapp_enabled || !company?.whatsapp_phone) {
     return null;
   }
 
   const handleWhatsAppClick = () => {
-    const phone = company.whatsapp_support.phone.replace(/\D/g, ''); // Remove caracteres não numéricos
-    const message = encodeURIComponent(company.whatsapp_support.message || 'Olá! Preciso de ajuda.');
+    const phone = company.whatsapp_phone.replace(/\D/g, ''); // Remove caracteres não numéricos
+    const message = encodeURIComponent(company.whatsapp_message || 'Olá! Preciso de ajuda.');
     const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
     window.open(whatsappUrl, '_blank');
   };

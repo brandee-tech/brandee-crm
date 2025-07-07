@@ -12,12 +12,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Building2, Upload, MapPin, Globe, Phone } from 'lucide-react';
-import { useCompanySettings } from '@/hooks/useCompanySettings';
+import { useCurrentCompany } from '@/hooks/useCurrentCompany';
 import { useToast } from '@/hooks/use-toast';
 import { WhatsAppSettings } from './WhatsAppSettings';
 
 export const CompanyInfoSettings = () => {
-  const { company, updateCompany, uploadLogo, isUploadingLogo } = useCompanySettings();
+  const { company, updateCompany, uploadLogo, updating } = useCurrentCompany();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -43,9 +43,13 @@ export const CompanyInfoSettings = () => {
     }
   }, [company]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateCompany.mutate(formData);
+    try {
+      await updateCompany(formData);
+    } catch (error) {
+      // Error is already handled in the hook
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -106,10 +110,10 @@ export const CompanyInfoSettings = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={handleLogoUpload}
-                disabled={isUploadingLogo}
+                disabled={updating}
               >
                 <Upload className="w-4 h-4 mr-2" />
-                {isUploadingLogo ? 'Enviando...' : 'Alterar Logo'}
+                {updating ? 'Enviando...' : 'Alterar Logo'}
               </Button>
               <p className="text-xs text-gray-500 mt-1">PNG ou JPG, máx. 2MB</p>
               <input
@@ -212,8 +216,8 @@ export const CompanyInfoSettings = () => {
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={updateCompany.isPending}>
-                {updateCompany.isPending ? 'Salvando...' : 'Salvar'}
+              <Button type="submit" disabled={updating}>
+                {updating ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
           </form>

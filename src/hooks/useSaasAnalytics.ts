@@ -61,11 +61,16 @@ export const useSaasAnalytics = (filters: AnalyticsFilters = { period_days: 30 }
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.rpc('get_saas_metrics');
+      const { data, error } = await supabase.rpc('get_advanced_saas_analytics', {
+        period_days: filters.period_days,
+        company_filter: filters.company_filter || null
+      });
 
       if (error) throw error;
       
-      setAnalytics(data as unknown as SaasAnalyticsData);
+      // A função retorna um JSON, então fazemos parse
+      const analyticsData = typeof data === 'string' ? JSON.parse(data) : data;
+      setAnalytics(analyticsData as SaasAnalyticsData);
     } catch (error) {
       console.error('Erro ao buscar analytics SaaS:', error);
       toast({

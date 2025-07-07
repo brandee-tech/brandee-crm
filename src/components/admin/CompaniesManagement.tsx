@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAllCompanies } from '@/hooks/useAllCompanies';
 import { CompanyFormDialog } from './CompanyFormDialog';
-import { Building2, Users, Phone, Globe, MapPin, Calendar, Plus, Edit, UserPlus } from 'lucide-react';
+import { Building2, Users, Phone, Globe, MapPin, Calendar, Plus, Edit, UserPlus, Power, Trash } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -15,6 +15,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { AssignExistingUserDialog } from './AssignExistingUserDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface CompanyData {
   id: string;
@@ -35,10 +45,13 @@ interface CompanyData {
 
 export const CompaniesManagement = () => {
   const navigate = useNavigate();
-  const { companies, loading, updateCompanyStatus, refetch } = useAllCompanies();
+  const { companies, loading, updateCompanyStatus, deactivateCompany, deleteCompany, refetch } = useAllCompanies();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false);
   const [selectedCompanyForUser, setSelectedCompanyForUser] = useState<{ id: string; name: string } | null>(null);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedCompanyForAction, setSelectedCompanyForAction] = useState<{ id: string; name: string } | null>(null);
 
   if (loading) {
     return (
@@ -94,6 +107,32 @@ export const CompaniesManagement = () => {
   const handleAssignUserSuccess = () => {
     refetch();
     setSelectedCompanyForUser(null);
+  };
+
+  const handleDeactivateCompany = (company: CompanyData) => {
+    setSelectedCompanyForAction({ id: company.id, name: company.name });
+    setDeactivateDialogOpen(true);
+  };
+
+  const handleDeleteCompany = (company: CompanyData) => {
+    setSelectedCompanyForAction({ id: company.id, name: company.name });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeactivate = async () => {
+    if (selectedCompanyForAction) {
+      await deactivateCompany(selectedCompanyForAction.id);
+      setDeactivateDialogOpen(false);
+      setSelectedCompanyForAction(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (selectedCompanyForAction) {
+      await deleteCompany(selectedCompanyForAction.id);
+      setDeleteDialogOpen(false);
+      setSelectedCompanyForAction(null);
+    }
   };
 
   return (
@@ -238,27 +277,52 @@ export const CompaniesManagement = () => {
                   </Select>
                 </div>
                 
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleEditCompany(company)}
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Editar</span>
-                    <span className="sm:hidden">Editar</span>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleAssignUser(company)}
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Atribuir Usuário</span>
-                    <span className="sm:hidden">Usuário</span>
-                  </Button>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleEditCompany(company)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Editar</span>
+                      <span className="sm:hidden">Editar</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleAssignUser(company)}
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Atribuir Usuário</span>
+                      <span className="sm:hidden">Usuário</span>
+                    </Button>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 text-yellow-600 border-yellow-200 hover:bg-yellow-50"
+                      onClick={() => handleDeactivateCompany(company)}
+                      disabled={company.status?.toLowerCase() === 'inativa'}
+                    >
+                      <Power className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Inativar</span>
+                      <span className="sm:hidden">Inativar</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                      onClick={() => handleDeleteCompany(company)}
+                    >
+                      <Trash className="w-4 h-4 mr-2" />
+                      <span className="hidden sm:inline">Excluir</span>
+                      <span className="sm:hidden">Excluir</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -289,6 +353,42 @@ export const CompaniesManagement = () => {
           onSuccess={handleAssignUserSuccess}
         />
       )}
+
+      <AlertDialog open={deactivateDialogOpen} onOpenChange={setDeactivateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Inativar Empresa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja inativar a empresa "{selectedCompanyForAction?.name}"?
+              Esta ação irá alterar o status da empresa para "Inativa".
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeactivate} className="bg-yellow-600 hover:bg-yellow-700">
+              Inativar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Empresa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir permanentemente a empresa "{selectedCompanyForAction?.name}"?
+              Esta ação não pode ser desfeita e todos os dados relacionados serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Excluir Permanentemente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

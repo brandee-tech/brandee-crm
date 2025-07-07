@@ -112,9 +112,53 @@ export const useAllCompanies = () => {
     }
   };
 
+  const deactivateCompany = async (id: string) => {
+    await updateCompanyStatus(id, 'Inativa');
+  };
+
+  const deleteCompany = async (id: string) => {
+    try {
+      console.log('useAllCompanies: Deleting company:', { id });
+      
+      const { error } = await supabase
+        .from('companies')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('useAllCompanies: Error deleting company:', error);
+        throw error;
+      }
+      
+      setCompanies(prev => prev.filter(company => company.id !== id));
+
+      toast({
+        title: "Sucesso",
+        description: "Empresa excluída com sucesso"
+      });
+      
+    } catch (error: any) {
+      console.error('Erro ao excluir empresa:', error);
+      
+      if (error.code === 'PGRST116' || error.message?.includes('RLS')) {
+        toast({
+          title: "Acesso Negado",
+          description: "Você não tem permissão para excluir empresas",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível excluir a empresa",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     fetchCompanies();
   }, []);
 
-  return { companies, loading, refetch: fetchCompanies, updateCompanyStatus };
+  return { companies, loading, refetch: fetchCompanies, updateCompanyStatus, deactivateCompany, deleteCompany };
 };

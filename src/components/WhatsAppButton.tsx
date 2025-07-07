@@ -4,7 +4,7 @@ import { MessageCircle, X } from 'lucide-react';
 import { useCurrentCompany } from '@/hooks/useCurrentCompany';
 
 export const WhatsAppButton = () => {
-  const { company } = useCurrentCompany();
+  const { company, loading } = useCurrentCompany();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -16,7 +16,29 @@ export const WhatsAppButton = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (!company?.whatsapp_enabled || !company?.whatsapp_phone) {
+  // Debug logs
+  console.log('WhatsAppButton Debug:', {
+    company,
+    loading,
+    whatsapp_enabled: company?.whatsapp_enabled,
+    whatsapp_phone: company?.whatsapp_phone,
+    isVisible
+  });
+
+  // Aguardar carregamento dos dados
+  if (loading) {
+    return null;
+  }
+
+  // Verificar se WhatsApp está habilitado e telefone existe (com trim para espaços)
+  const phoneExists = company?.whatsapp_phone && company.whatsapp_phone.trim().length > 0;
+  
+  if (!company?.whatsapp_enabled || !phoneExists) {
+    console.log('WhatsApp button not shown:', { 
+      enabled: company?.whatsapp_enabled, 
+      phoneExists,
+      phone: company?.whatsapp_phone 
+    });
     return null;
   }
 

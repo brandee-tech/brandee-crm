@@ -41,11 +41,35 @@ export const WhatsAppSettings = () => {
       return;
     }
 
+    // Validar se o telefone tem pelo menos alguns números
+    if (whatsappConfig.enabled) {
+      const numbersOnly = whatsappConfig.phone.replace(/\D/g, '');
+      if (numbersOnly.length < 10) {
+        toast({
+          title: "Erro", 
+          description: "Por favor, insira um número de telefone completo com DDD.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
+      console.log('Salvando configurações WhatsApp:', {
+        whatsapp_enabled: whatsappConfig.enabled,
+        whatsapp_phone: whatsappConfig.phone.trim(),
+        whatsapp_message: whatsappConfig.message,
+      });
+
       await updateCompany({
         whatsapp_enabled: whatsappConfig.enabled,
-        whatsapp_phone: whatsappConfig.phone,
+        whatsapp_phone: whatsappConfig.phone.trim(),
         whatsapp_message: whatsappConfig.message,
+      });
+
+      toast({
+        title: "Sucesso",
+        description: "Configurações do WhatsApp salvas com sucesso!",
       });
     } catch (error) {
       // Error is already handled in the hook

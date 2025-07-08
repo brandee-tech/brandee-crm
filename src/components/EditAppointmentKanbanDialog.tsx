@@ -31,7 +31,7 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
     time: '',
     duration: 60,
     status: 'Agendado',
-    meetingUrl: ''
+    meeting_url: ''
   });
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
         time: appointment.time || '',
         duration: appointment.duration || 60,
         status: appointment.status || 'Agendado',
-        meetingUrl: appointment.meeting_url || ''
+        meeting_url: appointment.meeting_url || ''
       });
     }
   }, [appointment]);
@@ -59,7 +59,7 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
       time: formData.time,
       duration: formData.duration,
       status: formData.status,
-      meeting_url: formData.meetingUrl || null
+      meeting_url: formData.meeting_url || null
     });
 
     if (result && formData.status === 'Reagendar') {
@@ -146,8 +146,8 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
             <Input
               id="meetingUrl"
               type="url"
-              value={formData.meetingUrl}
-              onChange={(e) => setFormData(prev => ({ ...prev, meetingUrl: e.target.value }))}
+              value={formData.meeting_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, meeting_url: e.target.value }))}
               placeholder="https://meet.google.com/... ou https://zoom.us/..."
             />
           </div>

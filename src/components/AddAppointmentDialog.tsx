@@ -47,7 +47,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
     lead_id: '',
     assigned_to: '',
     status: 'Agendado',
-    meetingUrl: ''
+    meeting_url: ''
   });
 
   // Auto-select current user as default assignee when closers are loaded
@@ -92,7 +92,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
         scheduled_by: user.id,
         lead_id: formData.lead_id || null,
         assigned_to: formData.assigned_to,
-        meeting_url: formData.meetingUrl || null,
+        meeting_url: formData.meeting_url || null,
       };
 
       const created = await createAppointment(appointmentData);
@@ -108,7 +108,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
           lead_id: '',
           assigned_to: '',
           status: 'Agendado',
-          meetingUrl: ''
+          meeting_url: ''
         });
         onOpenChange(false);
       }
@@ -159,8 +159,8 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
             <Input
               id="meetingUrl"
               type="url"
-              value={formData.meetingUrl}
-              onChange={(e) => setFormData(prev => ({ ...prev, meetingUrl: e.target.value }))}
+              value={formData.meeting_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, meeting_url: e.target.value }))}
               placeholder="https://meet.google.com/... ou https://zoom.us/..."
             />
           </div>

@@ -71,6 +71,15 @@ export const parseExcel = (file: File): Promise<any[]> => {
         const headers = jsonData[0] as string[];
         const rows = jsonData.slice(1) as any[][];
         
+        // Função para normalizar valores do Excel
+        const normalizeExcelValue = (value: any): string => {
+          if (value === null || value === undefined || value === '') {
+            return '';
+          }
+          // Converter números para string, mantendo formatação original
+          return String(value).trim();
+        };
+
         // Converter para objetos
         const result = rows.map(row => {
           const obj: any = {};
@@ -85,7 +94,7 @@ export const parseExcel = (file: File): Promise<any[]> => {
             else if (normalized?.includes('status')) key = 'status';
             else if (normalized?.includes('origem') || normalized?.includes('source')) key = 'origem';
             
-            obj[key] = row[index] || '';
+            obj[key] = normalizeExcelValue(row[index]);
           });
           return obj;
         }).filter(row => row.nome && row.nome.trim() !== ''); // Filtrar linhas vazias

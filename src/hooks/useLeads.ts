@@ -436,6 +436,14 @@ export const useLeads = () => {
       let errorCount = 0;
       const total = csvLeads.length;
 
+      // Função para processar dados do CSV/Excel
+      const processLeadValue = (value: any): string | null => {
+        if (value === null || value === undefined || value === '') {
+          return null;
+        }
+        return String(value).trim() || null;
+      };
+
       // Processar leads em lotes de 50 para melhor performance
       const batchSize = 50;
       console.log(`Starting import of ${total} leads in batches of ${batchSize}`);
@@ -445,11 +453,11 @@ export const useLeads = () => {
         console.log(`Processing batch ${Math.floor(i / batchSize) + 1}: ${batch.length} leads`);
         
         const leadsToInsert = batch.map(csvLead => ({
-          name: csvLead.nome.trim(),
-          email: csvLead.email?.trim() || null,
-          phone: csvLead.telefone?.trim() || null,
-          status: csvLead.status?.trim() || defaultStatus,
-          source: csvLead.origem?.trim() || null,
+          name: processLeadValue(csvLead.nome),
+          email: processLeadValue(csvLead.email),
+          phone: processLeadValue(csvLead.telefone),
+          status: processLeadValue(csvLead.status) || defaultStatus,
+          source: processLeadValue(csvLead.origem),
           created_by: user.id,
           company_id: profileData.company_id
         }));

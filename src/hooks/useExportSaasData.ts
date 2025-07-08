@@ -1,51 +1,16 @@
-import { useToast } from '@/hooks/use-toast';
+import { useExcelUtils } from '@/lib/excel-utils';
 import type { SaasAnalyticsData, AnalyticsFilters } from './useSaasAnalytics';
 
 export const useExportSaasData = (analytics: SaasAnalyticsData | null, filters: AnalyticsFilters) => {
-  const { toast } = useToast();
+  const { convertToExcel, downloadExcelWithToast } = useExcelUtils();
 
-  // Função utilitária para converter dados em CSV
-  const convertToCSV = (data: any[], headers: { [key: string]: string }) => {
-    const headerRow = Object.values(headers).join(',');
-    const dataRows = data.map(row => {
-      return Object.keys(headers).map(key => {
-        const value = row[key];
-        if (typeof value === 'string' && value.includes(',')) {
-          return `"${value}"`;
-        }
-        return value || '';
-      }).join(',');
-    });
-    return [headerRow, ...dataRows].join('\n');
-  };
-
-  // Função para fazer download do CSV
-  const downloadCSV = (csvContent: string, filename: string) => {
-    try {
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      
-      const filterSuffix = filters.company_filter ? '-empresa-especifica' : '';
-      const periodSuffix = `-${filters.period_days}dias`;
-      const dateSuffix = new Date().toISOString().split('T')[0];
-      
-      a.download = `${filename}${periodSuffix}${filterSuffix}-${dateSuffix}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Sucesso",
-        description: "Relatório exportado com sucesso!"
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao exportar relatório",
-        variant: "destructive"
-      });
-    }
+  // Função para gerar nome do arquivo com filtros
+  const generateFilename = (baseFilename: string) => {
+    const filterSuffix = filters.company_filter ? '-empresa-especifica' : '';
+    const periodSuffix = `-${filters.period_days}dias`;
+    const dateSuffix = new Date().toISOString().split('T')[0];
+    
+    return `${baseFilename}${periodSuffix}${filterSuffix}-${dateSuffix}`;
   };
 
   const exportOverviewData = () => {
@@ -59,8 +24,9 @@ export const useExportSaasData = (analytics: SaasAnalyticsData | null, filters: 
     ];
     
     const headers = { metric: 'Métrica', value: 'Valor' };
-    const csvContent = convertToCSV(data, headers);
-    downloadCSV(csvContent, 'saas-overview');
+    const workbook = convertToExcel(data, headers, 'Overview');
+    const filename = generateFilename('saas-overview');
+    downloadExcelWithToast(workbook, filename, 'Relatório de overview exportado com sucesso!');
   };
 
   const exportCompaniesData = () => {
@@ -93,8 +59,9 @@ export const useExportSaasData = (analytics: SaasAnalyticsData | null, filters: 
     const allData = [...planData, ...industryData, ...sizeData, ...growthData];
     
     const headers = { category: 'Categoria', type: 'Tipo/Data', quantity: 'Quantidade' };
-    const csvContent = convertToCSV(allData, headers);
-    downloadCSV(csvContent, 'empresas-analytics');
+    const workbook = convertToExcel(allData, headers, 'Empresas');
+    const filename = generateFilename('empresas-analytics');
+    downloadExcelWithToast(workbook, filename, 'Relatório de empresas exportado com sucesso!');
   };
 
   const exportUsersData = () => {
@@ -115,8 +82,9 @@ export const useExportSaasData = (analytics: SaasAnalyticsData | null, filters: 
     const allData = [...roleData, ...growthData];
     
     const headers = { category: 'Categoria', type: 'Tipo/Data', quantity: 'Quantidade' };
-    const csvContent = convertToCSV(allData, headers);
-    downloadCSV(csvContent, 'usuarios-analytics');
+    const workbook = convertToExcel(allData, headers, 'Usuários');
+    const filename = generateFilename('usuarios-analytics');
+    downloadExcelWithToast(workbook, filename, 'Relatório de usuários exportado com sucesso!');
   };
 
   const exportActivitiesData = () => {
@@ -158,8 +126,9 @@ export const useExportSaasData = (analytics: SaasAnalyticsData | null, filters: 
       quantity: 'Quantidade',
       total: 'Total da Atividade'
     };
-    const csvContent = convertToCSV(allData, headers);
-    downloadCSV(csvContent, 'atividades-analytics');
+    const workbook = convertToExcel(allData, headers, 'Atividades');
+    const filename = generateFilename('atividades-analytics');
+    downloadExcelWithToast(workbook, filename, 'Relatório de atividades exportado com sucesso!');
   };
 
   const exportPerformanceData = () => {
@@ -173,37 +142,40 @@ export const useExportSaasData = (analytics: SaasAnalyticsData | null, filters: 
       activity_score: 'Pontuação'
     };
     
-    const csvContent = convertToCSV(analytics.top_companies, headers);
-    downloadCSV(csvContent, 'performance-empresas');
+    const workbook = convertToExcel(analytics.top_companies, headers, 'Performance');
+    const filename = generateFilename('performance-empresas');
+    downloadExcelWithToast(workbook, filename, 'Relatório de performance exportado com sucesso!');
   };
 
   const exportCompleteReport = () => {
     if (!analytics) return;
     
-    // Preparar dados do overview
-    const overviewSection = [
-      '=== OVERVIEW GERAL ===',
-      `Total de Empresas,${analytics.overview.total_companies}`,
-      `Total de Usuários,${analytics.overview.total_users}`,
-      `Empresas Ativas,${analytics.overview.active_companies}`,
-      `Novos Usuários (Período),${analytics.overview.new_users_this_period}`,
-      '',
-      '=== EMPRESAS POR PLANO ===',
-      'Plano,Quantidade',
-      ...Object.entries(analytics.companies.by_plan).map(([plan, count]) => `${plan},${count}`),
-      '',
-      '=== USUÁRIOS POR CARGO ===',
-      'Cargo,Quantidade',
-      ...Object.entries(analytics.users.by_role).map(([role, count]) => `${role},${count}`),
-      '',
-      '=== TOP EMPRESAS ===',
-      'Empresa,Usuários,Leads,Agendamentos,Pontuação',
-      ...analytics.top_companies.map(company => 
-        `${company.name},${company.users_count},${company.leads_count},${company.appointments_count},${company.activity_score}`
-      )
-    ].join('\n');
+    // Criar múltiplas planilhas em um workbook
+    const workbook = convertToExcel([], {}, 'Relatório Completo');
     
-    downloadCSV(overviewSection, 'relatorio-completo-saas');
+    // Dados do overview
+    const overviewData = [
+      { secao: 'OVERVIEW GERAL', item: 'Total de Empresas', valor: analytics.overview.total_companies },
+      { secao: 'OVERVIEW GERAL', item: 'Total de Usuários', valor: analytics.overview.total_users },
+      { secao: 'OVERVIEW GERAL', item: 'Empresas Ativas', valor: analytics.overview.active_companies },
+      { secao: 'OVERVIEW GERAL', item: 'Novos Usuários (Período)', valor: analytics.overview.new_users_this_period },
+      ...Object.entries(analytics.companies.by_plan).map(([plan, count]) => ({
+        secao: 'EMPRESAS POR PLANO',
+        item: plan,
+        valor: count
+      })),
+      ...Object.entries(analytics.users.by_role).map(([role, count]) => ({
+        secao: 'USUÁRIOS POR CARGO',
+        item: role,
+        valor: count
+      }))
+    ];
+    
+    const overviewHeaders = { secao: 'Seção', item: 'Item', valor: 'Valor' };
+    const overviewWorkbook = convertToExcel(overviewData, overviewHeaders, 'Relatório Geral');
+    
+    const filename = generateFilename('relatorio-completo-saas');
+    downloadExcelWithToast(overviewWorkbook, filename, 'Relatório completo exportado com sucesso!');
   };
 
   return {

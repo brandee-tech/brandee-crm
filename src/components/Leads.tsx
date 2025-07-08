@@ -108,13 +108,13 @@ export const Leads = () => {
         <div className="flex items-center gap-4">
           <RealtimeBadge isUpdating={isUpdating} />
           <div className="flex gap-2 w-full sm:w-auto">
-          <Button 
+           <Button 
             variant="outline"
             onClick={() => setImportDialogOpen(true)}
             className="flex-1 sm:flex-none"
           >
             <Upload className="w-4 h-4 mr-2" />
-            Importar CSV
+            Importar Excel
           </Button>
           <Button 
             variant="outline"
@@ -123,7 +123,7 @@ export const Leads = () => {
             disabled={filteredLeads.length === 0}
           >
             <Download className="w-4 h-4 mr-2" />
-            Exportar CSV
+            Exportar Excel
           </Button>
           <Button 
             className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"

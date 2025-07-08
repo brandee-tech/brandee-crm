@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Upload, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import { useLeads } from '@/hooks/useLeads';
-import Papa from 'papaparse';
+import { useExcelUtils } from '@/lib/excel-utils';
 import { useToast } from '@/hooks/use-toast';
 
 interface ImportLeadsDialogProps {
@@ -20,7 +20,7 @@ interface ImportLeadsDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface CSVLead {
+interface ExcelLead {
   nome: string;
   email?: string;
   telefone?: string;
@@ -36,11 +36,12 @@ interface ValidationError {
 
 export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps) => {
   const { importLeadsFromCSV } = useLeads();
+  const { parseExcelWithToast, generateExcelTemplate } = useExcelUtils();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [file, setFile] = useState<File | null>(null);
-  const [leads, setLeads] = useState<CSVLead[]>([]);
+  const [leads, setLeads] = useState<ExcelLead[]>([]);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -55,68 +56,49 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    if (!selectedFile.name.endsWith('.csv')) {
+    if (!selectedFile.name.endsWith('.xlsx') && !selectedFile.name.endsWith('.xls')) {
       toast({
         title: "Erro",
-        description: "Por favor, selecione um arquivo CSV válido",
+        description: "Por favor, selecione um arquivo Excel válido (.xlsx ou .xls)",
         variant: "destructive"
       });
       return;
     }
 
     setFile(selectedFile);
-    parseCSV(selectedFile);
+    parseExcelFile(selectedFile);
   };
 
-  const parseCSV = (file: File) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => {
-        // Normalizar nomes das colunas
-        const normalized = header.toLowerCase().trim();
-        if (normalized.includes('nome') || normalized.includes('name')) return 'nome';
-        if (normalized.includes('email') || normalized.includes('e-mail')) return 'email';
-        if (normalized.includes('telefone') || normalized.includes('phone') || normalized.includes('celular')) return 'telefone';
-        if (normalized.includes('status')) return 'status';
-        if (normalized.includes('origem') || normalized.includes('source')) return 'origem';
-        return header;
-      },
-      complete: (results) => {
-        const parsedLeads = results.data as CSVLead[];
-        const errors: ValidationError[] = [];
+  const parseExcelFile = async (file: File) => {
+    const parsedData = await parseExcelWithToast(file);
+    
+    if (!parsedData) return;
 
-        // Validar dados
-        parsedLeads.forEach((lead, index) => {
-          if (!lead.nome || lead.nome.trim() === '') {
-            errors.push({
-              row: index + 1,
-              field: 'nome',
-              message: 'Nome é obrigatório'
-            });
-          }
+    const parsedLeads = parsedData as ExcelLead[];
+    const errors: ValidationError[] = [];
 
-          if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
-            errors.push({
-              row: index + 1,
-              field: 'email',
-              message: 'Email inválido'
-            });
-          }
+    // Validar dados
+    parsedLeads.forEach((lead, index) => {
+      if (!lead.nome || lead.nome.trim() === '') {
+        errors.push({
+          row: index + 1,
+          field: 'nome',
+          message: 'Nome é obrigatório'
         });
+      }
 
-        setLeads(parsedLeads);
-        setValidationErrors(errors);
-        setStep('preview');
-      },
-      error: (error) => {
-        toast({
-          title: "Erro",
-          description: `Erro ao ler arquivo CSV: ${error.message}`,
-          variant: "destructive"
+      if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) {
+        errors.push({
+          row: index + 1,
+          field: 'email',
+          message: 'Email inválido'
         });
       }
     });
+
+    setLeads(parsedLeads);
+    setValidationErrors(errors);
+    setStep('preview');
   };
 
   const handleImport = async () => {
@@ -151,12 +133,15 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
   };
 
   const downloadTemplate = () => {
-    const template = 'nome,email,telefone,status,origem\nJoão Silva,joao@email.com,(11) 99999-9999,Quente,Instagram\nMaria Santos,maria@email.com,(11) 88888-8888,Morno,Facebook';
-    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'template_leads.csv';
-    link.click();
+    const templateData = {
+      headers: ['nome', 'email', 'telefone', 'status', 'origem'],
+      sampleData: [
+        ['João Silva', 'joao@email.com', '(11) 99999-9999', 'Quente', 'Instagram'],
+        ['Maria Santos', 'maria@email.com', '(11) 88888-8888', 'Morno', 'Facebook']
+      ]
+    };
+    
+    generateExcelTemplate(templateData, 'template_leads');
   };
 
   const resetDialog = () => {
@@ -181,7 +166,7 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Importar Leads via CSV</DialogTitle>
+          <DialogTitle>Importar Leads via Excel</DialogTitle>
         </DialogHeader>
 
         {step === 'upload' && (
@@ -189,17 +174,17 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
             <div className="text-center border-2 border-dashed border-border rounded-lg p-8">
               <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <div className="space-y-2">
-                <Label htmlFor="csvFile" className="cursor-pointer">
-                  <div className="text-lg font-medium">Selecione um arquivo CSV</div>
+                <Label htmlFor="excelFile" className="cursor-pointer">
+                  <div className="text-lg font-medium">Selecione um arquivo Excel</div>
                   <div className="text-sm text-muted-foreground">
-                    Clique aqui ou arraste um arquivo CSV
+                    Clique aqui ou arraste um arquivo Excel (.xlsx ou .xls)
                   </div>
                 </Label>
                 <Input
                   ref={fileInputRef}
-                  id="csvFile"
+                  id="excelFile"
                   type="file"
-                  accept=".csv"
+                  accept=".xlsx,.xls"
                   onChange={handleFileSelect}
                   className="hidden"
                 />

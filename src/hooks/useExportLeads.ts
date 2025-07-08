@@ -1,4 +1,4 @@
-import { useToast } from '@/hooks/use-toast';
+import { useExcelUtils } from '@/lib/excel-utils';
 import type { LeadFilterState } from '@/components/LeadFilters';
 
 interface Lead {
@@ -13,46 +13,7 @@ interface Lead {
 }
 
 export const useExportLeads = () => {
-  const { toast } = useToast();
-
-  // Função utilitária para converter dados em CSV
-  const convertToCSV = (data: any[], headers: { [key: string]: string }) => {
-    const headerRow = Object.values(headers).join(',');
-    const dataRows = data.map(row => {
-      return Object.keys(headers).map(key => {
-        const value = row[key];
-        if (typeof value === 'string' && value.includes(',')) {
-          return `"${value}"`;
-        }
-        return value || '';
-      }).join(',');
-    });
-    return [headerRow, ...dataRows].join('\n');
-  };
-
-  // Função para fazer download do CSV
-  const downloadCSV = (csvContent: string, filename: string) => {
-    try {
-      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-      
-      toast({
-        title: "Sucesso",
-        description: "Leads exportados com sucesso!"
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao exportar leads",
-        variant: "destructive"
-      });
-    }
-  };
+  const { convertToExcel, downloadExcelWithToast } = useExcelUtils();
 
   // Função para gerar nome do arquivo baseado nos filtros
   const generateFilename = (filters: LeadFilterState, leadsCount: number) => {
@@ -79,22 +40,17 @@ export const useExportLeads = () => {
       ? `leads-filtrados-${filterDescriptions.join('-')}`
       : 'todos-leads';
 
-    return `${baseFilename}-${leadsCount}-registros-${dateSuffix}.csv`;
+    return `${baseFilename}-${leadsCount}-registros-${dateSuffix}`;
   };
 
   // Função principal para exportar leads filtrados
   const exportFilteredLeads = (leads: Lead[], filters: LeadFilterState) => {
     if (leads.length === 0) {
-      toast({
-        title: "Aviso",
-        description: "Nenhum lead encontrado para exportar",
-        variant: "destructive"
-      });
       return;
     }
 
-    // Preparar dados para o CSV
-    const csvData = leads.map(lead => ({
+    // Preparar dados para o Excel
+    const excelData = leads.map(lead => ({
       nome: lead.name,
       email: lead.email || '',
       telefone: lead.phone || '',
@@ -116,9 +72,9 @@ export const useExportLeads = () => {
       data_criacao: 'Data de Criação'
     };
 
-    const csvContent = convertToCSV(csvData, headers);
+    const workbook = convertToExcel(excelData, headers, 'Leads');
     const filename = generateFilename(filters, leads.length);
-    downloadCSV(csvContent, filename);
+    downloadExcelWithToast(workbook, filename, 'Leads exportados com sucesso!');
   };
 
   // Função específica para exportar por tags
@@ -128,15 +84,10 @@ export const useExportLeads = () => {
     );
 
     if (filteredLeads.length === 0) {
-      toast({
-        title: "Aviso",
-        description: "Nenhum lead encontrado com as tags selecionadas",
-        variant: "destructive"
-      });
       return;
     }
 
-    const csvData = filteredLeads.map(lead => ({
+    const excelData = filteredLeads.map(lead => ({
       nome: lead.name,
       email: lead.email || '',
       telefone: lead.phone || '',
@@ -158,12 +109,12 @@ export const useExportLeads = () => {
       data_criacao: 'Data de Criação'
     };
 
-    const csvContent = convertToCSV(csvData, headers);
+    const workbook = convertToExcel(excelData, headers, 'Leads por Tags');
     const tagNamesForFile = tagNames.join('-').toLowerCase().replace(/\s+/g, '-');
     const dateSuffix = new Date().toISOString().split('T')[0];
-    const filename = `leads-tags-${tagNamesForFile}-${filteredLeads.length}-registros-${dateSuffix}.csv`;
+    const filename = `leads-tags-${tagNamesForFile}-${filteredLeads.length}-registros-${dateSuffix}`;
     
-    downloadCSV(csvContent, filename);
+    downloadExcelWithToast(workbook, filename, 'Leads exportados com sucesso!');
   };
 
   return {

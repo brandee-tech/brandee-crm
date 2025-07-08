@@ -923,6 +923,45 @@ export type Database = {
           },
         ]
       }
+      partners: {
+        Row: {
+          contact_person: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          status: string
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          contact_person?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string
+          target_value?: number
+          updated_at?: string
+        }
+        Update: {
+          contact_person?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string
+          target_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -1202,6 +1241,8 @@ export type Database = {
           id: string
           institution_id: string
           name: string
+          origin: string | null
+          partner_id: string | null
           payment_proof_url: string | null
           phone: string | null
           photo_url: string | null
@@ -1234,6 +1275,8 @@ export type Database = {
           id?: string
           institution_id: string
           name: string
+          origin?: string | null
+          partner_id?: string | null
           payment_proof_url?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -1266,6 +1309,8 @@ export type Database = {
           id?: string
           institution_id?: string
           name?: string
+          origin?: string | null
+          partner_id?: string | null
           payment_proof_url?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -1290,6 +1335,13 @@ export type Database = {
             columns: ["institution_id"]
             isOneToOne: false
             referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
             referencedColumns: ["id"]
           },
         ]

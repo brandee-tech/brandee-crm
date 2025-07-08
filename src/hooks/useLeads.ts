@@ -206,7 +206,7 @@ export const useLeads = () => {
           .from('pipeline_columns')
           .select('name')
           .eq('company_id', profileData.company_id)
-          .order('order_index', { ascending: true })
+          .order('position', { ascending: true })
           .limit(1)
           .single();
         
@@ -426,7 +426,7 @@ export const useLeads = () => {
         .from('pipeline_columns')
         .select('name')
         .eq('company_id', profileData.company_id)
-        .order('order_index', { ascending: true })
+        .order('position', { ascending: true })
         .limit(1)
         .single();
 
@@ -436,10 +436,13 @@ export const useLeads = () => {
       let errorCount = 0;
       const total = csvLeads.length;
 
-      // Processar leads em lotes de 10
-      const batchSize = 10;
+      // Processar leads em lotes de 50 para melhor performance
+      const batchSize = 50;
+      console.log(`Starting import of ${total} leads in batches of ${batchSize}`);
+      
       for (let i = 0; i < csvLeads.length; i += batchSize) {
         const batch = csvLeads.slice(i, i + batchSize);
+        console.log(`Processing batch ${Math.floor(i / batchSize) + 1}: ${batch.length} leads`);
         
         const leadsToInsert = batch.map(csvLead => ({
           name: csvLead.nome.trim(),
@@ -451,34 +454,52 @@ export const useLeads = () => {
           company_id: profileData.company_id
         }));
 
-        try {
-          const { data, error } = await supabase
-            .from('leads')
-            .insert(leadsToInsert)
-            .select();
+        let retryCount = 0;
+        const maxRetries = 3;
+        let batchSuccess = false;
 
-          if (error) {
-            console.error('Batch insert error:', error);
-            errorCount += batch.length;
-          } else {
-            successCount += data?.length || 0;
-            // Adicionar leads criados ao estado local
-            if (data) {
-              setLeads(prev => [...data, ...prev]);
+        while (retryCount < maxRetries && !batchSuccess) {
+          try {
+            const { data, error } = await supabase
+              .from('leads')
+              .insert(leadsToInsert)
+              .select();
+
+            if (error) {
+              console.error(`Batch insert error (attempt ${retryCount + 1}):`, error);
+              retryCount++;
+              if (retryCount < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                continue;
+              }
+              errorCount += batch.length;
+            } else {
+              successCount += data?.length || 0;
+              console.log(`Batch processed successfully: ${data?.length || 0} leads inserted`);
+              batchSuccess = true;
             }
+          } catch (batchError) {
+            console.error(`Batch processing error (attempt ${retryCount + 1}):`, batchError);
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+              continue;
+            }
+            errorCount += batch.length;
           }
-        } catch (batchError) {
-          console.error('Batch processing error:', batchError);
-          errorCount += batch.length;
         }
 
         // Atualizar progresso
         const progress = ((i + batchSize) / total) * 100;
         onProgress?.(Math.min(progress, 100));
 
-        // Pequena pausa entre lotes para não sobrecarregar
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Pequena pausa entre lotes
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
+
+      // Fazer refresh completo dos dados após importação
+      console.log('Import completed, refreshing leads data...');
+      await fetchLeads();
 
       const results = { success: successCount, errors: errorCount, total };
       

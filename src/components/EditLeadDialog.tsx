@@ -20,6 +20,7 @@ import {
 import { TagSelector } from './TagSelector';
 import { useLeads } from '@/hooks/useLeads';
 import { useLeadTagAssignments } from '@/hooks/useLeadTagAssignments';
+import { usePartners } from '@/hooks/usePartners';
 
 interface Lead {
   id: string;
@@ -28,6 +29,7 @@ interface Lead {
   phone: string | null;
   status: string | null;
   source: string | null;
+  partner_id: string | null;
   created_at: string;
 }
 
@@ -49,18 +51,21 @@ const LEAD_SOURCES = [
   'Site',
   'E-mail marketing',
   'Telefone',
+  'Parceiro',
   'Outros'
 ];
 
 export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps) => {
   const { updateLead } = useLeads();
   const { assignTagsToLead, getLeadTags } = useLeadTagAssignments();
+  const { partners, loading: partnersLoading } = usePartners();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     status: 'Frio',
     source: '' as string,
+    partner_id: '' as string,
     tags: [] as Array<{ id: string; name: string; color: string }>
   });
   const [loadingTags, setLoadingTags] = useState(false);
@@ -73,6 +78,7 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         phone: lead.phone || '',
         status: lead.status || 'Frio',
         source: lead.source || '',
+        partner_id: lead.partner_id || '',
         tags: []
       });
       
@@ -102,7 +108,8 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       email: formData.email || null,
       phone: formData.phone || null,
       status: formData.status,
-      source: formData.source || null
+      source: formData.source || null,
+      partner_id: formData.partner_id || null
     });
 
     // Atualizar tags do lead
@@ -165,7 +172,13 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
             <Label htmlFor="source">Origem</Label>
             <Select
               value={formData.source || undefined}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, source: value || '' }))}
+              onValueChange={(value) => {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  source: value || '',
+                  partner_id: value === 'Parceiro' ? prev.partner_id : ''
+                }));
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione uma origem" />
@@ -179,6 +192,37 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
               </SelectContent>
             </Select>
           </div>
+          
+          {formData.source === 'Parceiro' && (
+            <div className="space-y-2">
+              <Label htmlFor="partner">Parceiro *</Label>
+              {partnersLoading ? (
+                <div className="text-sm text-muted-foreground">Carregando parceiros...</div>
+              ) : partners.length === 0 ? (
+                <div className="text-sm text-yellow-600">
+                  Nenhum parceiro ativo encontrado. Cadastre parceiros primeiro.
+                </div>
+              ) : (
+                <Select
+                  value={formData.partner_id || undefined}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, partner_id: value || '' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um parceiro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {partners
+                      .filter(partner => partner.status === 'ativo')
+                      .map((partner) => (
+                        <SelectItem key={partner.id} value={partner.id}>
+                          {partner.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+          )}
           
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
@@ -197,7 +241,10 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit">
+            <Button 
+              type="submit"
+              disabled={formData.source === 'Parceiro' && !formData.partner_id}
+            >
               Salvar Alterações
             </Button>
           </DialogFooter>

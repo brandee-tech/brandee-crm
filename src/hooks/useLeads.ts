@@ -174,7 +174,7 @@ export const useLeads = () => {
     };
   }, [user?.id, fetchLeads]);
 
-  const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'>) => {
+  const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'> & { partner_id?: string | null }) => {
     if (!user) {
       toast({
         title: "Erro",

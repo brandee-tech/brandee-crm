@@ -21,6 +21,7 @@ export const AddFollowUpDialog = ({ open, onOpenChange, appointment, appointment
   const [scheduledTime, setScheduledTime] = useState('');
   const [channel, setChannel] = useState<string>('');
   const [messageSent, setMessageSent] = useState('');
+  const [meetingUrl, setMeetingUrl] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -43,6 +44,7 @@ export const AddFollowUpDialog = ({ open, onOpenChange, appointment, appointment
         scheduled_time: scheduledTime,
         channel: channel as any,
         message_sent: messageSent || null,
+        meeting_url: meetingUrl || null,
         response_received: null,
         response_date: null,
         result: null,
@@ -57,6 +59,7 @@ export const AddFollowUpDialog = ({ open, onOpenChange, appointment, appointment
       setScheduledTime('');
       setChannel('');
       setMessageSent('');
+      setMeetingUrl('');
       setNotes('');
     } catch (error) {
       console.error('Erro ao criar follow-up:', error);
@@ -129,6 +132,17 @@ export const AddFollowUpDialog = ({ open, onOpenChange, appointment, appointment
               onChange={(e) => setMessageSent(e.target.value)}
               placeholder="Mensagem que será enviada no follow-up"
               rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="meetingUrl">Link da Chamada</Label>
+            <Input
+              id="meetingUrl"
+              type="url"
+              value={meetingUrl}
+              onChange={(e) => setMeetingUrl(e.target.value)}
+              placeholder="https://meet.google.com/... ou https://zoom.us/..."
             />
           </div>
 

@@ -76,7 +76,8 @@ export const CompleteFollowUpDialog = ({ open, onOpenChange, followUp }: Complet
     'Não Fechou',
     'Aguardando',
     'Sem Resposta',
-    'Reagendar'
+    'Reagendar',
+    'No Show'
   ];
 
   return (

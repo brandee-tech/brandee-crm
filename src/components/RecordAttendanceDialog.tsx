@@ -72,7 +72,8 @@ export const RecordAttendanceDialog = ({ open, onOpenChange, appointment }: Reco
     'Fechou',
     'Não Fechou',
     'Aguardando',
-    'Reagendar'
+    'Reagendar',
+    'No Show'
   ];
 
   return (

@@ -26,6 +26,7 @@ interface Appointment {
   status: string;
   created_at: string;
   updated_at: string;
+  meeting_url?: string | null;
   leads?: {
     name: string;
   };
@@ -50,6 +51,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
   const [leadId, setLeadId] = useState<string>('');
   const [assignedTo, setAssignedTo] = useState<string>('');
   const [status, setStatus] = useState('Agendado');
+  const [meetingUrl, setMeetingUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
 
@@ -68,6 +70,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
       setLeadId(appointment.lead_id || '');
       setAssignedTo(appointment.assigned_to);
       setStatus(appointment.status);
+      setMeetingUrl(appointment.meeting_url || '');
     }
   }, [appointment]);
 
@@ -86,6 +89,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
       lead_id: leadId || null,
       assigned_to: assignedTo,
       status,
+      meeting_url: meetingUrl || null,
       updated_at: new Date().toISOString()
     };
 
@@ -106,6 +110,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
         setLeadId('');
         setAssignedTo('');
         setStatus('Agendado');
+        setMeetingUrl('');
       }
     }
 
@@ -117,7 +122,8 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
     'Confirmado', 
     'Realizado',
     'Cancelado',
-    'Reagendar'
+    'Reagendar',
+    'No Show'
   ];
 
   return (
@@ -163,6 +169,17 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Descrição do agendamento (opcional)"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="meetingUrl">Link da Chamada</Label>
+            <Input
+              id="meetingUrl"
+              type="url"
+              value={meetingUrl}
+              onChange={(e) => setMeetingUrl(e.target.value)}
+              placeholder="https://meet.google.com/... ou https://zoom.us/..."
             />
           </div>
 
@@ -256,6 +273,7 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
             setLeadId('');
             setAssignedTo('');
             setStatus('Agendado');
+            setMeetingUrl('');
           }
         }}
         appointment={appointment}

@@ -30,7 +30,8 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
     date: '',
     time: '',
     duration: 60,
-    status: 'Agendado'
+    status: 'Agendado',
+    meetingUrl: ''
   });
 
   useEffect(() => {
@@ -41,7 +42,8 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
         date: appointment.date || '',
         time: appointment.time || '',
         duration: appointment.duration || 60,
-        status: appointment.status || 'Agendado'
+        status: appointment.status || 'Agendado',
+        meetingUrl: appointment.meeting_url || ''
       });
     }
   }, [appointment]);
@@ -56,7 +58,8 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
       date: formData.date,
       time: formData.time,
       duration: formData.duration,
-      status: formData.status
+      status: formData.status,
+      meeting_url: formData.meetingUrl || null
     });
 
     if (result && formData.status === 'Reagendar') {
@@ -137,6 +140,17 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
               required
             />
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="meetingUrl">Link da Chamada</Label>
+            <Input
+              id="meetingUrl"
+              type="url"
+              value={formData.meetingUrl}
+              onChange={(e) => setFormData(prev => ({ ...prev, meetingUrl: e.target.value }))}
+              placeholder="https://meet.google.com/... ou https://zoom.us/..."
+            />
+          </div>
           
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
@@ -151,6 +165,7 @@ export const EditAppointmentKanbanDialog = ({ appointment, open, onOpenChange }:
               <option value="Cancelado">Cancelado</option>
               <option value="Realizado">Realizado</option>
               <option value="Reagendar">Reagendar</option>
+              <option value="No Show">No Show</option>
             </select>
           </div>
 

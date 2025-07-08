@@ -17,6 +17,7 @@ export const RescheduleAppointmentDialog = ({ open, onOpenChange, appointment }:
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
   const [reason, setReason] = useState('');
+  const [meetingUrl, setMeetingUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { createAppointment, updateAppointment } = useAppointments();
@@ -27,6 +28,7 @@ export const RescheduleAppointmentDialog = ({ open, onOpenChange, appointment }:
       setNewDate('');
       setNewTime('');
       setReason('');
+      setMeetingUrl('');
     }
   }, [appointment, open]);
 
@@ -49,7 +51,8 @@ export const RescheduleAppointmentDialog = ({ open, onOpenChange, appointment }:
         assigned_to: appointment.assigned_to,
         status: 'Agendado',
         rescheduled_from_id: appointment.id,
-        reschedule_reason: reason || null
+        reschedule_reason: reason || null,
+        meeting_url: meetingUrl || null
       });
 
       if (newAppointment) {
@@ -112,6 +115,17 @@ export const RescheduleAppointmentDialog = ({ open, onOpenChange, appointment }:
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="meetingUrl">Link da Chamada</Label>
+              <Input
+                id="meetingUrl"
+                type="url"
+                value={meetingUrl}
+                onChange={(e) => setMeetingUrl(e.target.value)}
+                placeholder="https://meet.google.com/... ou https://zoom.us/..."
+              />
             </div>
 
             <div className="space-y-2">

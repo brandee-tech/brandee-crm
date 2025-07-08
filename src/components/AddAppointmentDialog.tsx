@@ -46,7 +46,8 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
     duration: 60,
     lead_id: '',
     assigned_to: '',
-    status: 'Agendado'
+    status: 'Agendado',
+    meetingUrl: ''
   });
 
   // Auto-select current user as default assignee when closers are loaded
@@ -91,6 +92,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
         scheduled_by: user.id,
         lead_id: formData.lead_id || null,
         assigned_to: formData.assigned_to,
+        meeting_url: formData.meetingUrl || null,
       };
 
       const created = await createAppointment(appointmentData);
@@ -105,7 +107,8 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
           duration: 60,
           lead_id: '',
           assigned_to: '',
-          status: 'Agendado'
+          status: 'Agendado',
+          meetingUrl: ''
         });
         onOpenChange(false);
       }
@@ -148,6 +151,17 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Detalhes do agendamento..."
               rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="meetingUrl">Link da Chamada</Label>
+            <Input
+              id="meetingUrl"
+              type="url"
+              value={formData.meetingUrl}
+              onChange={(e) => setFormData(prev => ({ ...prev, meetingUrl: e.target.value }))}
+              placeholder="https://meet.google.com/... ou https://zoom.us/..."
             />
           </div>
 
@@ -239,6 +253,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
                 <SelectItem value="Confirmado">Confirmado</SelectItem>
                 <SelectItem value="Cancelado">Cancelado</SelectItem>
                 <SelectItem value="Realizado">Realizado</SelectItem>
+                <SelectItem value="No Show">No Show</SelectItem>
               </SelectContent>
             </Select>
           </div>

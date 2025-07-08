@@ -194,8 +194,6 @@ export const Kanban = () => {
                                      {appointment.leads.tags.map(tag => <TagBadge key={tag.id} name={tag.name} color={tag.color} size="sm" />)}
                                    </div>}
 
-                                {appointment.description}
-
                                 {dragLoading === appointment.id && <div className="flex items-center gap-2 text-xs text-blue-600">
                                     <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                     Movendo...

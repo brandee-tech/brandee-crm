@@ -185,13 +185,7 @@ export const Kanban = () => {
                                    {appointment.leads && <div className="flex items-center gap-2">
                                         <User className="w-3 h-3" />
                                         <span>Lead: {appointment.leads.name}</span>
-                                        {appointment.leads.phone && (
-                                          <WhatsAppLeadButton 
-                                            phone={appointment.leads.phone} 
-                                            leadName={appointment.leads.name} 
-                                            size="sm" 
-                                          />
-                                        )}
+                                        {appointment.leads.phone && <WhatsAppLeadButton phone={appointment.leads.phone} leadName={appointment.leads.name} size="sm" />}
                                       </div>}
                                  </div>
 
@@ -200,9 +194,7 @@ export const Kanban = () => {
                                      {appointment.leads.tags.map(tag => <TagBadge key={tag.id} name={tag.name} color={tag.color} size="sm" />)}
                                    </div>}
 
-                                {appointment.description && <p className="text-xs text-gray-500 line-clamp-2">
-                                    {appointment.description}
-                                  </p>}
+                                {appointment.description}
 
                                 {dragLoading === appointment.id && <div className="flex items-center gap-2 text-xs text-blue-600">
                                     <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>

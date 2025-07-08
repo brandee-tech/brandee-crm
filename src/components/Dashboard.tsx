@@ -6,7 +6,9 @@ import { WelcomeMessage } from '@/components/WelcomeMessage';
 import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target } from 'lucide-react';
+import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target, User, MessageSquare } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const Dashboard = () => {
@@ -160,6 +162,32 @@ export const Dashboard = () => {
                       </div>
                     </div>
                   ))
+                ) : stats.upcomingAppointments && stats.upcomingAppointments.length > 0 ? (
+                  stats.upcomingAppointments.map((appointment: any) => (
+                    <div key={appointment.id} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                          <Calendar className="h-5 w-5 text-blue-600" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {appointment.title}
+                        </p>
+                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                          <span>
+                            {format(new Date(`${appointment.date}T${appointment.time}`), "dd/MM 'às' HH:mm", { locale: ptBR })}
+                          </span>
+                          {appointment.leads?.name && (
+                            <>
+                              <span>•</span>
+                              <span>{appointment.leads.name}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -189,6 +217,55 @@ export const Dashboard = () => {
                       </div>
                     </div>
                   ))
+                ) : stats.recentActivities && stats.recentActivities.length > 0 ? (
+                  stats.recentActivities.map((activity: any, index: number) => {
+                    const getActivityIcon = (type: string) => {
+                      switch (type) {
+                        case 'lead':
+                          return User;
+                        case 'appointment':
+                          return Calendar;
+                        default:
+                          return MessageSquare;
+                      }
+                    };
+                    
+                    const getActivityColor = (type: string) => {
+                      switch (type) {
+                        case 'lead':
+                          return 'bg-green-100 text-green-600';
+                        case 'appointment':
+                          return 'bg-blue-100 text-blue-600';
+                        default:
+                          return 'bg-gray-100 text-gray-600';
+                      }
+                    };
+
+                    const ActivityIcon = getActivityIcon(activity.type);
+                    
+                    return (
+                      <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex-shrink-0">
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
+                            <ActivityIcon className="h-4 w-4" />
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900">
+                            {activity.title}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-gray-500">
+                              {activity.description}
+                            </p>
+                            <span className="text-xs text-gray-400">
+                              {format(new Date(activity.time), "dd/MM HH:mm", { locale: ptBR })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Target className="h-12 w-12 mx-auto mb-3 text-gray-300" />

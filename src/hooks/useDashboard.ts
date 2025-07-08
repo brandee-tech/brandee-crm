@@ -8,6 +8,8 @@ interface DashboardStats {
   totalTasks: number;
   totalAppointments: number;
   recentLeads: any[];
+  upcomingAppointments: any[];
+  recentActivities: any[];
   tasksByStatus: Record<string, number>;
   leadsByStatus: Record<string, number>;
   appointmentsByStatus: Record<string, number>;
@@ -29,6 +31,8 @@ export const useDashboard = () => {
     totalTasks: 0,
     totalAppointments: 0,
     recentLeads: [],
+    upcomingAppointments: [],
+    recentActivities: [],
     tasksByStatus: {},
     leadsByStatus: {},
     appointmentsByStatus: {},
@@ -66,6 +70,8 @@ export const useDashboard = () => {
           totalTasks: 0,
           totalAppointments: 0,
           recentLeads: [],
+          upcomingAppointments: [],
+          recentActivities: [],
           tasksByStatus: {},
           leadsByStatus: {},
           appointmentsByStatus: {},
@@ -141,6 +147,68 @@ export const useDashboard = () => {
         .order('created_at', { ascending: false })
         .limit(5);
 
+      // Fetch upcoming appointments (próximos 7 dias)
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      
+      const { data: upcomingAppointments } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          leads (name, phone),
+          assigned_closer:profiles!appointments_assigned_to_fkey (full_name)
+        `)
+        .gte('date', tomorrow.toISOString().split('T')[0])
+        .lte('date', nextWeek.toISOString().split('T')[0])
+        .order('date', { ascending: true })
+        .order('time', { ascending: true })
+        .limit(5);
+
+      // Fetch recent activities (últimos leads, agendamentos e tarefas criados)
+      const recentActivities = [];
+      
+      // Adicionar leads recentes
+      if (recentLeads) {
+        recentActivities.push(...recentLeads.slice(0, 3).map(lead => ({
+          type: 'lead',
+          title: `Novo lead: ${lead.name}`,
+          description: `Lead criado por ${lead.created_by}`,
+          time: lead.created_at,
+          icon: 'user'
+        })));
+      }
+
+      // Adicionar agendamentos recentes (últimos 3 dias)
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 3);
+      
+      const { data: recentAppointments } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          leads (name),
+          assigned_closer:profiles!appointments_assigned_to_fkey (full_name)
+        `)
+        .gte('created_at', recentDate.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (recentAppointments) {
+        recentActivities.push(...recentAppointments.map(apt => ({
+          type: 'appointment',
+          title: `Agendamento: ${apt.title}`,
+          description: `Com ${apt.leads?.name || 'Lead não identificado'}`,
+          time: apt.created_at,
+          icon: 'calendar'
+        })));
+      }
+
+      // Ordenar atividades por data
+      recentActivities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      recentActivities.splice(5); // Manter apenas os 5 mais recentes
+
       // Fetch detailed data for statistics
       const { data: allLeads } = await supabase.from('leads').select('*');
       const { data: allTasks } = await supabase.from('tasks').select('status');
@@ -197,6 +265,8 @@ export const useDashboard = () => {
         totalTasks: tasksResult.count || 0,
         totalAppointments: appointmentsResult.count || 0,
         recentLeads: recentLeads || [],
+        upcomingAppointments: upcomingAppointments || [],
+        recentActivities: recentActivities || [],
         tasksByStatus,
         leadsByStatus,
         appointmentsByStatus,

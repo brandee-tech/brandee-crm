@@ -91,7 +91,7 @@ export const LeadsPipeline = () => {
       {showColumnManager && <PipelineColumnManager />}
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-4">
+        <div className="flex gap-6 overflow-x-auto scrollbar-none pb-4">
           {columns.map(column => (
             <div key={column.id} className="flex-1 min-w-[300px] max-w-[350px] space-y-4">
               <Card className="shrink-0">
@@ -114,7 +114,7 @@ export const LeadsPipeline = () => {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className={`h-[calc(100vh-350px)] overflow-y-auto space-y-3 p-2 rounded-lg transition-colors ${
+                    className={`h-[calc(100vh-350px)] overflow-y-auto scrollbar-none space-y-3 p-2 rounded-lg transition-colors ${
                       snapshot.isDraggingOver ? 'bg-gray-100' : ''
                     }`}
                   >
@@ -192,28 +192,27 @@ export const LeadsPipeline = () => {
                                     </div>
                                   )}
 
-                                   {lead.source && (
-                                     <div className="flex items-center gap-2">
-                                       <Badge variant="outline" className="text-xs">
-                                         {lead.source}
-                                       </Badge>
-                                     </div>
-                                   )}
-
-                                   {lead.temperature && (
-                                     <div className="flex items-center gap-2">
-                                       <Badge 
-                                         variant="outline" 
-                                         className={`text-xs ${
-                                           lead.temperature === 'Quente' 
-                                             ? 'border-red-300 text-red-700 bg-red-50' 
-                                             : lead.temperature === 'Morno'
-                                             ? 'border-yellow-300 text-yellow-700 bg-yellow-50'
-                                             : 'border-blue-300 text-blue-700 bg-blue-50'
-                                         }`}
-                                       >
-                                         {lead.temperature}
-                                       </Badge>
+                                   {(lead.source || lead.temperature) && (
+                                     <div className="flex items-center gap-2 flex-wrap">
+                                       {lead.source && (
+                                         <Badge variant="outline" className="text-xs">
+                                           {lead.source}
+                                         </Badge>
+                                       )}
+                                       {lead.temperature && (
+                                         <Badge 
+                                           variant="outline" 
+                                           className={`text-xs ${
+                                             lead.temperature === 'Quente' 
+                                               ? 'border-red-300 text-red-700 bg-red-50' 
+                                               : lead.temperature === 'Morno'
+                                               ? 'border-yellow-300 text-yellow-700 bg-yellow-50'
+                                               : 'border-blue-300 text-blue-700 bg-blue-50'
+                                           }`}
+                                         >
+                                           {lead.temperature}
+                                         </Badge>
+                                       )}
                                      </div>
                                    )}
 

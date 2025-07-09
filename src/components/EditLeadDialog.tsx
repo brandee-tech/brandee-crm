@@ -124,11 +124,11 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] md:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Lead</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 px-1 py-2">
           <div className="space-y-2">
             <Label htmlFor="name">Nome *</Label>
             <Input
@@ -261,13 +261,14 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
             )}
           </div>
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
               Cancelar
             </Button>
             <Button 
               type="submit"
               disabled={formData.source === 'Parceiro' && !formData.partner_id}
+              className="w-full sm:w-auto"
             >
               Salvar Alterações
             </Button>

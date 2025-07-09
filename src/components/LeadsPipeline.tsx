@@ -114,7 +114,7 @@ export const LeadsPipeline = () => {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className={`h-[calc(100vh-350px)] overflow-y-auto scrollbar-none space-y-3 p-2 rounded-lg transition-colors ${
+                    className={`h-[calc(100vh-300px)] lg:h-[calc(100vh-240px)] xl:h-[calc(100vh-200px)] overflow-y-auto scrollbar-none space-y-3 p-2 rounded-lg transition-colors ${
                       snapshot.isDraggingOver ? 'bg-gray-100' : ''
                     }`}
                   >

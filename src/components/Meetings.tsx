@@ -18,7 +18,7 @@ import { ptBR } from 'date-fns/locale';
 
 export const Meetings = () => {
   const { meetings, loading, isUpdating } = useRealtimeMeetings();
-  const { deleteMeeting } = useMeetings();
+  const { deleteMeeting, updateMeeting } = useMeetings();
   const { user } = useAuth();
   const { profiles } = useProfiles();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -68,6 +68,11 @@ export const Meetings = () => {
       setDeleteDialogOpen(false);
       setMeetingToDelete(null);
     }
+  };
+
+  const handleStatusChange = (meetingId: string, newStatus: 'Agendada' | 'Em andamento' | 'Finalizada', e: React.MouseEvent) => {
+    e.stopPropagation();
+    updateMeeting.mutate({ id: meetingId, status: newStatus });
   };
 
   if (selectedMeetingId) {
@@ -169,6 +174,24 @@ export const Meetings = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={(e) => handleStatusChange(meeting.id, 'Agendada', e)}
+                            disabled={meeting.status === 'Agendada'}
+                          >
+                            Marcar como Agendada
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => handleStatusChange(meeting.id, 'Em andamento', e)}
+                            disabled={meeting.status === 'Em andamento'}
+                          >
+                            Marcar como Em andamento
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => handleStatusChange(meeting.id, 'Finalizada', e)}
+                            disabled={meeting.status === 'Finalizada'}
+                          >
+                            Marcar como Finalizada
+                          </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={(e) => handleDeleteMeeting(meeting.id, e)}
                             className="text-red-600 focus:text-red-600"

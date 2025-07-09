@@ -36,6 +36,7 @@ interface ExcelLead {
   status?: string;
   origem?: string;
   parceiro?: string;
+  temperatura?: string;
 }
 
 interface ValidationError {
@@ -144,10 +145,10 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
 
   const downloadTemplate = () => {
     const templateData = {
-      headers: ['nome', 'email', 'telefone', 'status', 'origem', 'parceiro'],
+      headers: ['nome', 'email', 'telefone', 'temperatura', 'origem', 'parceiro'],
       sampleData: [
         ['João Silva', 'joao@email.com', '(11) 99999-9999', 'Quente', 'Parceiro', 'João Farinelli'],
-        ['Maria Santos', 'maria@email.com', '(11) 88888-8888', 'Morno', 'Instagram', '']
+        ['Maria Santos', 'maria@email.com', '(11) 88888-8888', 'Frio', 'Instagram', '']
       ]
     };
     
@@ -203,7 +204,7 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
 
             <div className="flex items-center justify-between text-sm">
               <div className="text-muted-foreground">
-                Formato esperado: nome, email, telefone, status, origem, parceiro
+                Formato esperado: nome, email, telefone, temperatura, origem, parceiro
               </div>
               <Button
                 variant="outline"
@@ -258,7 +259,7 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
                       <TableHead className="min-w-[120px] font-medium">Nome</TableHead>
                       <TableHead className="min-w-[180px] font-medium">Email</TableHead>
                       <TableHead className="min-w-[120px] font-medium">Telefone</TableHead>
-                      <TableHead className="min-w-[80px] font-medium">Status</TableHead>
+                      <TableHead className="min-w-[100px] font-medium">Temperatura</TableHead>
                       <TableHead className="min-w-[100px] font-medium">Origem</TableHead>
                       <TableHead className="min-w-[100px] font-medium">Parceiro</TableHead>
                     </TableRow>
@@ -282,8 +283,8 @@ export const ImportLeadsDialog = ({ open, onOpenChange }: ImportLeadsDialogProps
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="truncate max-w-[80px]" title={lead.status || 'Frio'}>
-                            {lead.status || 'Frio'}
+                          <div className="truncate max-w-[100px]" title={lead.temperatura || 'Frio'}>
+                            {lead.temperatura || 'Frio'}
                           </div>
                         </TableCell>
                         <TableCell>

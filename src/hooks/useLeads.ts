@@ -394,6 +394,7 @@ export const useLeads = () => {
       status?: string;
       origem?: string;
       parceiro?: string;
+      temperatura?: string;
     }>,
     onProgress?: (progress: number) => void
   ) => {
@@ -465,14 +466,22 @@ export const useLeads = () => {
             }
           }
           
+          // Processar temperatura do CSV/Excel
+          let temperature = processLeadValue(csvLead.temperatura) || 'Frio';
+          
+          // Validar valores válidos de temperatura
+          if (!['Quente', 'Morno', 'Frio'].includes(temperature)) {
+            temperature = 'Frio';
+          }
+          
           return {
             name: processLeadValue(csvLead.nome),
             email: processLeadValue(csvLead.email),
             phone: processLeadValue(csvLead.telefone),
-            status: defaultStatus, // SEMPRE usar primeira coluna do pipeline
+            status: defaultStatus, // SEMPRE usar "Novo Lead"
             source: source,
             partner_id: partnerId,
-            temperature: 'Frio', // Valor padrão para temperatura
+            temperature: temperature,
             created_by: user.id,
             company_id: profileData.company_id
           };

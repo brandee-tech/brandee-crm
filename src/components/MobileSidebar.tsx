@@ -37,7 +37,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'leads', label: 'Leads', icon: UserPlus },
-    { id: 'kanban', label: 'Pipeline', icon: Kanban },
+    { id: 'leadsPipeline', label: 'Pipeline de Leads', icon: Kanban },
     { id: 'appointments', label: 'Agendamentos', icon: Calendar },
     { id: 'meetings', label: 'Reuniões', icon: Video },
     { id: 'calendar', label: 'Calendário', icon: CalendarDays },

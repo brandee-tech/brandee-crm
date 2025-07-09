@@ -5,6 +5,7 @@ import { MobileSidebar } from '@/components/MobileSidebar';
 import { Dashboard } from '@/components/Dashboard';
 import { Leads } from '@/components/Leads';
 import { Kanban } from '@/components/Kanban';
+import { LeadsPipeline } from '@/components/LeadsPipeline';
 import { Appointments } from '@/components/Appointments';
 import { Meetings } from '@/components/Meetings';
 import { CalendarView } from '@/components/Calendar';
@@ -38,6 +39,8 @@ const Index = () => {
         return <Dashboard />;
       case 'leads':
         return <Leads />;
+      case 'leadsPipeline':
+        return <LeadsPipeline />;
       case 'kanban':
         return <Kanban />;
       case 'appointments':

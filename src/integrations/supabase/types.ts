@@ -1610,6 +1610,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      sync_lead_status_with_pipeline: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       user_has_permission: {
         Args: { permission_path: string }
         Returns: boolean

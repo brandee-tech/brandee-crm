@@ -1048,6 +1048,7 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          is_protected: boolean
           name: string
           position: number
           updated_at: string
@@ -1057,6 +1058,7 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          is_protected?: boolean
           name: string
           position?: number
           updated_at?: string
@@ -1066,6 +1068,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          is_protected?: boolean
           name?: string
           position?: number
           updated_at?: string

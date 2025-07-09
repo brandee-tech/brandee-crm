@@ -109,6 +109,67 @@ export const useLeadsPipeline = () => {
     }
   }, [user?.id, toast]);
 
+  const createLead = useCallback(async (leadData: {
+    name: string;
+    email: string | null;
+    phone: string | null;
+    status: string;
+    source: string | null;
+    partner_id: string | null;
+  }) => {
+    if (!user) return null;
+
+    try {
+      // Buscar company_id do usuário
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profileData?.company_id) {
+        throw new Error('Usuário não possui empresa associada');
+      }
+
+      // Se não foi especificado status, usar primeira coluna do pipeline
+      let finalStatus = leadData.status;
+      if (!finalStatus && columns.length > 0) {
+        const firstColumn = columns.sort((a, b) => a.position - b.position)[0];
+        finalStatus = firstColumn.name;
+      }
+
+      const { data, error } = await supabase
+        .from('leads')
+        .insert({
+          ...leadData,
+          status: finalStatus,
+          company_id: profileData.company_id,
+          created_by: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await fetchLeads();
+      
+      toast({
+        title: "Sucesso",
+        description: "Lead criado com sucesso"
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Erro ao criar lead:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível criar o lead",
+        variant: "destructive"
+      });
+      return null;
+    }
+  }, [user, columns, fetchLeads, toast]);
+
   const updateLeadStatus = useCallback(async (leadId: string, newStatus: string) => {
     if (!user) return;
 
@@ -208,6 +269,7 @@ export const useLeadsPipeline = () => {
     dragLoading,
     handleDragEnd,
     updateLeadStatus,
+    createLead,
     refetch: fetchLeads
   };
 };

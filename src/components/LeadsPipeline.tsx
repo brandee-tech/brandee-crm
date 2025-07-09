@@ -23,7 +23,8 @@ export const LeadsPipeline = () => {
     loading,
     isUpdating,
     dragLoading,
-    handleDragEnd
+    handleDragEnd,
+    createLead
   } = useLeadsPipeline();
 
   const [addLeadDialogOpen, setAddLeadDialogOpen] = useState(false);
@@ -273,7 +274,7 @@ export const LeadsPipeline = () => {
       <AddLeadDialog 
         open={addLeadDialogOpen} 
         onOpenChange={setAddLeadDialogOpen} 
-        onCreateLead={async () => {}}
+        onCreateLead={createLead}
       />
 
       <EditLeadDialog 

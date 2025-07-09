@@ -12,6 +12,7 @@ interface PipelineColumn {
   color: string;
   created_at: string;
   updated_at: string;
+  is_protected?: boolean;
 }
 
 export const usePipelineColumns = () => {

@@ -13,6 +13,7 @@ interface PipelineColumn {
   name: string;
   position: number;
   color: string;
+  is_protected?: boolean;
 }
 
 export const PipelineColumnManager = () => {
@@ -51,7 +52,13 @@ export const PipelineColumnManager = () => {
   };
 
   const handleDeleteColumn = async (columnId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta coluna? Todos os agendamentos nela serão movidos para "Agendado".')) {
+    const column = columns.find(col => col.id === columnId);
+    if (column?.is_protected) {
+      alert('Esta coluna não pode ser excluída pois é uma coluna base do sistema.');
+      return;
+    }
+    
+    if (window.confirm('Tem certeza que deseja excluir esta coluna? Todos os leads nela serão movidos para a primeira coluna.')) {
       await deleteColumn(columnId);
     }
   };
@@ -214,6 +221,11 @@ export const PipelineColumnManager = () => {
               style={{ backgroundColor: column.color }}
             />
             <span className="flex-1 font-medium">{column.name}</span>
+            {column.is_protected && (
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                Protegida
+              </span>
+            )}
             <span className="text-sm text-gray-500">Ordem: {column.position}</span>
             <Button
               variant="ghost"
@@ -228,8 +240,9 @@ export const PipelineColumnManager = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-red-600 hover:text-red-700"
+              className={`${column.is_protected ? 'opacity-50 cursor-not-allowed' : 'text-red-600 hover:text-red-700'}`}
               onClick={() => handleDeleteColumn(column.id)}
+              disabled={column.is_protected}
             >
               <Trash2 className="w-4 h-4" />
             </Button>

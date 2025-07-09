@@ -55,7 +55,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
     name: '',
     email: '',
     phone: '',
-    status: 'Frio',
+    status: '',
     source: '' as string,
     partner_id: '' as string,
     tags: [] as Array<{ id: string; name: string; color: string }>
@@ -70,7 +70,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
       name: formData.name,
       email: formData.email || null,
       phone: formData.phone || null,
-      status: formData.status,
+      status: formData.status || '', // será definido automaticamente pela primeira coluna do pipeline
       source: formData.source || null,
       partner_id: formData.partner_id || null
     });
@@ -85,7 +85,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
       name: '',
       email: '',
       phone: '',
-      status: 'Frio',
+      status: '',
       source: '',
       partner_id: '',
       tags: []
@@ -130,19 +130,6 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              value={formData.status}
-              onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Quente">Quente</option>
-              <option value="Morno">Morno</option>
-              <option value="Frio">Frio</option>
-            </select>
-          </div>
           
           <div className="space-y-2">
             <Label htmlFor="source">Origem</Label>

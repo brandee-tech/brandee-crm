@@ -29,9 +29,22 @@ export const usePipelineColumns = () => {
     try {
       console.log('Fetching pipeline columns for user:', user.id);
       
+      // Buscar company_id do usuário atual
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profileData?.company_id) {
+        console.error('Erro ao buscar company_id:', profileError);
+        throw new Error('Company ID not found for user');
+      }
+
       const { data, error } = await supabase
         .from('pipeline_columns')
         .select('*')
+        .eq('company_id', profileData.company_id)
         .order('position', { ascending: true });
 
       if (error) {

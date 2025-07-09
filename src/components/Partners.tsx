@@ -7,7 +7,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { usePartners } from '@/hooks/usePartners';
 import { AddPartnerDialog } from './AddPartnerDialog';
 import { EditPartnerDialog } from './EditPartnerDialog';
-import { supabase } from '@/integrations/supabase/client';
 
 export const Partners = () => {
   const [editingPartner, setEditingPartner] = useState(null);
@@ -38,24 +37,7 @@ export const Partners = () => {
     }).format(value);
   };
 
-  const handleDelete = async (id: string, partnerName: string) => {
-    // Verificar se há estudantes associados a este parceiro
-    const { data: students, error } = await supabase
-      .from('students')
-      .select('id')
-      .eq('partner_id', id)
-      .limit(1);
-
-    if (error) {
-      console.error('Erro ao verificar estudantes associados:', error);
-      return;
-    }
-
-    if (students && students.length > 0) {
-      alert(`Não é possível excluir o parceiro "${partnerName}" pois existem estudantes associados a ele. Primeiro remova ou reassocie os estudantes.`);
-      return;
-    }
-
+  const handleDelete = async (id: string) => {
     await deletePartner(id);
   };
 
@@ -162,7 +144,7 @@ export const Partners = () => {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(partner.id, partner.name)}>
+                        <AlertDialogAction onClick={() => handleDelete(partner.id)}>
                           Excluir
                         </AlertDialogAction>
                       </AlertDialogFooter>

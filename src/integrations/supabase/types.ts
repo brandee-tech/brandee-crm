@@ -654,6 +654,7 @@ export type Database = {
           phone: string | null
           source: string | null
           status: string | null
+          temperature: string | null
           updated_at: string
         }
         Insert: {
@@ -668,6 +669,7 @@ export type Database = {
           phone?: string | null
           source?: string | null
           status?: string | null
+          temperature?: string | null
           updated_at?: string
         }
         Update: {
@@ -682,6 +684,7 @@ export type Database = {
           phone?: string | null
           source?: string | null
           status?: string | null
+          temperature?: string | null
           updated_at?: string
         }
         Relationships: [

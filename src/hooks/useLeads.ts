@@ -438,44 +438,53 @@ export const useLeads = () => {
       // Buscar primeira coluna do pipeline para status padrão
       console.log('Buscando primeira coluna do pipeline para empresa:', profileData.company_id);
       
-      const { data: firstColumn, error: columnError } = await supabase
+      // Primeiro, buscar usando MIN(position) para garantir que pegamos a primeira coluna
+      const { data: allColumns } = await supabase
         .from('pipeline_columns')
         .select('name, position')
         .eq('company_id', profileData.company_id)
-        .order('position', { ascending: true })
-        .limit(1)
-        .single();
+        .order('position', { ascending: true });
 
-      if (columnError) {
-        console.error('Erro ao buscar primeira coluna do pipeline:', columnError);
+      console.log('Todas as colunas do pipeline:', allColumns);
+
+      let defaultStatus = null;
+
+      // Usar a primeira coluna por posição
+      if (allColumns && allColumns.length > 0) {
+        defaultStatus = allColumns[0].name;
+        console.log('Primeira coluna por posição:', defaultStatus);
       }
-
-      console.log('Primeira coluna encontrada:', firstColumn);
       
-      // Tentar buscar especificamente por coluna de novos leads se não encontrou pela posição
-      let defaultStatus = firstColumn?.name;
-      
+      // Se não encontrou, tentar buscar por nomes comuns de nova coluna
       if (!defaultStatus) {
-        console.log('Primeira coluna não encontrada pela posição, buscando por nome...');
-        const { data: newLeadColumn } = await supabase
-          .from('pipeline_columns')
-          .select('name')
-          .eq('company_id', profileData.company_id)
-          .ilike('name', '%novo%')
-          .limit(1)
-          .single();
+        console.log('Buscando coluna de novos leads por nome...');
         
-        defaultStatus = newLeadColumn?.name;
-        console.log('Coluna "novo" encontrada:', newLeadColumn);
+        const searchPatterns = ['%novo%', '%nova%', '%new%', '%lead%'];
+        
+        for (const pattern of searchPatterns) {
+          const { data: namedColumn } = await supabase
+            .from('pipeline_columns')
+            .select('name')
+            .eq('company_id', profileData.company_id)
+            .ilike('name', pattern)
+            .limit(1)
+            .maybeSingle();
+          
+          if (namedColumn) {
+            defaultStatus = namedColumn.name;
+            console.log(`Coluna encontrada com padrão "${pattern}":`, defaultStatus);
+            break;
+          }
+        }
       }
       
-      // Fallback para "Frio" se ainda não encontrou
+      // Fallback final
       if (!defaultStatus) {
-        defaultStatus = 'Frio';
-        console.log('Usando status fallback:', defaultStatus);
+        defaultStatus = 'Novas Leads';
+        console.log('Usando status fallback padrão:', defaultStatus);
       }
       
-      console.log('Status padrão definido como:', defaultStatus);
+      console.log('Status padrão final definido como:', defaultStatus);
 
       // Buscar todos os parceiros ativos para matching por nome
       const { data: partnersData } = await supabase

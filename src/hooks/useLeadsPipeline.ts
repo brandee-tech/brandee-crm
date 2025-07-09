@@ -158,7 +158,7 @@ export const useLeadsPipeline = () => {
 
   // Agrupar leads por status
   const leadsByStatus = leads.reduce((acc, lead) => {
-    const status = lead.status || 'Novo Lead';
+    const status = lead.status || 'Novas Leads';
     if (!acc[status]) {
       acc[status] = [];
     }

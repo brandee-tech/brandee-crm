@@ -192,13 +192,30 @@ export const LeadsPipeline = () => {
                                     </div>
                                   )}
 
-                                  {lead.source && (
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="outline" className="text-xs">
-                                        {lead.source}
-                                      </Badge>
-                                    </div>
-                                  )}
+                                   {lead.source && (
+                                     <div className="flex items-center gap-2">
+                                       <Badge variant="outline" className="text-xs">
+                                         {lead.source}
+                                       </Badge>
+                                     </div>
+                                   )}
+
+                                   {lead.temperature && (
+                                     <div className="flex items-center gap-2">
+                                       <Badge 
+                                         variant="outline" 
+                                         className={`text-xs ${
+                                           lead.temperature === 'Quente' 
+                                             ? 'border-red-300 text-red-700 bg-red-50' 
+                                             : lead.temperature === 'Morno'
+                                             ? 'border-yellow-300 text-yellow-700 bg-yellow-50'
+                                             : 'border-blue-300 text-blue-700 bg-blue-50'
+                                         }`}
+                                       >
+                                         {lead.temperature}
+                                       </Badge>
+                                     </div>
+                                   )}
 
                                   {lead.latest_appointment && (
                                     <div className="flex items-center gap-2 text-blue-600">

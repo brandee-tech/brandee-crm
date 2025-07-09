@@ -131,18 +131,12 @@ export const useLeadsPipeline = () => {
         throw new Error('Usuário não possui empresa associada');
       }
 
-      // Se não foi especificado status, usar primeira coluna do pipeline
-      let finalStatus = leadData.status;
-      if (!finalStatus && columns.length > 0) {
-        const firstColumn = columns.sort((a, b) => a.position - b.position)[0];
-        finalStatus = firstColumn.name;
-      }
-
+      // SEMPRE usar "Novo Lead" como status inicial
       const { data, error } = await supabase
         .from('leads')
         .insert({
           ...leadData,
-          status: finalStatus,
+          status: 'Novo Lead', // FORÇAR sempre "Novo Lead"
           company_id: profileData.company_id,
           created_by: user.id
         })
@@ -168,7 +162,7 @@ export const useLeadsPipeline = () => {
       });
       return null;
     }
-  }, [user, columns, fetchLeads, toast]);
+  }, [user, fetchLeads, toast]);
 
   const updateLeadStatus = useCallback(async (leadId: string, newStatus: string) => {
     if (!user) return;

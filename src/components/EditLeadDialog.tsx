@@ -30,6 +30,7 @@ interface Lead {
   status: string | null;
   source: string | null;
   partner_id: string | null;
+  temperature: string | null;
   created_at: string;
 }
 
@@ -63,9 +64,10 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
     name: '',
     email: '',
     phone: '',
-    status: 'Frio',
+    status: 'Novo Lead',
     source: '' as string,
     partner_id: '' as string,
+    temperature: 'Frio' as string,
     tags: [] as Array<{ id: string; name: string; color: string }>
   });
   const [loadingTags, setLoadingTags] = useState(false);
@@ -76,9 +78,10 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
         name: lead.name || '',
         email: lead.email || '',
         phone: lead.phone || '',
-        status: lead.status || 'Frio',
+        status: lead.status || 'Novo Lead',
         source: lead.source || '',
         partner_id: lead.partner_id || '',
+        temperature: lead.temperature || 'Frio',
         tags: []
       });
       
@@ -109,7 +112,8 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
       phone: formData.phone || null,
       status: formData.status,
       source: formData.source || null,
-      partner_id: formData.partner_id || null
+      partner_id: formData.partner_id || null,
+      temperature: formData.temperature
     });
 
     // Atualizar tags do lead
@@ -155,11 +159,11 @@ export const EditLeadDialog = ({ lead, open, onOpenChange }: EditLeadDialogProps
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
+            <Label htmlFor="temperature">Temperatura</Label>
             <select
-              id="status"
-              value={formData.status}
-              onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+              id="temperature"
+              value={formData.temperature}
+              onChange={(e) => setFormData(prev => ({ ...prev, temperature: e.target.value }))}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="Quente">Quente</option>

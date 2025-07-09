@@ -11,6 +11,7 @@ interface Lead {
   status: string | null;
   source: string | null;
   partner_id: string | null;
+  temperature: string | null;
   company_id: string;
   created_at: string;
   tags?: Array<{ id: string; name: string; color: string }>;
@@ -206,6 +207,9 @@ export const useLeads = () => {
       // SEMPRE usar "Novo Lead" como status inicial
       let finalLeadData = { ...leadData };
       finalLeadData.status = 'Novo Lead';
+      if (!finalLeadData.temperature) {
+        finalLeadData.temperature = 'Frio';
+      }
 
       const { data, error } = await supabase
         .from('leads')
@@ -468,6 +472,7 @@ export const useLeads = () => {
             status: defaultStatus, // SEMPRE usar primeira coluna do pipeline
             source: source,
             partner_id: partnerId,
+            temperature: 'Frio', // Valor padrão para temperatura
             created_by: user.id,
             company_id: profileData.company_id
           };

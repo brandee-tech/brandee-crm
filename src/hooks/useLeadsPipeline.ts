@@ -12,6 +12,7 @@ interface Lead {
   status: string | null;
   source: string | null;
   partner_id: string | null;
+  temperature: string | null;
   company_id: string;
   created_at: string;
   updated_at: string;
@@ -116,6 +117,7 @@ export const useLeadsPipeline = () => {
     status: string;
     source: string | null;
     partner_id: string | null;
+    temperature: string | null;
   }) => {
     if (!user) return null;
 
@@ -137,6 +139,7 @@ export const useLeadsPipeline = () => {
         .insert({
           ...leadData,
           status: 'Novo Lead', // FORÇAR sempre "Novo Lead"
+          temperature: leadData.temperature || 'Frio',
           company_id: profileData.company_id,
           created_by: user.id
         })

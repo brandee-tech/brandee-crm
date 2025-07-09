@@ -3,7 +3,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { WelcomeMessage } from '@/components/WelcomeMessage';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
+
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target, User, MessageSquare } from 'lucide-react';
@@ -108,8 +108,6 @@ export const Dashboard = () => {
             )}
           </p>
         </div>
-        
-        <RealtimeBadge isUpdating={false} />
       </div>
 
       {/* Grid de KPIs - Responsivo */}

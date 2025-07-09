@@ -12,7 +12,7 @@ import { useScriptAttachments } from '@/hooks/useScriptAttachments';
 import { AddScriptDialog } from '@/components/AddScriptDialog';
 import { EditScriptDialog } from '@/components/EditScriptDialog';
 import { ViewScriptDialog } from '@/components/ViewScriptDialog';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
+
 import { useAuth } from '@/hooks/useAuth';
 
 interface Script {
@@ -183,7 +183,6 @@ export const Scripts = () => {
             <p className="text-gray-600">Gerencie seus materiais de vendas e atendimento</p>
           </div>
           <div className="flex items-center gap-4">
-            <RealtimeBadge isUpdating={isUpdating} />
             <Button onClick={() => setAddDialogOpen(true)} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Novo Material

@@ -4,7 +4,7 @@ import { Plus, Edit2, Trash2, Phone, Mail, Upload, Download, Route } from 'lucid
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useLeads } from '@/hooks/useLeads';
 import { EditLeadDialog } from './EditLeadDialog';
@@ -139,7 +139,6 @@ export const Leads = () => {
           <p className="text-gray-600 mt-1">Gerencie seus prospects e oportunidades</p>
         </div>
         <div className="flex items-center gap-4">
-          <RealtimeBadge isUpdating={isUpdating} />
           <div className="flex gap-2 w-full sm:w-auto">
            <Button 
             variant="outline"

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Calendar, Clock, User, Eye, Edit, Trash2 } from 'lucide-react';
 import { useAppointments } from '@/hooks/useAppointments';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
+
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
 import { EditAppointmentKanbanDialog } from '@/components/EditAppointmentKanbanDialog';
@@ -103,7 +103,6 @@ export const Kanban = () => {
           <p className="text-gray-600 mt-1">Gerencie agendamentos por status</p>
         </div>
         <div className="flex items-center gap-4">
-          <RealtimeBadge isUpdating={isUpdating} />
           <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowColumnManager(!showColumnManager)}>
             Gerenciar Colunas

@@ -5,7 +5,6 @@ import { AddAppointmentDialog } from './AddAppointmentDialog';
 import { AppointmentCard } from './appointments/AppointmentCard';
 import { EmptyAppointments } from './appointments/EmptyAppointments';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import { useAppointments } from '@/hooks/useAppointments';
 import { Plus } from 'lucide-react';
 
@@ -39,8 +38,7 @@ export const Appointments = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
-          <RealtimeBadge isUpdating={isUpdating} />
-          <Button 
+          <Button
             onClick={handleCreateNew}
             className="w-full sm:w-auto"
             size="lg"

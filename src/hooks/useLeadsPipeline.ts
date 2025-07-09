@@ -4,6 +4,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
 
+export interface PipelineFilterState {
+  searchTerm: string;
+  temperature: string;
+  partner_id: string;
+  dateRange: { from: string; to: string };
+}
+
 interface Lead {
   id: string;
   name: string;
@@ -35,6 +42,12 @@ export const useLeadsPipeline = () => {
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [dragLoading, setDragLoading] = useState<string | null>(null);
+  const [filters, setFilters] = useState<PipelineFilterState>({
+    searchTerm: '',
+    temperature: 'todos',
+    partner_id: 'todos',
+    dateRange: { from: '', to: '' }
+  });
   const { user } = useAuth();
   const { toast } = useToast();
   const { columns } = usePipelineColumns();
@@ -59,8 +72,8 @@ export const useLeadsPipeline = () => {
         return;
       }
 
-      // Buscar leads com dados relacionados
-      const { data, error } = await supabase
+      // Construir query com filtros
+      let query = supabase
         .from('leads')
         .select(`
           *,
@@ -74,8 +87,30 @@ export const useLeadsPipeline = () => {
             created_at
           )
         `)
-        .eq('company_id', profileData.company_id)
-        .order('updated_at', { ascending: false });
+        .eq('company_id', profileData.company_id);
+
+      // Aplicar filtros
+      if (filters.searchTerm) {
+        query = query.or(`name.ilike.%${filters.searchTerm}%,email.ilike.%${filters.searchTerm}%`);
+      }
+
+      if (filters.temperature !== 'todos') {
+        query = query.eq('temperature', filters.temperature);
+      }
+
+      if (filters.partner_id !== 'todos') {
+        query = query.eq('partner_id', filters.partner_id);
+      }
+
+      if (filters.dateRange.from) {
+        query = query.gte('created_at', filters.dateRange.from);
+      }
+
+      if (filters.dateRange.to) {
+        query = query.lte('created_at', filters.dateRange.to + 'T23:59:59');
+      }
+
+      const { data, error } = await query.order('updated_at', { ascending: false });
 
       if (error) throw error;
       
@@ -108,7 +143,7 @@ export const useLeadsPipeline = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, toast]);
+  }, [user?.id, toast, filters]);
 
   const createLead = useCallback(async (leadData: {
     name: string;
@@ -264,6 +299,8 @@ export const useLeadsPipeline = () => {
     loading,
     isUpdating,
     dragLoading,
+    filters,
+    setFilters,
     handleDragEnd,
     updateLeadStatus,
     createLead,

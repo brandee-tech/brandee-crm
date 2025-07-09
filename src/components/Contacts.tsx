@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
 import { useContacts } from '@/hooks/useContacts';
 import { EditContactDialog } from './EditContactDialog';
 import { AddContactDialog } from './AddContactDialog';
@@ -59,8 +58,7 @@ export const Contacts = () => {
           <p className="text-gray-600 mt-1">Gerencie sua rede de contatos</p>
         </div>
         <div className="flex items-center gap-4">
-          <RealtimeBadge isUpdating={isUpdating} />
-          <Button 
+          <Button
             className="bg-blue-600 hover:bg-blue-700"
             onClick={() => setAddDialogOpen(true)}
           >

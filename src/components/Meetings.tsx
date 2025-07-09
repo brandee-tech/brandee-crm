@@ -4,7 +4,7 @@ import { Plus, Calendar, Clock, Users, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
+
 import { useRealtimeMeetings } from '@/hooks/useRealtimeMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
@@ -67,7 +67,6 @@ export const Meetings = () => {
           <p className="text-gray-600">Gerencie suas reuniões, pautas e atas</p>
         </div>
         <div className="flex items-center gap-4">
-          <RealtimeBadge isUpdating={isUpdating} />
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Nova Reunião

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
+
 import {
   Select,
   SelectContent,
@@ -109,7 +109,6 @@ export const Tasks = () => {
           <p className="text-gray-600 mt-1">Gerencie suas atividades e compromissos</p>
         </div>
         <div className="flex items-center gap-4">
-          <RealtimeBadge isUpdating={isUpdating} />
           <AddTaskDialog onAddTask={createTask} users={users} />
         </div>
       </div>

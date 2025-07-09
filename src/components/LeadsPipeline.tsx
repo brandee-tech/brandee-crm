@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone } from 'lucide-react';
 import { useLeadsPipeline } from '@/hooks/useLeadsPipeline';
-import { RealtimeBadge } from '@/components/ui/realtime-badge';
+
 import { AddLeadDialog } from '@/components/AddLeadDialog';
 import { EditLeadDialog } from '@/components/EditLeadDialog';
 import { PipelineStatusIndicator } from '@/components/PipelineStatusIndicator';
 import { PipelineColumnManager } from '@/components/PipelineColumnManager';
+import { PipelineFilters } from '@/components/PipelineFilters';
 import { TagBadge } from '@/components/TagBadge';
 import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
@@ -21,8 +22,9 @@ export const LeadsPipeline = () => {
     leadsByStatus,
     columns,
     loading,
-    isUpdating,
     dragLoading,
+    filters,
+    setFilters,
     handleDragEnd,
     createLead
   } = useLeadsPipeline();
@@ -70,7 +72,6 @@ export const LeadsPipeline = () => {
           <p className="text-gray-600 mt-1">Acompanhe a jornada completa dos seus leads</p>
         </div>
         <div className="flex items-center gap-4">
-          <RealtimeBadge isUpdating={isUpdating} />
           <div className="flex gap-2">
             <Button 
               variant="outline" 
@@ -87,6 +88,8 @@ export const LeadsPipeline = () => {
       </div>
 
       <PipelineStatusIndicator />
+
+      <PipelineFilters filters={filters} onFiltersChange={setFilters} />
 
       {showColumnManager && <PipelineColumnManager />}
 

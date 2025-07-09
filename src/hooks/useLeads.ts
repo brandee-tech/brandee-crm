@@ -533,7 +533,7 @@ export const useLeads = () => {
             name: processLeadValue(csvLead.nome),
             email: processLeadValue(csvLead.email),
             phone: processLeadValue(csvLead.telefone),
-            status: processLeadValue(csvLead.status) || defaultStatus,
+            status: defaultStatus, // SEMPRE usar primeira coluna do pipeline
             source: source,
             partner_id: partnerId,
             created_by: user.id,

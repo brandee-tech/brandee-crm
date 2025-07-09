@@ -120,12 +120,72 @@ export const useMeetings = () => {
     },
   });
 
+  const rescheduleMeeting = useMutation({
+    mutationFn: async ({ 
+      originalMeetingId, 
+      newMeetingData, 
+      reschedule_reason 
+    }: {
+      originalMeetingId: string;
+      newMeetingData: Omit<Meeting, 'id' | 'created_at' | 'updated_at' | 'status'>;
+      reschedule_reason: string;
+    }) => {
+      console.log('Reagendando reunião:', { originalMeetingId, newMeetingData, reschedule_reason });
+      
+      // Criar nova reunião
+      const { data: newMeeting, error: createError } = await supabase
+        .from('meetings')
+        .insert([{
+          ...newMeetingData,
+          status: 'Agendada',
+        }])
+        .select()
+        .single();
+      
+      if (createError) {
+        console.error('Erro ao criar nova reunião:', createError);
+        throw createError;
+      }
+      
+      // Atualizar reunião original
+      const { error: updateError } = await supabase
+        .from('meetings')
+        .update({
+          status: 'Reagendada',
+          rescheduled_to_id: newMeeting.id,
+          reschedule_reason: reschedule_reason,
+        })
+        .eq('id', originalMeetingId);
+      
+      if (updateError) {
+        console.error('Erro ao atualizar reunião original:', updateError);
+        throw updateError;
+      }
+      
+      console.log('Reunião reagendada com sucesso:', { original: originalMeetingId, new: newMeeting.id });
+      return newMeeting;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      toast({ title: 'Reunião reagendada com sucesso!' });
+    },
+    onError: (error) => {
+      console.error('Erro no reagendamento:', error);
+      toast({ 
+        title: 'Erro ao reagendar reunião', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    },
+  });
+
   return {
     meetings,
     isLoading,
     createMeeting,
     updateMeeting,
     deleteMeeting,
+    rescheduleMeeting,
   };
 };
 

@@ -6,12 +6,15 @@ export interface Meeting {
   date: string;
   time: string;
   duration: number;
-  status: 'Agendada' | 'Em andamento' | 'Finalizada';
+  status: 'Agendada' | 'Em andamento' | 'Finalizada' | 'Cancelada' | 'Reagendada';
   organizer_id: string;
   company_id: string;
   location?: string;
   meeting_type?: string;
   meeting_url?: string;
+  rescheduled_from_id?: string;
+  reschedule_reason?: string;
+  rescheduled_to_id?: string;
   created_at: string;
   updated_at: string;
 }

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, Calendar, Clock, Users, FileText, Trash2, MoreVertical } from 'lucide-react';
+import { Plus, Calendar, Clock, Users, FileText, Trash2, MoreVertical, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +13,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
 import { MeetingDialog } from './MeetingDialog';
 import { MeetingDetails } from './MeetingDetails';
+import { RescheduleMeetingDialog } from './RescheduleMeetingDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Meeting } from '@/types/meeting';
 
 export const Meetings = () => {
   const { meetings, loading, isUpdating } = useRealtimeMeetings();
@@ -25,6 +27,8 @@ export const Meetings = () => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [meetingToDelete, setMeetingToDelete] = useState<string | null>(null);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [meetingToReschedule, setMeetingToReschedule] = useState<Meeting | null>(null);
 
   const currentUserProfile = profiles.find(p => p.id === user?.id);
   
@@ -51,6 +55,10 @@ export const Meetings = () => {
         return 'bg-green-500';
       case 'Finalizada':
         return 'bg-gray-500';
+      case 'Cancelada':
+        return 'bg-red-500';
+      case 'Reagendada':
+        return 'bg-orange-500';
       default:
         return 'bg-gray-500';
     }
@@ -70,9 +78,15 @@ export const Meetings = () => {
     }
   };
 
-  const handleStatusChange = (meetingId: string, newStatus: 'Agendada' | 'Em andamento' | 'Finalizada', e: React.MouseEvent) => {
+  const handleStatusChange = (meetingId: string, newStatus: 'Agendada' | 'Em andamento' | 'Finalizada' | 'Cancelada' | 'Reagendada', e: React.MouseEvent) => {
     e.stopPropagation();
     updateMeeting.mutate({ id: meetingId, status: newStatus });
+  };
+
+  const handleRescheduleMeeting = (meeting: Meeting, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMeetingToReschedule(meeting);
+    setRescheduleDialogOpen(true);
   };
 
   if (selectedMeetingId) {
@@ -157,12 +171,23 @@ export const Meetings = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        <FileText className="w-4 h-4 mr-1" />
-                        Ver Detalhes
-                      </Button>
+                   <div className="flex flex-col items-end gap-2">
+                     <div className="flex items-center gap-2">
+                       {meeting.status === 'Cancelada' && (
+                         <Button 
+                           variant="outline" 
+                           size="sm"
+                           onClick={(e) => handleRescheduleMeeting(meeting, e)}
+                           className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                         >
+                           <RotateCcw className="w-4 h-4 mr-1" />
+                           Reagendar
+                         </Button>
+                       )}
+                       <Button variant="outline" size="sm">
+                         <FileText className="w-4 h-4 mr-1" />
+                         Ver Detalhes
+                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button 
@@ -191,6 +216,12 @@ export const Meetings = () => {
                             disabled={meeting.status === 'Finalizada'}
                           >
                             Marcar como Finalizada
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => handleStatusChange(meeting.id, 'Cancelada', e)}
+                            disabled={meeting.status === 'Cancelada'}
+                          >
+                            Marcar como Cancelada
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={(e) => handleDeleteMeeting(meeting.id, e)}
@@ -234,6 +265,19 @@ export const Meetings = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {meetingToReschedule && (
+        <RescheduleMeetingDialog
+          meeting={meetingToReschedule}
+          open={rescheduleDialogOpen}
+          onOpenChange={(open) => {
+            setRescheduleDialogOpen(open);
+            if (!open) {
+              setMeetingToReschedule(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

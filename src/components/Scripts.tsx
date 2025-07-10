@@ -110,9 +110,40 @@ const ScriptCard = ({ script, onEdit, onDelete, onView, canEdit }: {
 interface ScriptsProps {
   addDialogOpen: boolean;
   setAddDialogOpen: (open: boolean) => void;
+  scriptFormData: {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  };
+  setScriptFormData: (data: {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  } | ((prev: {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  }) => {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  })) => void;
+  createdScriptId: string | null;
+  setCreatedScriptId: (id: string | null) => void;
 }
 
-export const Scripts = ({ addDialogOpen, setAddDialogOpen }: ScriptsProps) => {
+export const Scripts = ({ 
+  addDialogOpen, 
+  setAddDialogOpen, 
+  scriptFormData, 
+  setScriptFormData, 
+  createdScriptId, 
+  setCreatedScriptId 
+}: ScriptsProps) => {
   const { scripts, loading, isUpdating } = useRealtimeScripts();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -250,6 +281,10 @@ export const Scripts = ({ addDialogOpen, setAddDialogOpen }: ScriptsProps) => {
       <AddScriptDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
+        formData={scriptFormData}
+        setFormData={setScriptFormData}
+        createdScriptId={createdScriptId}
+        setCreatedScriptId={setCreatedScriptId}
       />
 
       <EditScriptDialog

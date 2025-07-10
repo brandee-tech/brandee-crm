@@ -22,6 +22,16 @@ import { useAuth } from '@/hooks/useAuth';
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [addScriptDialogOpen, setAddScriptDialogOpen] = useState(false);
+  
+  // Script form state
+  const [scriptFormData, setScriptFormData] = useState({
+    title: '',
+    content: '',
+    category: 'Vendas',
+    description: ''
+  });
+  const [createdScriptId, setCreatedScriptId] = useState<string | null>(null);
+  
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -58,7 +68,11 @@ const Index = () => {
       case 'scripts':
         return <Scripts 
           addDialogOpen={addScriptDialogOpen} 
-          setAddDialogOpen={setAddScriptDialogOpen} 
+          setAddDialogOpen={setAddScriptDialogOpen}
+          scriptFormData={scriptFormData}
+          setScriptFormData={setScriptFormData}
+          createdScriptId={createdScriptId}
+          setCreatedScriptId={setCreatedScriptId}
         />;
       case 'reports':
         return <Reports />;

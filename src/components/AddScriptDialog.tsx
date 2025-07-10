@@ -24,17 +24,41 @@ import { ScriptAttachments } from '@/components/ScriptAttachments';
 interface AddScriptDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  formData: {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  };
+  setFormData: (data: {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  } | ((prev: {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  }) => {
+    title: string;
+    content: string;
+    category: string;
+    description: string;
+  })) => void;
+  createdScriptId: string | null;
+  setCreatedScriptId: (id: string | null) => void;
 }
 
-export const AddScriptDialog = ({ open, onOpenChange }: AddScriptDialogProps) => {
+export const AddScriptDialog = ({ 
+  open, 
+  onOpenChange, 
+  formData, 
+  setFormData, 
+  createdScriptId, 
+  setCreatedScriptId 
+}: AddScriptDialogProps) => {
   const { createScript } = useScripts();
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    category: 'Vendas',
-    description: ''
-  });
-  const [createdScriptId, setCreatedScriptId] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -90,6 +90,7 @@ export const useRealtimeFollowUps = () => {
     response_date?: string;
     result?: string;
     completed?: boolean;
+    completed_at?: string;
   }) => {
     if (!user) {
       toast({

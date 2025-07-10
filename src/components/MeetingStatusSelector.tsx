@@ -24,10 +24,12 @@ export const MeetingStatusSelector = ({
     switch (status) {
       case 'Agendada':
         return 'bg-blue-500';
-      case 'Em andamento':
-        return 'bg-green-500';
       case 'Finalizada':
         return 'bg-gray-500';
+      case 'Cancelada':
+        return 'bg-red-500';
+      case 'Reagendada':
+        return 'bg-orange-500';
       default:
         return 'bg-gray-500';
     }
@@ -35,8 +37,9 @@ export const MeetingStatusSelector = ({
 
   const statusOptions = [
     { value: 'Agendada', label: 'Agendada' },
-    { value: 'Em andamento', label: 'Em andamento' },
     { value: 'Finalizada', label: 'Finalizada' },
+    { value: 'Cancelada', label: 'Cancelada' },
+    { value: 'Reagendada', label: 'Reagendada' },
   ] as const;
 
   return (

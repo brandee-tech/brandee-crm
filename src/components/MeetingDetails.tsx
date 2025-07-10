@@ -47,14 +47,14 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
   }, [minutes]);
 
   const handleSaveMinutes = async () => {
-    await updateMinutes(minutesContent);
+    await updateMinutes.mutateAsync(minutesContent);
   };
 
   const handleAddAgendaItem = async () => {
     if (!newAgendaItem.trim()) return;
     
     const nextIndex = agendas.length + 1;
-    await addAgendaItem({
+    await addAgendaItem.mutateAsync({
       meeting_id: meetingId,
       title: newAgendaItem,
       order_index: nextIndex,
@@ -75,7 +75,7 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
   };
 
   const handleStatusChange = async (status: any) => {
-    await updateMeeting({ status });
+    await updateMeeting.mutateAsync({ status });
   };
 
   const handleAddLink = async () => {

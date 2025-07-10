@@ -51,8 +51,6 @@ export const Meetings = () => {
     switch (status) {
       case 'Agendada':
         return 'bg-blue-500';
-      case 'Em andamento':
-        return 'bg-green-500';
       case 'Finalizada':
         return 'bg-gray-500';
       case 'Cancelada':
@@ -78,7 +76,7 @@ export const Meetings = () => {
     }
   };
 
-  const handleStatusChange = (meetingId: string, newStatus: 'Agendada' | 'Em andamento' | 'Finalizada' | 'Cancelada' | 'Reagendada', e: React.MouseEvent) => {
+  const handleStatusChange = (meetingId: string, newStatus: 'Agendada' | 'Finalizada' | 'Cancelada' | 'Reagendada', e: React.MouseEvent) => {
     e.stopPropagation();
     updateMeeting.mutate({ id: meetingId, status: newStatus });
   };
@@ -173,7 +171,7 @@ export const Meetings = () => {
                   
                    <div className="flex flex-col items-end gap-2">
                      <div className="flex items-center gap-2">
-                       {meeting.status === 'Cancelada' && (
+                       {(meeting.status === 'Cancelada' || meeting.status === 'Agendada') && (
                          <Button 
                            variant="outline" 
                            size="sm"
@@ -211,12 +209,6 @@ export const Meetings = () => {
                             disabled={meeting.status === 'Agendada'}
                           >
                             Marcar como Agendada
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => handleStatusChange(meeting.id, 'Em andamento', e)}
-                            disabled={meeting.status === 'Em andamento'}
-                          >
-                            Marcar como Em andamento
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={(e) => handleStatusChange(meeting.id, 'Finalizada', e)}

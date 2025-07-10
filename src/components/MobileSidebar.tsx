@@ -21,6 +21,7 @@ import {
   Video,
   Shield,
   Package,
+  Handshake,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -46,7 +47,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'scripts', label: 'Materiais', icon: FileText },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },
-    { id: 'partners', label: 'Parceiros', icon: Users },
+    { id: 'partners', label: 'Parceiros', icon: Handshake },
     { id: 'users', label: 'Usuários', icon: Users },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];

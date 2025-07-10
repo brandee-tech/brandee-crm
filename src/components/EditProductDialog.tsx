@@ -11,6 +11,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useProducts } from '@/hooks/useProducts';
+import { formatCurrency, parseCurrency } from '@/lib/utils';
 
 interface Product {
   id: string;
@@ -41,11 +42,18 @@ export const EditProductDialog = ({ product, open, onOpenChange }: EditProductDi
     if (product) {
       setFormData({
         name: product.name || '',
-        price: product.price?.toString() || '',
+        price: product.price?.toFixed(2).replace('.', ',') || '',
         description: product.description || ''
       });
     }
   }, [product]);
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite apenas números, vírgula e ponto
+    const numericValue = value.replace(/[^0-9,]/g, '');
+    setFormData(prev => ({ ...prev, price: numericValue }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +64,7 @@ export const EditProductDialog = ({ product, open, onOpenChange }: EditProductDi
     try {
       await updateProduct(product.id, {
         name: formData.name,
-        price: parseFloat(formData.price),
+        price: parseCurrency(formData.price),
         description: formData.description || undefined
       });
 
@@ -90,11 +98,8 @@ export const EditProductDialog = ({ product, open, onOpenChange }: EditProductDi
             <Label htmlFor="price">Preço (R$) *</Label>
             <Input
               id="price"
-              type="number"
-              step="0.01"
-              min="0"
               value={formData.price}
-              onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+              onChange={handlePriceChange}
               placeholder="0,00"
               required
             />

@@ -11,6 +11,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { useProducts } from '@/hooks/useProducts';
+import { formatCurrency, parseCurrency } from '@/lib/utils';
 
 interface AddProductDialogProps {
   open: boolean;
@@ -26,6 +27,13 @@ export const AddProductDialog = ({ open, onOpenChange }: AddProductDialogProps) 
   const [loading, setLoading] = useState(false);
   const { createProduct } = useProducts();
 
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite apenas números, vírgula e ponto
+    const numericValue = value.replace(/[^0-9,]/g, '');
+    setFormData(prev => ({ ...prev, price: numericValue }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -33,7 +41,7 @@ export const AddProductDialog = ({ open, onOpenChange }: AddProductDialogProps) 
     try {
       await createProduct({
         name: formData.name,
-        price: parseFloat(formData.price),
+        price: parseCurrency(formData.price),
         description: formData.description || undefined
       });
 
@@ -74,11 +82,8 @@ export const AddProductDialog = ({ open, onOpenChange }: AddProductDialogProps) 
             <Label htmlFor="price">Preço (R$) *</Label>
             <Input
               id="price"
-              type="number"
-              step="0.01"
-              min="0"
               value={formData.price}
-              onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+              onChange={handlePriceChange}
               placeholder="0,00"
               required
             />

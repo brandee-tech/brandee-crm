@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useProducts } from '@/hooks/useProducts';
 import { AddProductDialog } from './AddProductDialog';
 import { EditProductDialog } from './EditProductDialog';
+import { formatCurrency } from '@/lib/utils';
 
 export const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null);
@@ -61,7 +62,7 @@ export const Products = () => {
                     </div>
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 w-fit">
                       <DollarSign className="w-3 h-3 mr-1" />
-                      R$ {product.price.toFixed(2)}
+                      {formatCurrency(product.price)}
                     </Badge>
                     {product.active && (
                       <Badge className="bg-green-100 text-green-700 border-green-200 w-fit">

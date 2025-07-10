@@ -20,6 +20,7 @@ import {
   CalendarDays,
   Video,
   Shield,
+  Package,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +39,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'leads', label: 'Leads', icon: UserPlus },
     { id: 'leadsPipeline', label: 'Pipeline de Leads', icon: Kanban },
+    { id: 'products', label: 'Produtos', icon: Package },
     { id: 'appointments', label: 'Agendamentos', icon: Calendar },
     { id: 'meetings', label: 'Reuniões', icon: Video },
     { id: 'calendar', label: 'Calendário', icon: CalendarDays },

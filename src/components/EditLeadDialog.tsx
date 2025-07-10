@@ -306,7 +306,7 @@ const EditLeadDialogContent = ({ lead, open, onOpenChange }: EditLeadDialogProps
           <div className="space-y-2">
             <Label htmlFor="product">Produto/Serviço</Label>
             <Select
-              value={formData.product_id}
+              value={formData.product_id || undefined}
               onValueChange={(value) => {
                 const selectedProduct = products.find(p => p.id === value);
                 setFormData(prev => ({ 
@@ -361,13 +361,13 @@ const EditLeadDialogContent = ({ lead, open, onOpenChange }: EditLeadDialogProps
               ) : (
                 <Select
                   value={formData.assigned_to || undefined}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_to: value || '' }))}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_to: value === 'unassigned' ? '' : value || '' }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um closer" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Sem atribuição</SelectItem>
+                    <SelectItem value="unassigned">Sem atribuição</SelectItem>
                     {closers.map((closer) => (
                       <SelectItem key={closer.id} value={closer.id}>
                         {closer.full_name || closer.email}

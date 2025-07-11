@@ -6,8 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAllCompanies } from '@/hooks/useAllCompanies';
 import { useSaasRoles } from '@/hooks/useSaasRoles';
-import { useSaasProfiles } from '@/hooks/useSaasProfiles';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -19,6 +19,7 @@ interface CreateUserDialogProps {
 export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCompanyId }: CreateUserDialogProps) => {
   const [formData, setFormData] = useState({
     email: '',
+    password: '',
     full_name: '',
     company_id: '',
     role_id: ''
@@ -27,7 +28,6 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
 
   const { companies } = useAllCompanies();
   const { roles } = useSaasRoles(formData.company_id);
-  const { createUserInvitation } = useSaasProfiles();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.company_id || !formData.role_id) {
+    if (!formData.email || !formData.password || !formData.company_id || !formData.role_id) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -48,19 +48,64 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
       return;
     }
 
+    if (formData.password.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A senha deve ter pelo menos 6 caracteres",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      await createUserInvitation(formData.email, formData.company_id, formData.role_id, formData.full_name);
+      const { data: result, error } = await supabase.functions.invoke('invite-user', {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          role_id: formData.role_id,
+          create_with_password: true,
+          send_email: false
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao criar usuário');
+      }
+
+      // Atualizar o nome completo se fornecido
+      if (formData.full_name && result.user_id) {
+        await supabase
+          .from('profiles')
+          .update({ full_name: formData.full_name })
+          .eq('id', result.user_id);
+      }
+
+      toast({
+        title: "Usuário criado com sucesso!",
+        description: `${formData.email} foi criado diretamente no sistema`
+      });
+
       onSuccess();
       onOpenChange(false);
       setFormData({
         email: '',
+        password: '',
         full_name: '',
         company_id: '',
         role_id: ''
       });
-    } catch (error) {
-      // Erro já tratado no hook
+    } catch (error: any) {
+      console.error('Erro ao criar usuário:', error);
+      toast({
+        title: "Erro ao criar usuário",
+        description: error.message || "Ocorreu um erro inesperado",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -82,6 +127,18 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               placeholder="usuario@exemplo.com"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Senha *</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              placeholder="Senha do usuário (mín. 6 caracteres)"
               required
             />
           </div>

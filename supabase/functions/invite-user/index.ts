@@ -11,6 +11,8 @@ interface InviteUserRequest {
   role_id: string;
   send_email?: boolean;
   redirect_to?: string;
+  password?: string;
+  create_with_password?: boolean;
 }
 
 serve(async (req: Request) => {
@@ -69,18 +71,59 @@ serve(async (req: Request) => {
     }
 
     // Parse request body
-    const { email, role_id, send_email = true, redirect_to }: InviteUserRequest = await req.json();
+    const { email, role_id, send_email = true, redirect_to, password, create_with_password = false }: InviteUserRequest = await req.json();
 
     if (!email || !role_id) {
       throw new Error('Email and role_id are required');
     }
 
-    console.log(`📧 Processing invite for ${email}, send_email: ${send_email}`);
+    if (create_with_password && !password) {
+      throw new Error('Password is required when creating user directly');
+    }
+
+    console.log(`📧 Processing ${create_with_password ? 'user creation' : 'invite'} for ${email}`);
 
     let supabase_invite_id = null;
 
-    // If send_email is true, use Supabase native invite
-    if (send_email) {
+    // If create_with_password is true, create user directly
+    if (create_with_password) {
+      console.log('👤 Creating user directly with password');
+      
+      const { data: userData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          role_id: role_id,
+          company_id: profile.company_id,
+          created_via_admin: true
+        }
+      });
+
+      if (createError) {
+        console.error('❌ Failed to create user:', createError);
+        throw new Error(`Failed to create user: ${createError.message}`);
+      }
+
+      supabase_invite_id = userData.user?.id || null;
+      console.log('✅ User created successfully:', supabase_invite_id);
+      
+      // Create profile for the new user
+      const { error: profileCreateError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userData.user.id,
+          email,
+          company_id: profile.company_id,
+          role_id,
+          full_name: email.split('@')[0]
+        });
+
+      if (profileCreateError) {
+        console.error('❌ Failed to create profile:', profileCreateError);
+        // Don't throw here as user was created successfully
+      }
+    } else if (send_email) {
       console.log('📨 Sending native email invite via Supabase');
       
       const defaultRedirectTo = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '')}.supabase.co/`;
@@ -107,41 +150,48 @@ serve(async (req: Request) => {
       console.log('✅ Native invite sent successfully:', supabase_invite_id);
     }
 
-    // Always save invitation record in our table for tracking
-    const { data: invitation, error: insertError } = await supabase
-      .from('user_invitations')
-      .insert({
-        email,
-        role_id,
-        company_id: profile.company_id,
-        invited_by: user.id,
-        sent_via_email: send_email,
-        supabase_invite_id
-      })
-      .select(`
-        *,
-        roles (
-          name,
-          description
-        )
-      `)
-      .single();
+    // Save invitation record in our table for tracking (only if not creating user directly)
+    let invitation = null;
+    if (!create_with_password) {
+      const { data: invitationData, error: insertError } = await supabase
+        .from('user_invitations')
+        .insert({
+          email,
+          role_id,
+          company_id: profile.company_id,
+          invited_by: user.id,
+          sent_via_email: send_email,
+          supabase_invite_id
+        })
+        .select(`
+          *,
+          roles (
+            name,
+            description
+          )
+        `)
+        .single();
 
-    if (insertError) {
-      console.error('❌ Failed to save invitation record:', insertError);
-      throw new Error(`Failed to save invitation: ${insertError.message}`);
+      if (insertError) {
+        console.error('❌ Failed to save invitation record:', insertError);
+        throw new Error(`Failed to save invitation: ${insertError.message}`);
+      }
+      
+      invitation = invitationData;
+      console.log('✅ Invitation record saved successfully');
     }
-
-    console.log('✅ Invitation record saved successfully');
 
     return new Response(
       JSON.stringify({
         success: true,
         invitation,
-        sent_via_email: send_email,
-        message: send_email 
-          ? `Convite enviado por email para ${email}` 
-          : `Convite criado para ${email} (link manual)`
+        user_id: supabase_invite_id,
+        created_directly: create_with_password,
+        message: create_with_password
+          ? `Usuário criado diretamente para ${email}`
+          : send_email 
+            ? `Convite enviado por email para ${email}` 
+            : `Convite criado para ${email} (link manual)`
       }),
       {
         status: 200,

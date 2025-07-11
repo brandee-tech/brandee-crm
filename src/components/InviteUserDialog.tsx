@@ -42,7 +42,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password || !selectedRole) {
+    if (!email || !password || !selectedRole || !company?.id) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",

@@ -58,6 +58,15 @@ export const InviteUserDialog = ({
 
   const createWithPassword = form.watch('create_with_password');
   const onSubmit = async (data: InviteFormData) => {
+    if (!companyId) {
+      toast({
+        title: "Erro",
+        description: "ID da empresa não encontrado",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
     try {
       const { data: result, error } = await supabase.functions.invoke('invite-user', {

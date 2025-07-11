@@ -140,10 +140,13 @@ export const useDashboard = () => {
           .lte('created_at', lastMonthEnd.toISOString()),
       ]);
 
-      // Fetch recent leads
+      // Fetch recent leads with creator information
       const { data: recentLeads } = await supabase
         .from('leads')
-        .select('*')
+        .select(`
+          *,
+          creator:profiles!leads_created_by_fkey (full_name)
+        `)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -169,12 +172,12 @@ export const useDashboard = () => {
       // Fetch recent activities (últimos leads, agendamentos e tarefas criados)
       const recentActivities = [];
       
-      // Adicionar leads recentes
+      // Adicionar leads recentes com informações do criador
       if (recentLeads) {
         recentActivities.push(...recentLeads.slice(0, 3).map(lead => ({
           type: 'lead',
           title: `Novo lead: ${lead.name}`,
-          description: `Lead criado por ${lead.created_by}`,
+          description: `Lead criado por ${lead.creator?.full_name || 'Usuário'}`,
           time: lead.created_at,
           icon: 'user'
         })));

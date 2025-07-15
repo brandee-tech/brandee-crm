@@ -1256,6 +1256,86 @@ export type Database = {
           },
         ]
       }
+      schedule_blocks: {
+        Row: {
+          block_type: Database["public"]["Enums"]["schedule_block_type"]
+          company_id: string
+          created_at: string
+          created_by: string
+          end_date: string | null
+          end_time: string | null
+          id: string
+          is_recurring: boolean
+          reason: string | null
+          recurring_pattern: Json | null
+          start_date: string
+          start_time: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          block_type?: Database["public"]["Enums"]["schedule_block_type"]
+          company_id: string
+          created_at?: string
+          created_by: string
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          is_recurring?: boolean
+          reason?: string | null
+          recurring_pattern?: Json | null
+          start_date: string
+          start_time?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          block_type?: Database["public"]["Enums"]["schedule_block_type"]
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          end_time?: string | null
+          id?: string
+          is_recurring?: boolean
+          reason?: string | null
+          recurring_pattern?: Json | null
+          start_date?: string
+          start_time?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_blocks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_blocks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_blocks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_blocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scripts: {
         Row: {
           category: string | null
@@ -1767,7 +1847,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      schedule_block_type: "time_slot" | "full_day"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1894,6 +1974,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      schedule_block_type: ["time_slot", "full_day"],
+    },
   },
 } as const

@@ -80,6 +80,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
         email: email,
         senha: password,
         cargo: roleData?.name || '',
+        role_id: selectedRole,
         companyId: company?.id,
         companyName: company?.name || '',
         create_with_password: true,

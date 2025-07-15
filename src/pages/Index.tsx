@@ -16,6 +16,7 @@ import { Reports } from '@/components/Reports';
 import { UserManagement } from '@/components/UserManagement';
 import { Settings } from '@/components/Settings';
 import { Partners } from '@/components/Partners';
+import { ScheduleBlockManagement } from '@/components/ScheduleBlockManagement';
 import { OnboardingCheck } from '@/components/OnboardingCheck';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -64,7 +65,6 @@ const Index = () => {
       case 'calendar':
         return <CalendarView />;
       case 'scheduleBlocks':
-        const { ScheduleBlockManagement } = await import('@/components/ScheduleBlockManagement');
         return <ScheduleBlockManagement />;
       case 'tasks':
         return <Tasks />;

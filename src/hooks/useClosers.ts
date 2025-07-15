@@ -26,10 +26,15 @@ export const useClosers = () => {
         return;
       }
 
-      // Primeiro obter o company_id do usuário atual
+      // Primeiro obter o company_id e role do usuário atual
       const { data: currentUserProfile, error: profileError } = await supabase
         .from('profiles')
-        .select('company_id')
+        .select(`
+          company_id,
+          roles (
+            name
+          )
+        `)
         .eq('id', user.id)
         .single();
 
@@ -39,6 +44,9 @@ export const useClosers = () => {
         setLoading(false);
         return;
       }
+
+      const currentUserRole = currentUserProfile.roles?.name;
+      console.log('🔍 [DEBUG] useClosers - Role do usuário atual:', currentUserRole);
 
       // Buscar todos os usuários da empresa que podem ser assignees
       const { data, error } = await supabase
@@ -70,8 +78,18 @@ export const useClosers = () => {
       
       console.log('🔍 [DEBUG] useClosers - Dados retornados:', data);
       
-      // Filtrar apenas roles que podem gerenciar agendamentos
-      const validRoles = ['Admin', 'Gerente', 'Closer', 'Vendedor', 'Coordenador', 'SDR'];
+      // Definir roles válidos baseado no role do usuário atual
+      let validRoles: string[];
+      if (currentUserRole === 'SDR') {
+        // SDRs só podem atribuir para Closers, Admins e Gerentes
+        validRoles = ['Admin', 'Gerente', 'Closer'];
+        console.log('📋 [DEBUG] useClosers - SDR detectado, mostrando apenas:', validRoles);
+      } else {
+        // Outros roles podem ver todos os usuários aptos
+        validRoles = ['Admin', 'Gerente', 'Closer', 'Vendedor', 'Coordenador'];
+        console.log('📋 [DEBUG] useClosers - Usuário não-SDR, mostrando:', validRoles);
+      }
+
       const filteredUsers = (data || []).filter(user => {
         console.log('👤 [DEBUG] useClosers - Verificando usuário:', { 
           id: user.id, 
@@ -79,10 +97,11 @@ export const useClosers = () => {
           role: user.roles?.name 
         });
         
-        // Se user.roles é null ou undefined, incluir o usuário (pode ser admin sem role definido)
+        // Se user.roles é null ou undefined, incluir apenas se não for SDR fazendo a consulta
         if (!user.roles) {
-          console.log('⚠️ [DEBUG] useClosers - Usuário sem role definido, incluindo:', user.full_name);
-          return true;
+          const shouldInclude = currentUserRole !== 'SDR';
+          console.log(`⚠️ [DEBUG] useClosers - Usuário sem role definido, ${shouldInclude ? 'incluindo' : 'excluindo'}:`, user.full_name);
+          return shouldInclude;
         }
         
         const isValidRole = validRoles.includes(user.roles.name);

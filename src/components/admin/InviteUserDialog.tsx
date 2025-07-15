@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { UserPlus, Mail, Key } from 'lucide-react';
+import { UserPlus, Mail, Key, Eye, EyeOff } from 'lucide-react';
 import { useSaasRoles } from '@/hooks/useSaasRoles';
 import { supabase } from '@/integrations/supabase/client';
 const inviteSchema = z.object({
+  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   email: z.string().email('Digite um email válido'),
   role_id: z.string().min(1, 'Selecione um cargo'),
   password: z.string().optional(),
@@ -39,6 +40,7 @@ export const InviteUserDialog = ({
 }: InviteUserDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     toast
   } = useToast();
@@ -49,6 +51,7 @@ export const InviteUserDialog = ({
   const form = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
     defaultValues: {
+      name: '',
       email: '',
       role_id: '',
       password: '',
@@ -77,7 +80,7 @@ export const InviteUserDialog = ({
       const n8nUrl = 'https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
 
       console.log('Enviando dados para N8N:', {
-        nome: data.email, // Usando email como nome se não tiver nome específico
+        nome: data.name,
         email: data.email,
         senha: data.password || '',
         cargo: roleName
@@ -91,7 +94,7 @@ export const InviteUserDialog = ({
         },
         mode: 'no-cors', // Corrige o erro de CORS
         body: JSON.stringify({
-          nome: data.email, // Usando email como nome
+          nome: data.name,
           email: data.email,
           senha: data.password || '',
           cargo: roleName
@@ -160,26 +163,60 @@ export const InviteUserDialog = ({
               )}
             />
 
-            <FormField control={form.control} name="email" render={({
-            field
-          }) => <FormItem>
-                  <FormLabel>Email do usuário *</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="usuario@exemplo.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>} />
+            <FormField control={form.control} name="name" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome do usuário *</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nome completo do usuário" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <FormField control={form.control} name="email" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email do usuário *</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="usuario@exemplo.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
 
             {createWithPassword && (
-              <FormField control={form.control} name="password" render={({
-              field
-            }) => <FormItem>
-                    <FormLabel>Senha *</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Senha do usuário (mín. 6 caracteres)" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>} />
+              <FormField control={form.control} name="password" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha *</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="Senha do usuário (mín. 6 caracteres)" 
+                        {...field} 
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                        <span className="sr-only">
+                          {showPassword ? "Ocultar senha" : "Mostrar senha"}
+                        </span>
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             )}
 
             <FormField control={form.control} name="role_id" render={({

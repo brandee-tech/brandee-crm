@@ -147,9 +147,11 @@ export const useScheduleBlocks = () => {
   });
 
   // Função para verificar se um horário está bloqueado
-  const isTimeBlocked = (date: string, time?: string, userId?: string) => {
+  const isTimeBlocked = (date: string, time?: string, userId?: string, duration: number = 60) => {
     const targetUserId = userId || user?.id;
     if (!targetUserId) return false;
+
+    console.log('🔍 [DEBUG] isTimeBlocked:', { date, time, userId: targetUserId, duration, totalBlocks: scheduleBlocks.length });
 
     return scheduleBlocks.some(block => {
       // Verificar se é o usuário correto
@@ -166,16 +168,37 @@ export const useScheduleBlocks = () => {
       if (!isInDateRange) return false;
 
       // Se é bloqueio de dia inteiro, está bloqueado
-      if (block.block_type === 'full_day') return true;
+      if (block.block_type === 'full_day') {
+        console.log('🔴 [DEBUG] Blocked by full day block:', block.reason);
+        return true;
+      }
 
       // Se é bloqueio de horário específico e não foi passado um horário, não está bloqueado
       if (!time || !block.start_time || !block.end_time) return false;
 
-      // Verificar se o horário está no range do bloqueio
-      const blockStartTime = block.start_time;
-      const blockEndTime = block.end_time;
+      // Converter horários para minutos para facilitar comparação
+      const timeToMinutes = (timeStr: string) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+
+      const appointmentStart = timeToMinutes(time);
+      const appointmentEnd = appointmentStart + duration;
+      const blockStart = timeToMinutes(block.start_time);
+      const blockEnd = timeToMinutes(block.end_time);
+
+      // Verificar se há sobreposição entre o agendamento e o bloqueio
+      const hasOverlap = appointmentStart < blockEnd && appointmentEnd > blockStart;
       
-      return time >= blockStartTime && time <= blockEndTime;
+      if (hasOverlap) {
+        console.log('🔴 [DEBUG] Blocked by time overlap:', {
+          appointmentWindow: `${time} - ${appointmentEnd/60 >> 0}:${(appointmentEnd%60).toString().padStart(2, '0')}`,
+          blockWindow: `${block.start_time} - ${block.end_time}`,
+          reason: block.reason
+        });
+      }
+
+      return hasOverlap;
     });
   };
 

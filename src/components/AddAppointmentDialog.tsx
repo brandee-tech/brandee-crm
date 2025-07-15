@@ -100,7 +100,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
 
     // Verificar se o horário está bloqueado
     if (formData.date && formData.time && formData.assigned_to) {
-      const isBlocked = isTimeBlocked(formData.date, formData.time, formData.assigned_to);
+      const isBlocked = isTimeBlocked(formData.date, formData.time, formData.assigned_to, formData.duration);
       if (isBlocked) {
         toast({
           title: "Horário Indisponível",

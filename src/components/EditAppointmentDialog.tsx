@@ -11,6 +11,8 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useLeads } from '@/hooks/useLeads';
 import { useClosers } from '@/hooks/useClosers';
 import { useAuth } from '@/hooks/useAuth';
+import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
+import { useToast } from '@/hooks/use-toast';
 import { RescheduleAppointmentDialog } from './RescheduleAppointmentDialog';
 
 interface Appointment {
@@ -59,6 +61,8 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
   const { leads } = useLeads();
   const { closers } = useClosers();
   const { user } = useAuth();
+  const { isTimeBlocked } = useScheduleBlocks();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (appointment) {
@@ -77,6 +81,19 @@ export const EditAppointmentDialog = ({ open, onOpenChange, appointment }: EditA
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!appointment || !user) return;
+
+    // Verificar se o horário está bloqueado (se mudou data/hora/responsável)
+    if (date && time && assignedTo) {
+      const isBlocked = isTimeBlocked(date, time, assignedTo, duration);
+      if (isBlocked) {
+        toast({
+          title: "Horário Indisponível",
+          description: "O horário selecionado está bloqueado para este usuário. Escolha outro horário.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
 
     setLoading(true);
 

@@ -21,6 +21,13 @@ export const CalendarView = () => {
   const { appointments, loading: appointmentsLoading } = useAppointments();
   const { meetings, isLoading: meetingsLoading } = useMeetingsForCalendar();
   const { scheduleBlocks, isLoading: blocksLoading } = useScheduleBlocks();
+  
+  // Debug log para verificar se os bloqueios estão sendo carregados
+  console.log('Schedule blocks debug:', { 
+    scheduleBlocks: scheduleBlocks?.length, 
+    blocksLoading,
+    blocks: scheduleBlocks
+  });
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);

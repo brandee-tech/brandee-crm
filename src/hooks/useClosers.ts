@@ -68,14 +68,29 @@ export const useClosers = () => {
         return;
       }
       
+      console.log('🔍 [DEBUG] useClosers - Dados retornados:', data);
+      
       // Filtrar apenas roles que podem gerenciar agendamentos
-      const validRoles = ['Admin', 'Gerente', 'Closer', 'Vendedor', 'Coordenador'];
+      const validRoles = ['Admin', 'Gerente', 'Closer', 'Vendedor', 'Coordenador', 'SDR'];
       const filteredUsers = (data || []).filter(user => {
+        console.log('👤 [DEBUG] useClosers - Verificando usuário:', { 
+          id: user.id, 
+          name: user.full_name, 
+          role: user.roles?.name 
+        });
+        
         // Se user.roles é null ou undefined, incluir o usuário (pode ser admin sem role definido)
-        if (!user.roles) return true;
-        return validRoles.includes(user.roles.name);
+        if (!user.roles) {
+          console.log('⚠️ [DEBUG] useClosers - Usuário sem role definido, incluindo:', user.full_name);
+          return true;
+        }
+        
+        const isValidRole = validRoles.includes(user.roles.name);
+        console.log(`${isValidRole ? '✅' : '❌'} [DEBUG] useClosers - Role ${user.roles.name} ${isValidRole ? 'válido' : 'inválido'}`);
+        return isValidRole;
       });
       
+      console.log('📋 [DEBUG] useClosers - Usuários filtrados:', filteredUsers);
       setClosers(filteredUsers);
     } catch (error) {
       console.error('Erro ao buscar usuários para assignar:', error);

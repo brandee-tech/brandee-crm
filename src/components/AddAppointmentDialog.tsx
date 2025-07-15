@@ -24,6 +24,7 @@ import { useLeads } from '@/hooks/useLeads';
 import { useClosers } from '@/hooks/useClosers';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface AddAppointmentDialogProps {
   open: boolean;
@@ -36,6 +37,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
   const { closers, loading: closersLoading } = useClosers();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { hasPermission, userPermissions } = usePermissions();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -52,16 +54,26 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
 
   // Auto-select current user as default assignee when closers are loaded
   useEffect(() => {
+    console.log('🔍 [DEBUG] AddAppointmentDialog - useEffect:', { 
+      closers: closers.length, 
+      user: user?.id, 
+      assigned_to: formData.assigned_to,
+      userPermissions: userPermissions ? 'Definidas' : 'Não definidas',
+      canCreate: hasPermission('appointments', 'create')
+    });
+    
     if (!formData.assigned_to && user && closers.length > 0) {
       const currentUserInClosers = closers.find(closer => closer.id === user.id);
       if (currentUserInClosers) {
+        console.log('✅ [DEBUG] AddAppointmentDialog - Usuário atual encontrado nos closers');
         setFormData(prev => ({ ...prev, assigned_to: user.id }));
       } else if (closers.length === 1) {
         // If only one option available, auto-select it
+        console.log('✅ [DEBUG] AddAppointmentDialog - Apenas um closer disponível, selecionando automaticamente');
         setFormData(prev => ({ ...prev, assigned_to: closers[0].id }));
       }
     }
-  }, [closers, user, formData.assigned_to]);
+  }, [closers, user, formData.assigned_to, userPermissions, hasPermission]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,11 +225,18 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
 
           <div className="space-y-2">
             <Label>Responsável *</Label>
+            {!hasPermission('appointments', 'create') && (
+              <div className="text-sm text-red-600 mb-2">
+                ⚠️ Você não tem permissão para criar agendamentos. Verifique seu cargo.
+              </div>
+            )}
             {closersLoading ? (
               <div className="text-sm text-muted-foreground">Carregando usuários...</div>
             ) : closers.length === 0 ? (
               <div className="text-sm text-yellow-600">
-                Nenhum usuário disponível para atribuir agendamentos. Verifique as permissões.
+                Nenhum usuário disponível para atribuir agendamentos. 
+                <br />
+                Debug: Verifique o console para mais detalhes.
               </div>
             ) : (
               <Select value={formData.assigned_to} onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_to: value }))}>
@@ -232,6 +251,11 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
                         {closer.roles && (
                           <span className="text-xs text-muted-foreground">
                             ({closer.roles.name})
+                          </span>
+                        )}
+                        {!closer.roles && (
+                          <span className="text-xs text-orange-600">
+                            (Sem cargo)
                           </span>
                         )}
                       </div>
@@ -264,7 +288,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
             </Button>
             <Button 
               type="submit" 
-              disabled={!formData.assigned_to || isSubmitting || closersLoading}
+              disabled={!formData.assigned_to || isSubmitting || closersLoading || !hasPermission('appointments', 'create')}
             >
               {isSubmitting ? "Criando..." : "Criar Agendamento"}
             </Button>

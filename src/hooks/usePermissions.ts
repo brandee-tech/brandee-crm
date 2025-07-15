@@ -8,15 +8,25 @@ export const usePermissions = () => {
   const { userInfo } = useCurrentUser();
 
   const userPermissions = useMemo((): RolePermissions | null => {
-    if (!userInfo?.role_name) return null;
-
-    // Caso contrário, usar permissões padrão baseadas no nome do cargo
-    const defaultPerms = DEFAULT_PERMISSIONS[userInfo.role_name];
-    if (defaultPerms) {
-      return defaultPerms;
+    console.log('🔍 [DEBUG] usePermissions - userInfo:', userInfo);
+    
+    // Se não tem userInfo, retorna null
+    if (!userInfo) {
+      console.log('❌ [DEBUG] usePermissions - Sem userInfo');
+      return null;
     }
 
-    // Se não encontrar, dar permissões básicas de SDR por segurança
+    // Se tem role_name, usar permissões específicas
+    if (userInfo.role_name) {
+      console.log('✅ [DEBUG] usePermissions - Role encontrado:', userInfo.role_name);
+      const defaultPerms = DEFAULT_PERMISSIONS[userInfo.role_name];
+      if (defaultPerms) {
+        return defaultPerms;
+      }
+    }
+
+    // Se não tem role_name ou role não encontrado, usar SDR como fallback
+    console.log('⚠️ [DEBUG] usePermissions - Usando SDR como fallback para role:', userInfo.role_name);
     return DEFAULT_PERMISSIONS['SDR'];
   }, [userInfo]);
 
@@ -24,8 +34,13 @@ export const usePermissions = () => {
     module: T,
     action: PermissionAction<T>
   ): boolean => {
-    if (!userPermissions) return false;
-    return userPermissions[module]?.[action] === true;
+    if (!userPermissions) {
+      console.log('❌ [DEBUG] hasPermission - Sem permissões definidas');
+      return false;
+    }
+    const hasAccess = userPermissions[module]?.[action] === true;
+    console.log(`🔐 [DEBUG] hasPermission - ${module}.${String(action)}: ${hasAccess}`);
+    return hasAccess;
   };
 
   const canAccess = (resource: string): boolean => {

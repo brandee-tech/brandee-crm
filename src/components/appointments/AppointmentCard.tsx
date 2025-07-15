@@ -188,48 +188,48 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
           {/* Botões de Ação - Desktop - visible from medium screens up */}
           <div className="hidden md:block pt-4 border-t space-y-2">
             {/* Primeira linha de botões */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setViewDialogOpen(true)}
-                className="text-xs"
+                className="text-xs h-8 px-2 min-w-0 flex-1"
               >
-                <Eye className="w-3 h-3 mr-1" />
-                Ver
+                <Eye className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate">Ver</span>
               </Button>
 
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setEditDialogOpen(true)}
-                className="text-xs"
+                className="text-xs h-8 px-2 min-w-0 flex-1"
               >
-                <Edit className="w-3 h-3 mr-1" />
-                Editar
+                <Edit className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate">Editar</span>
               </Button>
 
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setTimelineDialogOpen(true)}
-                className="text-xs"
+                className="text-xs h-8 px-2 min-w-0 flex-1"
               >
-                <History className="w-3 h-3 mr-1" />
-                Timeline
+                <History className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate">Timeline</span>
               </Button>
             </div>
 
             {/* Segunda linha de botões - condicionais */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               {shouldShowRecordButton && (
                 <Button
                   size="sm"
                   onClick={() => setRecordDialogOpen(true)}
-                  className="bg-green-600 hover:bg-green-700 text-xs"
+                  className="bg-green-600 hover:bg-green-700 text-xs h-8 px-2 min-w-0 flex-1"
                 >
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Registrar
+                  <CheckCircle className="w-3 h-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">Registrar</span>
                 </Button>
               )}
 
@@ -238,10 +238,10 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
                   size="sm"
                   variant="outline"
                   onClick={() => setFollowUpDialogOpen(true)}
-                  className="text-xs"
+                  className="text-xs h-8 px-2 min-w-0 flex-1"
                 >
-                  <MessageSquare className="w-3 h-3 mr-1" />
-                  Follow-up
+                  <MessageSquare className="w-3 h-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">Follow-up</span>
                 </Button>
               )}
 
@@ -249,10 +249,10 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
                 variant="outline"
                 size="sm"
                 onClick={handleDelete}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs h-8 px-2 min-w-0 flex-1"
               >
-                <Trash2 className="w-3 h-3 mr-1" />
-                Excluir
+                <Trash2 className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate">Excluir</span>
               </Button>
             </div>
           </div>

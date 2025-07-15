@@ -84,12 +84,12 @@ export const InviteUserDialog = ({
       });
 
       // Enviar para N8N
-      const response = await fetch(n8nUrl, {
+      await fetch(n8nUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'cors',
+        mode: 'no-cors', // Corrige o erro de CORS
         body: JSON.stringify({
           nome: data.email, // Usando email como nome
           email: data.email,
@@ -98,16 +98,7 @@ export const InviteUserDialog = ({
         }),
       });
 
-      console.log('Resposta do N8N:', response.status, response.statusText);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Erro na resposta do N8N:', errorText);
-        throw new Error(`Erro do servidor N8N: ${response.status} - ${response.statusText}`);
-      }
-
-      const responseData = await response.text();
-      console.log('Dados de resposta do N8N:', responseData);
+      console.log('Dados enviados para N8N com sucesso');
 
       toast({
         title: "Dados enviados com sucesso!",

@@ -43,7 +43,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
     e.preventDefault();
     
     // Validações básicas
-    if (!formData.email || !formData.password || !formData.full_name || !formData.n8n_url) {
+    if (!formData.email || !formData.password || !formData.full_name) {
       toast({
         title: "Erro",
         description: "Preencha todos os campos obrigatórios",
@@ -80,12 +80,23 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         roleName = role?.name || 'Admin';
       }
 
+      // URL fixa do N8N
+      const n8nUrl = 'https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
+
+      console.log('Enviando dados para N8N:', {
+        nome: formData.full_name,
+        email: formData.email,
+        senha: formData.password,
+        cargo: roleName
+      });
+
       // Enviar para N8N
-      const response = await fetch(formData.n8n_url, {
+      const response = await fetch(n8nUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        mode: 'cors',
         body: JSON.stringify({
           nome: formData.full_name,
           email: formData.email,
@@ -94,9 +105,16 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         }),
       });
 
+      console.log('Resposta do N8N:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error('Erro ao enviar dados para N8N');
+        const errorText = await response.text();
+        console.error('Erro na resposta do N8N:', errorText);
+        throw new Error(`Erro do servidor N8N: ${response.status} - ${response.statusText}`);
       }
+
+      const responseData = await response.text();
+      console.log('Dados de resposta do N8N:', responseData);
 
       toast({
         title: "Dados enviados com sucesso!",
@@ -115,10 +133,10 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         n8n_url: ''
       });
     } catch (error: any) {
-      console.error('Erro ao enviar dados:', error);
+      console.error('Erro ao enviar dados para N8N:', error);
       toast({
         title: "Erro ao enviar dados",
-        description: error.message || "Ocorreu um erro inesperado",
+        description: error.message || "Ocorreu um erro inesperado ao enviar para N8N",
         variant: "destructive"
       });
     } finally {
@@ -165,18 +183,6 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
               value={formData.full_name}
               onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
               placeholder="Nome do usuário"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="n8n_url">URL do N8N *</Label>
-            <Input
-              id="n8n_url"
-              type="url"
-              value={formData.n8n_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, n8n_url: e.target.value }))}
-              placeholder="https://sua-instancia.n8n.cloud/webhook/..."
               required
             />
           </div>

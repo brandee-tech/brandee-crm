@@ -14,17 +14,22 @@ interface AssigneeUser {
 }
 
 export const useClosers = () => {
+  console.log('🔧 [DEBUG] useClosers - Hook inicializado');
   const [closers, setClosers] = useState<AssigneeUser[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
 
   const fetchClosers = useCallback(async () => {
+    console.log('🚀 [DEBUG] useClosers - Iniciando fetchClosers...');
     try {
       if (!user) {
+        console.log('❌ [DEBUG] useClosers - Usuário não encontrado');
         setLoading(false);
         return;
       }
+
+      console.log('👤 [DEBUG] useClosers - Usuário logado:', user.id);
 
       // Primeiro obter o company_id e role do usuário atual
       const { data: currentUserProfile, error: profileError } = await supabase
@@ -38,8 +43,13 @@ export const useClosers = () => {
         .eq('id', user.id)
         .single();
 
+      console.log('🔍 [DEBUG] useClosers - Resultado busca perfil:', { 
+        data: currentUserProfile, 
+        error: profileError 
+      });
+
       if (profileError || !currentUserProfile?.company_id) {
-        console.error('Erro ao buscar company_id do usuário:', profileError);
+        console.error('❌ [DEBUG] useClosers - Erro ao buscar company_id do usuário:', profileError);
         setClosers([]);
         setLoading(false);
         return;
@@ -47,6 +57,7 @@ export const useClosers = () => {
 
       const currentUserRole = currentUserProfile.roles?.name;
       console.log('🔍 [DEBUG] useClosers - Role do usuário atual:', currentUserRole);
+      console.log('🏢 [DEBUG] useClosers - Company ID:', currentUserProfile.company_id);
 
       // Buscar todos os usuários da empresa que podem ser assignees
       const { data, error } = await supabase
@@ -110,20 +121,25 @@ export const useClosers = () => {
       });
       
       console.log('📋 [DEBUG] useClosers - Usuários filtrados:', filteredUsers);
+      console.log('📋 [DEBUG] useClosers - Total de usuários encontrados:', filteredUsers.length);
       setClosers(filteredUsers);
+      console.log('✅ [DEBUG] useClosers - Processo concluído com sucesso!');
     } catch (error) {
-      console.error('Erro ao buscar usuários para assignar:', error);
+      console.error('❌ [DEBUG] useClosers - Erro ao buscar usuários para assignar:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar a lista de usuários",
         variant: "destructive"
       });
+      setClosers([]);
     } finally {
       setLoading(false);
+      console.log('🏁 [DEBUG] useClosers - Finalizando fetchClosers...');
     }
   }, [user, toast]);
 
   useEffect(() => {
+    console.log('🔄 [DEBUG] useClosers - useEffect executado, chamando fetchClosers...');
     fetchClosers();
   }, [fetchClosers]);
 

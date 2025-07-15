@@ -80,7 +80,7 @@ export const AddScriptDialog = ({
     setFormData({
       title: '',
       content: '',
-      category: 'Vendas',
+      category: 'Treinamento',
       description: ''
     });
     setCreatedScriptId(null);
@@ -116,11 +116,10 @@ export const AddScriptDialog = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Vendas">Vendas</SelectItem>
-                  <SelectItem value="Atendimento">Atendimento</SelectItem>
-                  <SelectItem value="Objeções">Objeções</SelectItem>
-                  <SelectItem value="Fechamento">Fechamento</SelectItem>
-                  <SelectItem value="Follow-up">Follow-up</SelectItem>
+                  <SelectItem value="Treinamento">Treinamento</SelectItem>
+                  <SelectItem value="Script">Script</SelectItem>
+                  <SelectItem value="Relacionamento">Relacionamento</SelectItem>
+                  <SelectItem value="Documentos">Documentos</SelectItem>
                   <SelectItem value="Outros">Outros</SelectItem>
                 </SelectContent>
               </Select>

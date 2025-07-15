@@ -30,7 +30,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
   const [loading, setLoading] = useState(false);
 
   const { companies } = useAllCompanies();
-  const { roles } = useSaasRoles(formData.company_id);
+  const { roles } = useSaasRoles();
   const { toast } = useToast();
 
   useEffect(() => {

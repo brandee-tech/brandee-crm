@@ -47,7 +47,7 @@ export const InviteUserDialog = ({
   const {
     roles,
     loading: rolesLoading
-  } = useSaasRoles(companyId);
+  } = useSaasRoles();
   const form = useForm<InviteFormData>({
     resolver: zodResolver(inviteSchema),
     defaultValues: {

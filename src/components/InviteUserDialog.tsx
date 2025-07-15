@@ -66,8 +66,8 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
     try {
       const roleData = roles.find(role => role.id === selectedRole);
       
-      // Usando webhook N8N alternativo
-      const response = await fetch('https://n8n.levante.app.br/webhook/cf9d62ed-59cb-4cd3-a69e-c4a1e05de77d', {
+      // Usando a URL correta do webhook N8N
+      const response = await fetch('https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

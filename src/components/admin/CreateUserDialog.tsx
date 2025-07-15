@@ -80,18 +80,18 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         roleName = role?.name || 'Admin';
       }
 
-      // URL fixa do N8N
-      const n8nUrl = 'https://n8n.sparkassessoria.com/webhook-test/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
+      // URL do webhook
+      const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
 
-      console.log('Enviando dados para N8N:', {
+      console.log('Enviando dados para webhook:', {
         nome: formData.full_name,
         email: formData.email,
         senha: formData.password,
         cargo: roleName
       });
 
-      // Enviar para N8N
-      const response = await fetch(n8nUrl, {
+      // Enviar para webhook
+      const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,20 +105,20 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         }),
       });
 
-      console.log('Resposta do N8N:', response.status, response.statusText);
+      console.log('Resposta do webhook:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Erro na resposta do N8N:', errorText);
-        throw new Error(`Erro do servidor N8N: ${response.status} - ${response.statusText}`);
+        console.error('Erro na resposta do webhook:', errorText);
+        throw new Error(`Erro do servidor webhook: ${response.status} - ${response.statusText}`);
       }
 
       const responseData = await response.text();
-      console.log('Dados de resposta do N8N:', responseData);
+      console.log('Dados de resposta do webhook:', responseData);
 
       toast({
         title: "Dados enviados com sucesso!",
-        description: `Informações de ${formData.email} foram enviadas para N8N`
+        description: `Informações de ${formData.email} foram enviadas para o webhook`
       });
 
       onSuccess();
@@ -133,10 +133,10 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
         n8n_url: ''
       });
     } catch (error: any) {
-      console.error('Erro ao enviar dados para N8N:', error);
+      console.error('Erro ao enviar dados para webhook:', error);
       toast({
         title: "Erro ao enviar dados",
-        description: error.message || "Ocorreu um erro inesperado ao enviar para N8N",
+        description: error.message || "Ocorreu um erro inesperado ao enviar para webhook",
         variant: "destructive"
       });
     } finally {
@@ -254,7 +254,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
               Cancelar
             </Button>
             <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-              {loading ? 'Enviando...' : 'Enviar para N8N'}
+              {loading ? 'Enviando...' : 'Enviar para Webhook'}
             </Button>
           </div>
         </form>

@@ -30,6 +30,8 @@ interface MonthViewProps {
   scheduleBlocks: ScheduleBlock[];
   onAppointmentClick: (appointment: Appointment) => void;
   onMeetingClick: (meeting: Meeting) => void;
+  onBlockClick: (block: any) => void;
+  onDateDoubleClick: (date: Date) => void;
 }
 
 export const MonthView = ({
@@ -38,7 +40,9 @@ export const MonthView = ({
   meetings,
   scheduleBlocks,
   onAppointmentClick,
-  onMeetingClick
+  onMeetingClick,
+  onBlockClick,
+  onDateDoubleClick
 }: MonthViewProps) => {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -53,6 +57,12 @@ export const MonthView = ({
   const getMeetingsForDay = (date: Date) => {
     return meetings.filter(meeting => 
       isSameDay(new Date(meeting.date), date)
+    );
+  };
+
+  const getScheduleBlocksForDay = (date: Date) => {
+    return scheduleBlocks.filter(block => 
+      isSameDay(new Date(block.start_date), date)
     );
   };
 
@@ -93,8 +103,9 @@ export const MonthView = ({
       {/* Grid do calendário */}
       <div className="grid grid-cols-7 gap-1 md:gap-4">
         {daysInMonth.map((day) => {
-          const dayAppointments = getAppointmentsForDay(day);
-          const dayMeetings = getMeetingsForDay(day);
+              const dayAppointments = getAppointmentsForDay(day);
+              const dayMeetings = getMeetingsForDay(day);
+              const dayBlocks = getScheduleBlocksForDay(day);
           const isToday = isSameDay(day, new Date());
 
           return (

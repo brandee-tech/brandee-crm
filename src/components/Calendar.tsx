@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
 import { CalendarIcon } from 'lucide-react';
-import { addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } from 'date-fns';
+import { addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, format } from 'date-fns';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useMeetingsForCalendar } from '@/hooks/useMeetingsForCalendar';
 import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 import { ViewAppointmentDialog } from './ViewAppointmentDialog';
 import { ViewMeetingDialog } from './ViewMeetingDialog';
+import { ScheduleBlockDialog } from './ScheduleBlockDialog';
 import { CalendarHeader } from './calendar/CalendarHeader';
 import { DayView } from './calendar/DayView';
 import { WeekView } from './calendar/WeekView';
@@ -26,6 +27,9 @@ export const CalendarView = () => {
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
   const [viewMeetingDialogOpen, setViewMeetingDialogOpen] = useState(false);
+  const [scheduleBlockDialogOpen, setScheduleBlockDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [blockToEdit, setBlockToEdit] = useState<any>(null);
 
   const handlePrevious = () => {
     switch (viewMode) {
@@ -69,6 +73,21 @@ export const CalendarView = () => {
     setViewMeetingDialogOpen(true);
   };
 
+  const handleCreateBlock = (date?: Date) => {
+    setSelectedDate(date || currentDate);
+    setBlockToEdit(null);
+    setScheduleBlockDialogOpen(true);
+  };
+
+  const handleBlockClick = (block: any) => {
+    setBlockToEdit(block);
+    setScheduleBlockDialogOpen(true);
+  };
+
+  const handleDateDoubleClick = (date: Date) => {
+    handleCreateBlock(date);
+  };
+
   const loading = appointmentsLoading || meetingsLoading || blocksLoading;
 
   if (loading) {
@@ -90,6 +109,8 @@ export const CalendarView = () => {
             scheduleBlocks={scheduleBlocks}
             onAppointmentClick={handleAppointmentClick}
             onMeetingClick={handleMeetingClick}
+            onBlockClick={handleBlockClick}
+            onDateDoubleClick={handleDateDoubleClick}
           />
         );
       case 'week':
@@ -101,6 +122,8 @@ export const CalendarView = () => {
             scheduleBlocks={scheduleBlocks}
             onAppointmentClick={handleAppointmentClick}
             onMeetingClick={handleMeetingClick}
+            onBlockClick={handleBlockClick}
+            onDateDoubleClick={handleDateDoubleClick}
           />
         );
       case 'month':
@@ -112,6 +135,8 @@ export const CalendarView = () => {
             scheduleBlocks={scheduleBlocks}
             onAppointmentClick={handleAppointmentClick}
             onMeetingClick={handleMeetingClick}
+            onBlockClick={handleBlockClick}
+            onDateDoubleClick={handleDateDoubleClick}
           />
         );
       default:
@@ -128,6 +153,7 @@ export const CalendarView = () => {
         onPrevious={handlePrevious}
         onNext={handleNext}
         onToday={handleToday}
+        onCreateBlock={() => handleCreateBlock()}
       />
 
       {/* Legenda */}
@@ -166,6 +192,13 @@ export const CalendarView = () => {
         open={viewMeetingDialogOpen}
         onOpenChange={setViewMeetingDialogOpen}
         meeting={selectedMeeting}
+      />
+
+      <ScheduleBlockDialog
+        open={scheduleBlockDialogOpen}
+        onOpenChange={setScheduleBlockDialogOpen}
+        blockToEdit={blockToEdit}
+        selectedDate={selectedDate}
       />
     </div>
   );

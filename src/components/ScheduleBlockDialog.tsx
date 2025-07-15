@@ -22,14 +22,16 @@ import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentCompany } from '@/hooks/useCurrentCompany';
+import { format } from 'date-fns';
 
 interface ScheduleBlockDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   blockToEdit?: any;
+  selectedDate?: Date | null;
 }
 
-export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit }: ScheduleBlockDialogProps) => {
+export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit, selectedDate }: ScheduleBlockDialogProps) => {
   const { createBlock, updateBlock } = useScheduleBlocks();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -61,9 +63,11 @@ export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit }: Schedul
         reason: blockToEdit.reason || ''
       });
     } else {
+      // Pre-fill with selected date if available
+      const defaultDate = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
       setFormData({
         block_type: 'time_slot',
-        start_date: '',
+        start_date: defaultDate,
         end_date: '',
         start_time: '',
         end_time: '',
@@ -72,7 +76,7 @@ export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit }: Schedul
         reason: ''
       });
     }
-  }, [blockToEdit, open]);
+  }, [blockToEdit, open, selectedDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

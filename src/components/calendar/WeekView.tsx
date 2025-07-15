@@ -31,6 +31,8 @@ interface WeekViewProps {
   scheduleBlocks: ScheduleBlock[];
   onAppointmentClick: (appointment: Appointment) => void;
   onMeetingClick: (meeting: Meeting) => void;
+  onBlockClick: (block: any) => void;
+  onDateDoubleClick: (date: Date) => void;
 }
 
 export const WeekView = ({
@@ -39,7 +41,9 @@ export const WeekView = ({
   meetings,
   scheduleBlocks,
   onAppointmentClick,
-  onMeetingClick
+  onMeetingClick,
+  onBlockClick,
+  onDateDoubleClick
 }: WeekViewProps) => {
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -51,10 +55,14 @@ export const WeekView = ({
     const dayMeetings = meetings.filter(meeting => 
       isSameDay(new Date(meeting.date), date)
     );
+    const dayScheduleBlocks = scheduleBlocks.filter(block => 
+      isSameDay(new Date(block.start_date), date)
+    );
     
     return [
       ...dayAppointments.map(apt => ({ ...apt, type: 'appointment' as const })),
-      ...dayMeetings.map(meeting => ({ ...meeting, type: 'meeting' as const }))
+      ...dayMeetings.map(meeting => ({ ...meeting, type: 'meeting' as const })),
+      ...dayScheduleBlocks.map(block => ({ ...block, type: 'block' as const, time: block.start_time || '00:00' }))
     ].sort((a, b) => a.time.localeCompare(b.time));
   };
 
@@ -91,9 +99,10 @@ export const WeekView = ({
           return (
             <div
               key={day.toISOString()}
-              className={`min-h-[300px] ${
+              className={`min-h-[300px] cursor-pointer ${
                 isDayToday ? 'bg-blue-50 border border-blue-200 rounded-lg p-2' : ''
               }`}
+              onDoubleClick={() => onDateDoubleClick(day)}
             >
               <div className={`text-center pb-3 border-b mb-3 ${
                 isDayToday ? 'border-blue-300' : 'border-gray-200'
@@ -109,51 +118,71 @@ export const WeekView = ({
               </div>
 
               <div className="space-y-2">
-                {dayEvents.slice(0, 3).map((event) => (
-                  <div
-                    key={`${event.type}-${event.id}`}
-                    className={`p-2 rounded text-xs cursor-pointer hover:shadow-sm transition-shadow ${
-                      event.type === 'appointment' 
-                        ? 'bg-blue-100 text-blue-800 border border-blue-200' 
-                        : 'bg-purple-100 text-purple-800 border border-purple-200'
-                    }`}
-                    onClick={() => {
-                      if (event.type === 'appointment') {
-                        onAppointmentClick(event as Appointment);
-                      } else {
-                        onMeetingClick(event as Meeting);
-                      }
-                    }}
-                  >
-                    <div className="flex items-center gap-1 mb-1">
-                      <Clock className="w-3 h-3" />
-                      <span className="font-medium">{formatTime(event.time)}</span>
-                    </div>
-                    
-                    <div className="font-semibold truncate" title={event.title}>
-                      {event.type === 'appointment' ? (
-                        <User className="w-3 h-3 inline mr-1" />
-                      ) : (
-                        <Users className="w-3 h-3 inline mr-1" />
-                      )}
-                      {event.title}
-                    </div>
-                    
-                    {event.type === 'appointment' && (event as Appointment).leads && (
-                      <div className="text-xs text-gray-600 truncate" title={(event as Appointment).leads.name}>
-                        {(event as Appointment).leads.name}
+                {dayEvents.slice(0, 3).map((event) => {
+                  if (event.type === 'appointment') {
+                    return (
+                      <div
+                        key={`${event.type}-${event.id}`}
+                        className="p-2 rounded text-xs cursor-pointer hover:shadow-sm transition-shadow bg-blue-100 text-blue-800 border border-blue-200"
+                        onClick={() => onAppointmentClick(event as Appointment)}
+                      >
+                        <div className="flex items-center gap-1 mb-1">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-medium">{formatTime(event.time)}</span>
+                        </div>
+                        <div className="font-semibold truncate" title={event.title}>
+                          <User className="w-3 h-3 inline mr-1" />
+                          {event.title}
+                        </div>
+                        <Badge className={`${getAppointmentStatusColor(event.status)} text-xs mt-1`}>
+                          {event.status}
+                        </Badge>
                       </div>
-                    )}
-                    
-                    <Badge className={`${
-                      event.type === 'appointment' 
-                        ? getAppointmentStatusColor(event.status) 
-                        : getMeetingStatusColor(event.status)
-                    } text-xs mt-1`}>
-                      {event.status}
-                    </Badge>
-                  </div>
-                ))}
+                    );
+                  } else if (event.type === 'meeting') {
+                    return (
+                      <div
+                        key={`${event.type}-${event.id}`}
+                        className="p-2 rounded text-xs cursor-pointer hover:shadow-sm transition-shadow bg-purple-100 text-purple-800 border border-purple-200"
+                        onClick={() => onMeetingClick(event as Meeting)}
+                      >
+                        <div className="flex items-center gap-1 mb-1">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-medium">{formatTime(event.time)}</span>
+                        </div>
+                        <div className="font-semibold truncate" title={event.title}>
+                          <Users className="w-3 h-3 inline mr-1" />
+                          {event.title}
+                        </div>
+                        <Badge className={`${getMeetingStatusColor(event.status)} text-xs mt-1`}>
+                          {event.status}
+                        </Badge>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div
+                        key={`${event.type}-${event.id}`}
+                        className="p-2 rounded text-xs cursor-pointer hover:shadow-sm transition-shadow bg-red-100 text-red-800 border border-red-200"
+                        onClick={() => onBlockClick(event)}
+                        title={event.reason || 'Horário bloqueado'}
+                      >
+                        <div className="flex items-center gap-1 mb-1">
+                          <Clock className="w-3 h-3" />
+                          <span className="font-medium">
+                            {event.block_type === 'full_day' ? 'Dia todo' : formatTime(event.time)}
+                          </span>
+                        </div>
+                        <div className="font-semibold truncate">
+                          🚫 Bloqueado
+                        </div>
+                        <Badge className="bg-red-500 text-white text-xs mt-1">
+                          Bloqueado
+                        </Badge>
+                      </div>
+                    );
+                  }
+                })}
 
                 {dayEvents.length > 3 && (
                   <div className="text-xs text-gray-500 text-center">

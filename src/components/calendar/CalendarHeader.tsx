@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -11,6 +11,7 @@ interface CalendarHeaderProps {
   onPrevious: () => void;
   onNext: () => void;
   onToday: () => void;
+  onCreateBlock: () => void;
 }
 
 export const CalendarHeader = ({
@@ -19,7 +20,8 @@ export const CalendarHeader = ({
   onViewModeChange,
   onPrevious,
   onNext,
-  onToday
+  onToday,
+  onCreateBlock
 }: CalendarHeaderProps) => {
   const getDateTitle = () => {
     switch (viewMode) {
@@ -75,6 +77,16 @@ export const CalendarHeader = ({
 
         {/* Controles de navegação */}
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onCreateBlock}
+            className="text-xs"
+          >
+            <Clock className="w-3 h-3 mr-1" />
+            Bloquear Horário
+          </Button>
+          
           <Button
             variant="outline"
             size="sm"

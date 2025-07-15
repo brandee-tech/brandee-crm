@@ -4,6 +4,7 @@ import { CalendarIcon } from 'lucide-react';
 import { addDays, addWeeks, addMonths, subDays, subWeeks, subMonths } from 'date-fns';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useMeetingsForCalendar } from '@/hooks/useMeetingsForCalendar';
+import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 import { ViewAppointmentDialog } from './ViewAppointmentDialog';
 import { ViewMeetingDialog } from './ViewMeetingDialog';
 import { CalendarHeader } from './calendar/CalendarHeader';
@@ -18,6 +19,7 @@ type ViewMode = 'day' | 'week' | 'month';
 export const CalendarView = () => {
   const { appointments, loading: appointmentsLoading } = useAppointments();
   const { meetings, isLoading: meetingsLoading } = useMeetingsForCalendar();
+  const { scheduleBlocks, isLoading: blocksLoading } = useScheduleBlocks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -67,7 +69,7 @@ export const CalendarView = () => {
     setViewMeetingDialogOpen(true);
   };
 
-  const loading = appointmentsLoading || meetingsLoading;
+  const loading = appointmentsLoading || meetingsLoading || blocksLoading;
 
   if (loading) {
     return (
@@ -85,6 +87,7 @@ export const CalendarView = () => {
             currentDate={currentDate}
             appointments={appointments}
             meetings={meetings}
+            scheduleBlocks={scheduleBlocks}
             onAppointmentClick={handleAppointmentClick}
             onMeetingClick={handleMeetingClick}
           />
@@ -95,6 +98,7 @@ export const CalendarView = () => {
             currentDate={currentDate}
             appointments={appointments}
             meetings={meetings}
+            scheduleBlocks={scheduleBlocks}
             onAppointmentClick={handleAppointmentClick}
             onMeetingClick={handleMeetingClick}
           />
@@ -105,6 +109,7 @@ export const CalendarView = () => {
             currentDate={currentDate}
             appointments={appointments}
             meetings={meetings}
+            scheduleBlocks={scheduleBlocks}
             onAppointmentClick={handleAppointmentClick}
             onMeetingClick={handleMeetingClick}
           />
@@ -134,6 +139,10 @@ export const CalendarView = () => {
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-purple-500"></div>
           <span>Reuniões</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded bg-red-500"></div>
+          <span>Horários Bloqueados</span>
         </div>
       </div>
 

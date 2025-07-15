@@ -22,6 +22,7 @@ import {
   Shield,
   Package,
   Handshake,
+  Clock,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -43,6 +44,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'appointments', label: 'Agendamentos', icon: Calendar },
     { id: 'meetings', label: 'Reuniões', icon: Video },
     { id: 'calendar', label: 'Calendário', icon: CalendarDays },
+    { id: 'scheduleBlocks', label: 'Gerenciar Horários', icon: Clock },
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'scripts', label: 'Materiais', icon: FileText },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },

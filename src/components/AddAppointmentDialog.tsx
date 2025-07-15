@@ -25,6 +25,7 @@ import { useClosers } from '@/hooks/useClosers';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 
 interface AddAppointmentDialogProps {
   open: boolean;
@@ -38,6 +39,7 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
   const { user } = useAuth();
   const { toast } = useToast();
   const { hasPermission, userPermissions } = usePermissions();
+  const { isTimeBlocked } = useScheduleBlocks();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -94,6 +96,19 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
         variant: "destructive"
       });
       return;
+    }
+
+    // Verificar se o horário está bloqueado
+    if (formData.date && formData.time && formData.assigned_to) {
+      const isBlocked = isTimeBlocked(formData.date, formData.time, formData.assigned_to);
+      if (isBlocked) {
+        toast({
+          title: "Horário Indisponível",
+          description: "O horário selecionado está bloqueado para este usuário. Escolha outro horário.",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     setIsSubmitting(true);

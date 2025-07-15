@@ -6,10 +6,28 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from '
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
 
+interface ScheduleBlock {
+  id: string;
+  user_id: string;
+  company_id: string;
+  block_type: 'time_slot' | 'full_day';
+  start_date: string;
+  end_date?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  is_recurring: boolean;
+  recurring_pattern: any;
+  reason?: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface MonthViewProps {
   currentDate: Date;
   appointments: Appointment[];
   meetings: Meeting[];
+  scheduleBlocks: ScheduleBlock[];
   onAppointmentClick: (appointment: Appointment) => void;
   onMeetingClick: (meeting: Meeting) => void;
 }
@@ -18,6 +36,7 @@ export const MonthView = ({
   currentDate,
   appointments,
   meetings,
+  scheduleBlocks,
   onAppointmentClick,
   onMeetingClick
 }: MonthViewProps) => {

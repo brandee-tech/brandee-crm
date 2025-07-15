@@ -63,6 +63,9 @@ const Index = () => {
         return <Meetings />;
       case 'calendar':
         return <CalendarView />;
+      case 'scheduleBlocks':
+        const { ScheduleBlockManagement } = await import('@/components/ScheduleBlockManagement');
+        return <ScheduleBlockManagement />;
       case 'tasks':
         return <Tasks />;
       case 'scripts':

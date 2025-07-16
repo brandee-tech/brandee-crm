@@ -5,6 +5,7 @@ import { Clock, User, Users, Shield } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns';
 import { Appointment } from '@/types/appointment';
 import { Meeting } from '@/types/meeting';
+import { compareLocalDateString } from '@/lib/date-utils';
 
 interface ScheduleBlock {
   id: string;
@@ -49,23 +50,20 @@ export const MonthView = ({
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const getAppointmentsForDay = (date: Date) => {
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return appointments.filter(appointment => 
-      appointment.date === dateStr
+      compareLocalDateString(appointment.date, date)
     );
   };
 
   const getMeetingsForDay = (date: Date) => {
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return meetings.filter(meeting => 
-      meeting.date === dateStr
+      compareLocalDateString(meeting.date, date)
     );
   };
 
   const getScheduleBlocksForDay = (date: Date) => {
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return scheduleBlocks.filter(block => 
-      block.start_date === dateStr
+      compareLocalDateString(block.start_date, date)
     );
   };
 

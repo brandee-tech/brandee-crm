@@ -18,10 +18,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { EnhancedDateTimePicker } from '@/components/ui/enhanced-date-time-picker';
 import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentCompany } from '@/hooks/useCurrentCompany';
+import { formatDateToLocal, parseDateFromLocal, formatTimeForInput } from '@/lib/date-utils';
 
 interface ScheduleBlockDialogProps {
   open: boolean;
@@ -39,8 +41,8 @@ export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit, selectedD
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     block_type: 'time_slot' as 'time_slot' | 'full_day',
-    start_date: '',
-    end_date: '',
+    start_date: null as Date | null,
+    end_date: null as Date | null,
     start_time: '',
     end_time: '',
     is_recurring: false,
@@ -53,22 +55,19 @@ export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit, selectedD
     if (blockToEdit) {
       setFormData({
         block_type: blockToEdit.block_type || 'time_slot',
-        start_date: blockToEdit.start_date || '',
-        end_date: blockToEdit.end_date || '',
-        start_time: blockToEdit.start_time || '',
-        end_time: blockToEdit.end_time || '',
+        start_date: blockToEdit.start_date ? parseDateFromLocal(blockToEdit.start_date) : null,
+        end_date: blockToEdit.end_date ? parseDateFromLocal(blockToEdit.end_date) : null,
+        start_time: formatTimeForInput(blockToEdit.start_time) || '',
+        end_time: formatTimeForInput(blockToEdit.end_time) || '',
         is_recurring: blockToEdit.is_recurring || false,
         recurring_pattern: blockToEdit.recurring_pattern || {},
         reason: blockToEdit.reason || ''
       });
     } else {
-      // Pre-fill with selected date if available
-      const defaultDate = selectedDate ? 
-        `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` : '';
       setFormData({
         block_type: 'time_slot',
-        start_date: defaultDate,
-        end_date: '',
+        start_date: selectedDate || null,
+        end_date: null,
         start_time: '',
         end_time: '',
         is_recurring: false,
@@ -127,8 +126,8 @@ export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit, selectedD
         user_id: user.id,
         company_id: company.id,
         block_type: formData.block_type,
-        start_date: formData.start_date,
-        end_date: formData.end_date || null,
+        start_date: formData.start_date ? formatDateToLocal(formData.start_date) : '',
+        end_date: formData.end_date ? formatDateToLocal(formData.end_date) : null,
         start_time: formData.block_type === 'time_slot' ? formData.start_time : null,
         end_time: formData.block_type === 'time_slot' ? formData.end_time : null,
         is_recurring: formData.is_recurring,
@@ -192,50 +191,71 @@ export const ScheduleBlockDialog = ({ open, onOpenChange, blockToEdit, selectedD
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="start_date">Data de Início *</Label>
-              <Input
-                id="start_date"
-                type="date"
-                value={formData.start_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
-                required
+              <Label>Data de Início *</Label>
+              <EnhancedDateTimePicker
+                selected={formData.start_date}
+                onSelect={(date) => setFormData(prev => ({ ...prev, start_date: date }))}
+                placeholder="Selecionar data de início"
+                className="w-full"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="end_date">Data de Fim</Label>
-              <Input
-                id="end_date"
-                type="date"
-                value={formData.end_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
-                min={formData.start_date}
+              <Label>Data de Fim</Label>
+              <EnhancedDateTimePicker
+                selected={formData.end_date}
+                onSelect={(date) => setFormData(prev => ({ ...prev, end_date: date }))}
+                placeholder="Selecionar data de fim (opcional)"
+                className="w-full"
               />
             </div>
           </div>
 
           {formData.block_type === 'time_slot' && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start_time">Horário de Início *</Label>
-                <Input
-                  id="start_time"
-                  type="time"
-                  value={formData.start_time}
-                  onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
-                  required
-                />
-              </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="start_time">Horário de Início *</Label>
+                  <Input
+                    id="start_time"
+                    type="time"
+                    value={formData.start_time}
+                    onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
+                    required
+                    className="w-full"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="end_time">Horário de Fim *</Label>
-                <Input
-                  id="end_time"
-                  type="time"
-                  value={formData.end_time}
-                  onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
-                  required
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="end_time">Horário de Fim *</Label>
+                  <Input
+                    id="end_time"
+                    type="time"
+                    value={formData.end_time}
+                    onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
+                    required
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                💡 Dica: Use os botões de horário comum para seleção rápida
+              </div>
+              
+              <div className="grid grid-cols-6 gap-2">
+                {['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'].map((time) => (
+                  <Button
+                    key={`start-${time}`}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => setFormData(prev => ({ ...prev, start_time: time }))}
+                  >
+                    {time}
+                  </Button>
+                ))}
               </div>
             </div>
           )}

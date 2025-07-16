@@ -33,10 +33,10 @@ export const applyRoleBasedLeadFilter = async (
 
     // Aplicar filtro baseado no role
     if (userRole === 'Closer') {
-      // Closers veem apenas leads atribuídos a eles
+      // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
       return query
         .eq('company_id', companyId)
-        .eq('assigned_to', userId);
+        .or(`assigned_to.eq.${userId},assigned_to.is.null`);
     } else {
       // Admins, SDRs e outros roles veem todos os leads da empresa
       return query.eq('company_id', companyId);
@@ -61,8 +61,8 @@ export const filterLeadsByRole = (
   userRole: string | null
 ): any[] => {
   if (userRole === 'Closer') {
-    // Closers veem apenas leads atribuídos a eles
-    return leads.filter(lead => lead.assigned_to === userId);
+    // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
+    return leads.filter(lead => lead.assigned_to === userId || lead.assigned_to === null);
   }
   
   // Admins, SDRs e outros roles veem todos os leads

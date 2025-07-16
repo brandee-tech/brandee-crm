@@ -97,6 +97,6 @@ export const useCurrentUser = () => {
     refetch: fetchUserInfo,
     hasCompany: userInfo?.has_company || false,
     companyId: userInfo?.company_id,
-    isAdmin: userInfo?.role_name === 'Admin'
+    isAdmin: userInfo?.role_name === 'Admin' || userInfo?.role_name === 'Administrador'
   };
 };

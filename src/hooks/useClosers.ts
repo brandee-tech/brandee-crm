@@ -92,12 +92,12 @@ export const useClosers = () => {
       // Definir roles válidos baseado no role do usuário atual
       let validRoles: string[];
       if (currentUserRole === 'SDR') {
-        // SDRs só podem atribuir para Closers, Admins e Gerentes
-        validRoles = ['Admin', 'Gerente', 'Closer'];
+        // SDRs podem atribuir para Closers, Admins, Gerentes e outros SDRs
+        validRoles = ['Administrador', 'Admin', 'Gerente', 'Closer', 'SDR'];
         console.log('📋 [DEBUG] useClosers - SDR detectado, mostrando apenas:', validRoles);
       } else {
         // Outros roles podem ver todos os usuários aptos
-        validRoles = ['Admin', 'Gerente', 'Closer', 'Vendedor', 'Coordenador'];
+        validRoles = ['Administrador', 'Admin', 'Gerente', 'Closer', 'SDR', 'Vendedor', 'Coordenador'];
         console.log('📋 [DEBUG] useClosers - Usuário não-SDR, mostrando:', validRoles);
       }
 

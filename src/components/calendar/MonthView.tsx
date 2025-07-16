@@ -49,20 +49,23 @@ export const MonthView = ({
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const getAppointmentsForDay = (date: Date) => {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return appointments.filter(appointment => 
-      isSameDay(new Date(appointment.date), date)
+      appointment.date === dateStr
     );
   };
 
   const getMeetingsForDay = (date: Date) => {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return meetings.filter(meeting => 
-      isSameDay(new Date(meeting.date), date)
+      meeting.date === dateStr
     );
   };
 
   const getScheduleBlocksForDay = (date: Date) => {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     return scheduleBlocks.filter(block => 
-      isSameDay(new Date(block.start_date), date)
+      block.start_date === dateStr
     );
   };
 

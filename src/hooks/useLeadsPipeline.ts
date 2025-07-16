@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
-import { applyRoleBasedLeadFilter } from '@/lib/lead-filters';
 
 export interface PipelineFilterState {
   searchTerm: string;
@@ -73,7 +72,7 @@ export const useLeadsPipeline = () => {
         return;
       }
 
-      // Construir query base
+      // Construir query base para buscar todos os leads da empresa
       let query = supabase
         .from('leads')
         .select(`
@@ -87,10 +86,8 @@ export const useLeadsPipeline = () => {
             id, date, time, status, title,
             created_at
           )
-        `);
-
-      // Aplicar filtro baseado no role do usuário
-      query = await applyRoleBasedLeadFilter(query, user.id, profileData.company_id);
+        `)
+        .eq('company_id', profileData.company_id);
 
       // Aplicar filtros
       if (filters.searchTerm) {
@@ -134,7 +131,34 @@ export const useLeadsPipeline = () => {
         };
       });
       
-      setLeads(processedLeads);
+      console.log('Pipeline leads before filtering:', processedLeads.length);
+      
+      // Aplicar filtro por role após buscar os dados
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          roles!profiles_role_id_fkey(name)
+        `)
+        .eq('id', user.id)
+        .single();
+
+      const userRole = userProfile?.roles?.name;
+      console.log('Pipeline user role for filtering:', userRole);
+
+      let filteredLeads = processedLeads;
+      if (userRole === 'Closer') {
+        // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
+        filteredLeads = processedLeads.filter(lead => 
+          lead.assigned_to === user.id || lead.assigned_to === null
+        );
+        console.log('Pipeline filtering for Closer - showing assigned + unassigned leads:', filteredLeads.length);
+      } else {
+        // Admins, SDRs e outros roles veem todos os leads da empresa
+        console.log('Pipeline user is Admin/SDR - showing all company leads:', filteredLeads.length);
+      }
+      
+      setLeads(filteredLeads);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);
       toast({

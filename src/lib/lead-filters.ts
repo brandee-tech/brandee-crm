@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Apply role-based filtering to a Supabase query for leads
+ * Apply role-based filtering to a Supabase query for leads (DEPRECATED - use filterLeadsByRole instead)
  * @param query - The base Supabase query builder
  * @param userId - The current user's ID
  * @param companyId - The user's company ID
@@ -12,40 +12,9 @@ export const applyRoleBasedLeadFilter = async (
   userId: string,
   companyId: string
 ) => {
-  try {
-    // Buscar o role do usuário
-    const { data: userProfile, error: userError } = await supabase
-      .from('profiles')
-      .select(`
-        id,
-        roles(name)
-      `)
-      .eq('id', userId)
-      .single();
-
-    if (userError) {
-      console.error('Error fetching user role:', userError);
-      return query.eq('company_id', companyId);
-    }
-
-    const userRole = userProfile?.roles?.name;
-    console.log('Applying role-based filter for role:', userRole);
-
-    // Aplicar filtro baseado no role
-    if (userRole === 'Closer') {
-      // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
-      return query
-        .eq('company_id', companyId)
-        .or(`assigned_to.eq.${userId},assigned_to.is.null`);
-    } else {
-      // Admins, SDRs e outros roles veem todos os leads da empresa
-      return query.eq('company_id', companyId);
-    }
-  } catch (error) {
-    console.error('Error applying role-based filter:', error);
-    // Em caso de erro, retornar query básica por empresa
-    return query.eq('company_id', companyId);
-  }
+  console.warn('applyRoleBasedLeadFilter is deprecated, use filterLeadsByRole instead');
+  // Simplificar - apenas aplicar filtro por empresa
+  return query.eq('company_id', companyId);
 };
 
 /**

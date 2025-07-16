@@ -110,25 +110,8 @@ export const useLeads = () => {
 
       console.log('User company_id:', profileData.company_id);
 
-      // Buscar leads baseado no role do usuário
-      const { data: userProfile, error: userError } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          roles(name)
-        `)
-        .eq('id', user.id)
-        .single();
-
-      if (userError) {
-        console.error('Error fetching user role:', userError);
-        throw userError;
-      }
-
-      const userRole = userProfile?.roles?.name;
-      console.log('User role:', userRole);
-
-      let query = supabase
+      // Buscar todos os leads da empresa primeiro
+      const { data, error } = await supabase
         .from('leads')
         .select(`
           *,
@@ -138,19 +121,8 @@ export const useLeads = () => {
           partners(id, name),
           assigned_user:profiles!leads_assigned_to_fkey(id, full_name)
         `)
-        .eq('company_id', profileData.company_id);
-
-      // Aplicar filtro baseado no role
-      if (userRole === 'Closer') {
-        // Closers veem apenas leads atribuídos a eles
-        query = query.eq('assigned_to', user.id);
-        console.log('Filtering leads for Closer - showing only assigned leads');
-      } else {
-        // Admins, SDRs e outros roles veem todos os leads da empresa
-        console.log('User is Admin/SDR - showing all company leads');
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
+        .eq('company_id', profileData.company_id)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching leads:', error);
@@ -165,8 +137,34 @@ export const useLeads = () => {
         assigned_user: lead.assigned_user || null
       }));
       
-      console.log('Fetched leads for company:', processedLeads.length, 'leads');
-      setLeads(processedLeads);
+      console.log('Fetched leads for company before filtering:', processedLeads.length, 'leads');
+      
+      // Aplicar filtro por role após buscar os dados (mais simples e confiável)
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          roles!profiles_role_id_fkey(name)
+        `)
+        .eq('id', user.id)
+        .single();
+
+      const userRole = userProfile?.roles?.name;
+      console.log('User role for filtering:', userRole);
+
+      let filteredLeads = processedLeads;
+      if (userRole === 'Closer') {
+        // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
+        filteredLeads = processedLeads.filter(lead => 
+          lead.assigned_to === user.id || lead.assigned_to === null
+        );
+        console.log('Filtering for Closer - showing assigned + unassigned leads:', filteredLeads.length);
+      } else {
+        // Admins, SDRs e outros roles veem todos os leads da empresa
+        console.log('User is Admin/SDR - showing all company leads:', filteredLeads.length);
+      }
+      
+      setLeads(filteredLeads);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);
       toast({

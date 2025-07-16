@@ -93,18 +93,22 @@ export const useDashboard = () => {
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
 
-      // Fetch current counts
+      console.log('Dashboard filtering by company_id:', profile.company_id);
+      
+      // Fetch current counts (filtered by company)
       const [
         leadsResult,
         contactsResult,
         tasksResult,
         appointmentsResult,
       ] = await Promise.all([
-        supabase.from('leads').select('*', { count: 'exact' }),
-        supabase.from('contacts').select('*', { count: 'exact' }),
-        supabase.from('tasks').select('*', { count: 'exact' }),
-        supabase.from('appointments').select('*', { count: 'exact' }),
+        supabase.from('leads').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
+        supabase.from('contacts').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
+        supabase.from('tasks').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
+        supabase.from('appointments').select('*', { count: 'exact' }).eq('company_id', profile.company_id),
       ]);
+      
+      console.log('Dashboard counts - Leads:', leadsResult.count, 'Contacts:', contactsResult.count);
 
       // Fetch data for current month comparison
       const [
@@ -113,10 +117,10 @@ export const useDashboard = () => {
         currentTasksResult,
         currentAppointmentsResult,
       ] = await Promise.all([
-        supabase.from('leads').select('*', { count: 'exact' }).gte('created_at', currentMonthStart.toISOString()),
-        supabase.from('contacts').select('*', { count: 'exact' }).gte('created_at', currentMonthStart.toISOString()),
-        supabase.from('tasks').select('*', { count: 'exact' }).gte('created_at', currentMonthStart.toISOString()),
-        supabase.from('appointments').select('*', { count: 'exact' }).gte('created_at', currentMonthStart.toISOString()),
+        supabase.from('leads').select('*', { count: 'exact' }).eq('company_id', profile.company_id).gte('created_at', currentMonthStart.toISOString()),
+        supabase.from('contacts').select('*', { count: 'exact' }).eq('company_id', profile.company_id).gte('created_at', currentMonthStart.toISOString()),
+        supabase.from('tasks').select('*', { count: 'exact' }).eq('company_id', profile.company_id).gte('created_at', currentMonthStart.toISOString()),
+        supabase.from('appointments').select('*', { count: 'exact' }).eq('company_id', profile.company_id).gte('created_at', currentMonthStart.toISOString()),
       ]);
 
       // Fetch data for last month comparison
@@ -127,15 +131,19 @@ export const useDashboard = () => {
         lastAppointmentsResult,
       ] = await Promise.all([
         supabase.from('leads').select('*', { count: 'exact' })
+          .eq('company_id', profile.company_id)
           .gte('created_at', lastMonthStart.toISOString())
           .lte('created_at', lastMonthEnd.toISOString()),
         supabase.from('contacts').select('*', { count: 'exact' })
+          .eq('company_id', profile.company_id)
           .gte('created_at', lastMonthStart.toISOString())
           .lte('created_at', lastMonthEnd.toISOString()),
         supabase.from('tasks').select('*', { count: 'exact' })
+          .eq('company_id', profile.company_id)
           .gte('created_at', lastMonthStart.toISOString())
           .lte('created_at', lastMonthEnd.toISOString()),
         supabase.from('appointments').select('*', { count: 'exact' })
+          .eq('company_id', profile.company_id)
           .gte('created_at', lastMonthStart.toISOString())
           .lte('created_at', lastMonthEnd.toISOString()),
       ]);
@@ -147,6 +155,7 @@ export const useDashboard = () => {
           *,
           creator:profiles!leads_created_by_fkey (full_name)
         `)
+        .eq('company_id', profile.company_id)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -163,6 +172,7 @@ export const useDashboard = () => {
           leads (name, phone),
           assigned_closer:profiles!appointments_assigned_to_fkey (full_name)
         `)
+        .eq('company_id', profile.company_id)
         .gte('date', tomorrow.toISOString().split('T')[0])
         .lte('date', nextWeek.toISOString().split('T')[0])
         .order('date', { ascending: true })
@@ -194,6 +204,7 @@ export const useDashboard = () => {
           leads (name),
           assigned_closer:profiles!appointments_assigned_to_fkey (full_name)
         `)
+        .eq('company_id', profile.company_id)
         .gte('created_at', recentDate.toISOString())
         .order('created_at', { ascending: false })
         .limit(3);
@@ -212,10 +223,10 @@ export const useDashboard = () => {
       recentActivities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
       recentActivities.splice(5); // Manter apenas os 5 mais recentes
 
-      // Fetch detailed data for statistics
-      const { data: allLeads } = await supabase.from('leads').select('*');
-      const { data: allTasks } = await supabase.from('tasks').select('status');
-      const { data: allAppointments } = await supabase.from('appointments').select('status');
+      // Fetch detailed data for statistics (filtered by company)
+      const { data: allLeads } = await supabase.from('leads').select('*').eq('company_id', profile.company_id);
+      const { data: allTasks } = await supabase.from('tasks').select('status').eq('company_id', profile.company_id);
+      const { data: allAppointments } = await supabase.from('appointments').select('status').eq('company_id', profile.company_id);
 
       // Calculate statistics by status
       const tasksByStatus = allTasks?.reduce((acc, task) => {

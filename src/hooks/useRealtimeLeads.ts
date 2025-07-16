@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { filterLeadsByRole } from '@/lib/lead-filters';
 
 interface Lead {
   id: string;
@@ -24,7 +22,6 @@ export const useRealtimeLeads = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { userInfo } = useCurrentUser();
 
   const fetchLeads = async () => {
     if (!user) {
@@ -53,8 +50,33 @@ export const useRealtimeLeads = () => {
 
       if (error) throw error;
       
-      // Aplicar filtro baseado no role do usuário
-      const filteredLeads = filterLeadsByRole(data || [], user.id, userInfo?.role_name || null);
+      console.log('Realtime leads before filtering:', (data || []).length);
+      
+      // Aplicar filtro baseado no role do usuário (buscar role corretamente)
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          roles!profiles_role_id_fkey(name)
+        `)
+        .eq('id', user.id)
+        .single();
+
+      const userRole = userProfile?.roles?.name;
+      console.log('Realtime user role for filtering:', userRole);
+
+      let filteredLeads = data || [];
+      if (userRole === 'Closer') {
+        // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
+        filteredLeads = (data || []).filter(lead => 
+          lead.assigned_to === user.id || lead.assigned_to === null
+        );
+        console.log('Realtime filtering for Closer - showing assigned + unassigned leads:', filteredLeads.length);
+      } else {
+        // Admins, SDRs e outros roles veem todos os leads da empresa
+        console.log('Realtime user is Admin/SDR - showing all company leads:', filteredLeads.length);
+      }
+      
       setLeads(filteredLeads);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);

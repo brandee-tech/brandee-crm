@@ -95,10 +95,14 @@ export const useClosers = () => {
         // SDRs podem atribuir para Closers, Admins, Gerentes e outros SDRs
         validRoles = ['Administrador', 'Admin', 'Gerente', 'Closer', 'SDR'];
         console.log('📋 [DEBUG] useClosers - SDR detectado, mostrando apenas:', validRoles);
+      } else if (currentUserRole === 'Closer') {
+        // Closers podem atribuir para outros Closers, Admins e Gerentes
+        validRoles = ['Administrador', 'Admin', 'Gerente', 'Closer'];
+        console.log('📋 [DEBUG] useClosers - Closer detectado, mostrando apenas:', validRoles);
       } else {
         // Outros roles podem ver todos os usuários aptos
         validRoles = ['Administrador', 'Admin', 'Gerente', 'Closer', 'SDR', 'Vendedor', 'Coordenador'];
-        console.log('📋 [DEBUG] useClosers - Usuário não-SDR, mostrando:', validRoles);
+        console.log('📋 [DEBUG] useClosers - Usuário não-SDR/não-Closer, mostrando:', validRoles);
       }
 
       const filteredUsers = (data || []).filter(user => {

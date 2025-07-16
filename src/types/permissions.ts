@@ -80,6 +80,16 @@ export const DEFAULT_PERMISSIONS: Record<string, RolePermissions> = {
     reports: { view: true, export: true, advanced: true },
     admin: { manageUsers: true, manageRoles: true, companySettings: true, systemSettings: true }
   },
+  'Administrador': {
+    leads: { view: true, create: true, edit: true, delete: true, assign: true, export: true, import: true },
+    appointments: { view: true, create: true, edit: true, delete: true, viewAll: true },
+    meetings: { view: true, create: true, edit: true, delete: true, moderate: true },
+    tasks: { view: true, create: true, edit: true, delete: true, assign: true },
+    contacts: { view: true, create: true, edit: true, delete: true },
+    scripts: { view: true, create: true, edit: true, delete: true },
+    reports: { view: true, export: true, advanced: true },
+    admin: { manageUsers: true, manageRoles: true, companySettings: true, systemSettings: true }
+  },
   'SDR': {
     leads: { view: true, create: true, edit: true, delete: false, assign: false, export: true, import: true },
     appointments: { view: true, create: true, edit: true, delete: false, viewAll: false },

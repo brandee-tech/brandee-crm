@@ -15,17 +15,22 @@ import { ActivitiesChart } from '@/components/charts/ActivitiesChart';
 import { MeetingsReportChart } from '@/components/charts/MeetingsReportChart';
 import { AppointmentsReportChart } from '@/components/charts/AppointmentsReportChart';
 import { PeriodSelector } from '@/components/PeriodSelector';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { Filter } from 'lucide-react';
 
 export const Reports = () => {
-  const { reportData, isLoading } = useReports();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('monthly');
   const [selectedCloser, setSelectedCloser] = useState<string>('');
+  const [selectedGeneralCloser, setSelectedGeneralCloser] = useState<string>('');
   const [periodDays, setPeriodDays] = useState(30);
+  
+  const { reportData, isLoading } = useReports(selectedGeneralCloser || undefined);
   
   const { reportData: meetingsAppointmentsData, isLoading: isLoadingMeetingsAppointments } = useMeetingsAndAppointmentsReports(selectedPeriod);
   const { closers, loading: closersLoading } = useClosers();
   const { reportData: closerReportData, isLoading: isLoadingCloserReport } = useCloserReports(selectedCloser, periodDays);
   const { comparisonData, isLoading: isLoadingComparison } = useClosersComparison(periodDays);
+  const { userInfo } = useCurrentUser();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -76,7 +81,10 @@ export const Reports = () => {
     };
     
     const csvContent = convertToCSV(reportData.salesByMonth, headers);
-    downloadCSV(csvContent, 'vendas-por-periodo');
+    const filename = selectedGeneralCloser 
+      ? `vendas-por-periodo-${closers.find(c => c.id === selectedGeneralCloser)?.full_name?.replace(/\s+/g, '-').toLowerCase()}`
+      : 'vendas-por-periodo';
+    downloadCSV(csvContent, filename);
   };
 
   const exportMeetingsData = () => {
@@ -187,7 +195,10 @@ export const Reports = () => {
     };
     
     const csvContent = convertToCSV(kpiData, headers);
-    downloadCSV(csvContent, 'kpis-gerais');
+    const filename = selectedGeneralCloser 
+      ? `kpis-gerais-${closers.find(c => c.id === selectedGeneralCloser)?.full_name?.replace(/\s+/g, '-').toLowerCase()}`
+      : 'kpis-gerais';
+    downloadCSV(csvContent, filename);
   };
 
   const exportActivitiesData = () => {
@@ -445,6 +456,36 @@ export const Reports = () => {
         </TabsList>
 
         <TabsContent value="geral" className="space-y-6">
+          {/* Filtro por Closer - Apenas para administradores */}
+          {userInfo?.role_name === 'Admin' && (
+            <Card className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium">Filtrar por closer:</span>
+                </div>
+                <Select value={selectedGeneralCloser} onValueChange={setSelectedGeneralCloser}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Todos os closers" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos os closers</SelectItem>
+                    {closers.map((closer) => (
+                      <SelectItem key={closer.id} value={closer.id}>
+                        {closer.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedGeneralCloser && (
+                  <span className="text-sm text-gray-500">
+                    Mostrando dados de: {closers.find(c => c.id === selectedGeneralCloser)?.full_name}
+                  </span>
+                )}
+              </div>
+            </Card>
+          )}
+
           {/* KPIs Principais de Vendas */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {kpis.map((kpi, index) => (

@@ -20,11 +20,11 @@ export interface ReportData {
   activitiesByMonth: { month: string; tasks: number; appointments: number }[];
 }
 
-export const useReports = () => {
+export const useReports = (closerId?: string) => {
   const { userInfo, loading: userLoading } = useCurrentUser();
 
   const { data: reportData, isLoading, error } = useQuery({
-    queryKey: ['reports', userInfo?.company_id],
+    queryKey: ['reports', userInfo?.company_id, closerId],
     queryFn: async (): Promise<ReportData> => {
       if (!userInfo?.company_id) throw new Error('Usuário sem empresa');
 
@@ -34,31 +34,53 @@ export const useReports = () => {
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
       const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
-      // Buscar todos os leads da empresa
-      const { data: allLeads } = await supabase
+      // Buscar todos os leads da empresa (filtrado por closer se fornecido)
+      let allLeadsQuery = supabase
         .from('leads')
         .select('*')
         .eq('company_id', userInfo.company_id);
 
+      if (closerId) {
+        allLeadsQuery = allLeadsQuery.eq('assigned_to', closerId);
+      }
+
+      const { data: allLeads } = await allLeadsQuery;
+
       // Buscar leads do mês atual e anterior para comparação
+      let currentMonthQuery = supabase.from('leads').select('*')
+        .eq('company_id', userInfo.company_id)
+        .gte('created_at', currentMonth.toISOString());
+      let lastMonthQuery = supabase.from('leads').select('*')
+        .eq('company_id', userInfo.company_id)
+        .gte('created_at', lastMonth.toISOString())
+        .lte('created_at', lastMonthEnd.toISOString());
+
+      if (closerId) {
+        currentMonthQuery = currentMonthQuery.eq('assigned_to', closerId);
+        lastMonthQuery = lastMonthQuery.eq('assigned_to', closerId);
+      }
+
       const [currentMonthLeads, lastMonthLeads] = await Promise.all([
-        supabase.from('leads').select('*')
-          .eq('company_id', userInfo.company_id)
-          .gte('created_at', currentMonth.toISOString()),
-        supabase.from('leads').select('*')
-          .eq('company_id', userInfo.company_id)
-          .gte('created_at', lastMonth.toISOString())
-          .lte('created_at', lastMonthEnd.toISOString())
+        currentMonthQuery,
+        lastMonthQuery
       ]);
 
       // Buscar tarefas e agendamentos dos últimos 6 meses da empresa
+      let tasksQuery = supabase.from('tasks').select('*')
+        .eq('company_id', userInfo.company_id)
+        .gte('created_at', sixMonthsAgo.toISOString());
+      let appointmentsQuery = supabase.from('appointments').select('*')
+        .eq('company_id', userInfo.company_id)
+        .gte('created_at', sixMonthsAgo.toISOString());
+
+      if (closerId) {
+        tasksQuery = tasksQuery.eq('assigned_to', closerId);
+        appointmentsQuery = appointmentsQuery.eq('assigned_to', closerId);
+      }
+
       const [tasksData, appointmentsData] = await Promise.all([
-        supabase.from('tasks').select('*')
-          .eq('company_id', userInfo.company_id)
-          .gte('created_at', sixMonthsAgo.toISOString()),
-        supabase.from('appointments').select('*')
-          .eq('company_id', userInfo.company_id)
-          .gte('created_at', sixMonthsAgo.toISOString())
+        tasksQuery,
+        appointmentsQuery
       ]);
 
       // Calcular vendas por mês (últimos 6 meses) - agora baseado apenas na quantidade

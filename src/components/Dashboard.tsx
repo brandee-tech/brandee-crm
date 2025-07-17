@@ -1,14 +1,17 @@
 
+import { useState } from 'react';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { WelcomeMessage } from '@/components/WelcomeMessage';
 import { useRevenue } from '@/hooks/useRevenue';
 import { GoalsWidget } from '@/components/dashboard/GoalsWidget';
+import { useClosers } from '@/hooks/useClosers';
 
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target, User, MessageSquare, DollarSign, TrendingDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Users, Calendar, CheckCircle, TrendingUp, Clock, Target, User, MessageSquare, DollarSign, TrendingDown, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,8 +19,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 export const Dashboard = () => {
   const { user } = useAuth();
   const { userInfo } = useCurrentUser();
-  const { stats, loading } = useDashboard();
+  const [selectedCloser, setSelectedCloser] = useState<string>('');
+  const { stats, loading } = useDashboard(selectedCloser || undefined);
   const { metrics: revenueMetrics, loading: revenueLoading } = useRevenue();
+  const { closers, loading: closersLoading } = useClosers();
 
   // Se não há dados ainda (empresa nova), mostrar mensagem de boas-vindas
   const isNewCompany = stats.totalLeads === 0 && stats.totalAppointments === 0 && stats.totalTasks === 0;
@@ -117,6 +122,11 @@ export const Dashboard = () => {
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Dashboard
+            {selectedCloser && (
+              <span className="text-lg text-blue-600 ml-2">
+                - {closers.find(c => c.id === selectedCloser)?.full_name}
+              </span>
+            )}
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
             Bem-vindo de volta, {userInfo?.full_name || user?.email?.split('@')[0]}!
@@ -127,6 +137,26 @@ export const Dashboard = () => {
             )}
           </p>
         </div>
+        
+        {/* Filtro por Closer - Apenas para administradores */}
+        {userInfo?.role_name === 'Admin' && (
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <Select value={selectedCloser} onValueChange={setSelectedCloser}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Todos os closers" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos os closers</SelectItem>
+                {closers.map((closer) => (
+                  <SelectItem key={closer.id} value={closer.id}>
+                    {closer.full_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Grid de KPIs - Responsivo */}

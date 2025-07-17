@@ -1,20 +1,82 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { AddAppointmentDialog } from './AddAppointmentDialog';
 import { AppointmentCard } from './appointments/AppointmentCard';
 import { EmptyAppointments } from './appointments/EmptyAppointments';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
+import { AppointmentFiltersComponent, AppointmentFilters } from './appointments/AppointmentFilters';
 import { useAppointments } from '@/hooks/useAppointments';
 import { Plus } from 'lucide-react';
+import { Appointment } from '@/types/appointment';
 
 export const Appointments = () => {
   const { appointments, loading, isUpdating } = useAppointments();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [filters, setFilters] = useState<AppointmentFilters>({
+    search: '',
+    status: '',
+    dateFrom: '',
+    dateTo: '',
+    closer: ''
+  });
 
   const handleCreateNew = () => {
     setAddDialogOpen(true);
   };
+
+  // Get unique closers for filter dropdown
+  const closers = useMemo(() => {
+    const uniqueClosers = new Map();
+    appointments.forEach(appointment => {
+      if (appointment.assigned_closer) {
+        const id = appointment.assigned_to;
+        const name = appointment.assigned_closer.full_name || appointment.assigned_closer.email || 'Sem nome';
+        uniqueClosers.set(id, { id, name });
+      }
+    });
+    return Array.from(uniqueClosers.values());
+  }, [appointments]);
+
+  // Filter appointments based on current filters
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((appointment: Appointment) => {
+      // Search filter
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        const leadName = appointment.leads?.name?.toLowerCase() || '';
+        const appointmentTitle = appointment.title?.toLowerCase() || '';
+        const leadPhone = appointment.leads?.phone?.toLowerCase() || '';
+        
+        if (!leadName.includes(searchTerm) && 
+            !appointmentTitle.includes(searchTerm) && 
+            !leadPhone.includes(searchTerm)) {
+          return false;
+        }
+      }
+
+      // Status filter
+      if (filters.status && appointment.status !== filters.status) {
+        return false;
+      }
+
+      // Closer filter
+      if (filters.closer && appointment.assigned_to !== filters.closer) {
+        return false;
+      }
+
+      // Date filters
+      if (filters.dateFrom && appointment.date < filters.dateFrom) {
+        return false;
+      }
+
+      if (filters.dateTo && appointment.date > filters.dateTo) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [appointments, filters]);
 
   if (loading) {
     return (
@@ -50,9 +112,17 @@ export const Appointments = () => {
         </div>
       </div>
 
+      {/* Filters */}
+      <AppointmentFiltersComponent
+        filters={filters}
+        onFiltersChange={setFilters}
+        closers={closers}
+        resultsCount={filteredAppointments.length}
+      />
+
       {/* Grid de Cards - Responsivo */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {appointments.map((appointment) => (
+        {filteredAppointments.map((appointment) => (
           <AppointmentCard
             key={appointment.id}
             appointment={appointment}
@@ -60,7 +130,13 @@ export const Appointments = () => {
         ))}
 
         {/* Empty State */}
-        {appointments.length === 0 && (
+        {filteredAppointments.length === 0 && appointments.length > 0 && (
+          <div className="col-span-full text-center py-8">
+            <p className="text-muted-foreground">Nenhum agendamento encontrado com os filtros aplicados.</p>
+          </div>
+        )}
+
+        {appointments.length === 0 && !loading && (
           <div className="col-span-full">
             <EmptyAppointments onCreateNew={handleCreateNew} />
           </div>

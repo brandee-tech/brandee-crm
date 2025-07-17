@@ -71,8 +71,13 @@ export const AppointmentCard = ({ appointment }: AppointmentCardProps) => {
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-base sm:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                {appointment.title}
+                {appointment.leads?.name || appointment.title}
               </h3>
+              {appointment.leads?.name && appointment.title && (
+                <p className="text-sm text-muted-foreground mb-1 line-clamp-1">
+                  {appointment.title}
+                </p>
+              )}
               <Badge className={`${getStatusColor(appointment.status)} text-xs`}>
                 {appointment.status}
               </Badge>

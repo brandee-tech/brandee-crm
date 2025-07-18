@@ -7,7 +7,8 @@ import {
   Users, 
   Settings as SettingsIcon, 
   Shield,
-  Mail
+  Mail,
+  Lock
 } from 'lucide-react';
 import { CompanyInfoSettings } from './settings/CompanyInfoSettings';
 import { SystemSettings } from './settings/SystemSettings';
@@ -15,9 +16,12 @@ import { UserRoleManagement } from './settings/UserRoleManagement';
 import { AdvancedSettings } from './settings/AdvancedSettings';
 import { InvitationSettings } from './settings/InvitationSettings';
 import { UserGoalsSettings } from './settings/UserGoalsSettings';
+import { CompanyRolePermissionsManager } from './settings/CompanyRolePermissionsManager';
+import { usePermissions } from '@/hooks/usePermissions';
 
 export const Settings = () => {
   const [activeTab, setActiveTab] = useState('company');
+  const { isAdmin } = usePermissions();
 
   const tabs = [
     {
@@ -31,6 +35,13 @@ export const Settings = () => {
       label: 'Usuários & Cargos',
       icon: Users,
       component: UserRoleManagement,
+    },
+    {
+      id: 'permissions',
+      label: 'Permissões',
+      icon: Lock,
+      component: CompanyRolePermissionsManager,
+      adminOnly: true,
     },
     {
       id: 'invitations',
@@ -56,7 +67,7 @@ export const Settings = () => {
       icon: Shield,
       component: AdvancedSettings,
     },
-  ];
+  ].filter(tab => !tab.adminOnly || isAdmin());
 
   return (
     <div className="p-6">
@@ -68,7 +79,7 @@ export const Settings = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (

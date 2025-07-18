@@ -46,6 +46,12 @@ export const CompanyRolePermissionsManager = () => {
   const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set());
   const [localPermissions, setLocalPermissions] = useState<Record<string, RolePermissions>>({});
 
+  console.log('🔍 [DEBUG] CompanyRolePermissionsManager - Estado:', { 
+    rolesCount: roles.length, 
+    loading, 
+    roles: roles.map(r => ({ id: r.id, name: r.name }))
+  });
+
   const toggleRoleExpansion = (roleId: string) => {
     const newExpanded = new Set(expandedRoles);
     if (newExpanded.has(roleId)) {

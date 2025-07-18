@@ -21,7 +21,12 @@ export const useCompanyRolePermissions = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchRoles = async () => {
-    if (!userInfo?.company_id) return;
+    if (!userInfo?.company_id) {
+      console.log('❌ [DEBUG] fetchRoles - Sem company_id:', userInfo);
+      return;
+    }
+
+    console.log('🔍 [DEBUG] fetchRoles - Buscando roles para company_id:', userInfo.company_id);
 
     try {
       const { data, error } = await supabase
@@ -30,10 +35,12 @@ export const useCompanyRolePermissions = () => {
         .eq('is_system_role', true)
         .order('name');
 
+      console.log('✅ [DEBUG] fetchRoles - Resultado:', { data, error });
+
       if (error) throw error;
       setRoles(data || []);
     } catch (error) {
-      console.error('Error fetching roles:', error);
+      console.error('❌ [DEBUG] fetchRoles - Error:', error);
       toast.error('Erro ao carregar cargos');
     }
   };

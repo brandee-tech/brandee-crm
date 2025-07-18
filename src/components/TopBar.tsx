@@ -19,7 +19,7 @@ export const TopBar = () => {
 
   if (loading) {
     return (
-      <div className="h-16 bg-white border-b shadow-sm flex items-center justify-end px-6">
+      <div className="h-[88px] bg-white border-b shadow-sm flex items-center justify-end px-6">
         <div className="animate-pulse flex items-center space-x-3">
           <div className="rounded-full bg-gray-200 h-8 w-8"></div>
           <div className="h-4 bg-gray-200 rounded w-24"></div>
@@ -37,7 +37,7 @@ export const TopBar = () => {
     .slice(0, 2);
 
   return (
-    <div className="h-16 bg-white border-b shadow-sm flex items-center justify-end px-6">
+    <div className="h-[88px] bg-white border-b shadow-sm flex items-center justify-end px-6">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button 

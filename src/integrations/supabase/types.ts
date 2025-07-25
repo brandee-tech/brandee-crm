@@ -1868,13 +1868,7 @@ export type Database = {
         Args:
           | Record<PropertyKey, never>
           | { period_days?: number; company_filter?: string }
-        Returns: {
-          total_companies: number
-          total_users: number
-          total_leads: number
-          total_appointments: number
-          active_companies: number
-        }[]
+        Returns: Json
       }
       get_current_user_company_id: {
         Args: Record<PropertyKey, never>

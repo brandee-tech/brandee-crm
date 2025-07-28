@@ -8,6 +8,9 @@ export interface MeetingParticipantWithProfile {
   meeting_id: string;
   user_id: string;
   role: 'organizer' | 'participant';
+  attended: boolean | null;
+  attendance_marked_at: string | null;
+  attendance_marked_by: string | null;
   created_at: string;
   profiles?: {
     full_name: string | null;
@@ -26,7 +29,7 @@ export const useMeetingParticipants = (meetingId: string) => {
         .from('meeting_participants')
         .select(`
           *,
-          profiles (
+          profiles!meeting_participants_user_id_fkey (
             full_name,
             email
           )
@@ -39,7 +42,7 @@ export const useMeetingParticipants = (meetingId: string) => {
         throw error;
       }
 
-      return data as MeetingParticipantWithProfile[];
+      return (data || []) as MeetingParticipantWithProfile[];
     },
     enabled: !!meetingId,
   });
@@ -133,11 +136,46 @@ export const useMeetingParticipants = (meetingId: string) => {
     },
   });
 
+  const markAttendance = useMutation({
+    mutationFn: async ({ participantId, attended }: { participantId: string; attended: boolean }) => {
+      const { data, error } = await supabase
+        .from('meeting_participants')
+        .update({ 
+          attended,
+          attendance_marked_at: new Date().toISOString(),
+          attendance_marked_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', participantId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao marcar presença:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meeting-participants', meetingId] });
+      toast({ title: 'Presença atualizada com sucesso!' });
+    },
+    onError: (error: any) => {
+      console.error('Erro ao marcar presença:', error);
+      toast({ 
+        title: 'Erro ao marcar presença', 
+        description: error.message || 'Ocorreu um erro inesperado',
+        variant: 'destructive' 
+      });
+    },
+  });
+
   return {
     participants,
     isLoading,
     addParticipant,
     removeParticipant,
     updateParticipantRole,
+    markAttendance,
   };
 };

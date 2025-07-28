@@ -237,9 +237,20 @@ const MeetingPDFDocument: React.FC<MeetingPDFDocumentProps> = ({
                 <Text style={styles.text}>
                   {participant.profiles?.full_name || participant.profiles?.email || 'Usuário'}
                 </Text>
-                <Text style={[styles.text, styles.badge]}>
-                  {participant.role === 'organizer' ? 'Organizador' : 'Participante'}
-                </Text>
+                <View style={{ flexDirection: 'row', gap: 5 }}>
+                  <Text style={[styles.text, styles.badge]}>
+                    {participant.role === 'organizer' ? 'Organizador' : 'Participante'}
+                  </Text>
+                  <Text style={[styles.text, styles.badge, { 
+                    backgroundColor: participant.attended === true ? '#dcfce7' : 
+                                   participant.attended === false ? '#fef2f2' : '#f3f4f6',
+                    color: participant.attended === true ? '#166534' : 
+                           participant.attended === false ? '#dc2626' : '#374151'
+                  }]}>
+                    {participant.attended === true ? 'Presente' : 
+                     participant.attended === false ? 'Ausente' : 'Pendente'}
+                  </Text>
+                </View>
               </View>
             ))}
           </View>

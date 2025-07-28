@@ -906,6 +906,9 @@ export type Database = {
       }
       meeting_participants: {
         Row: {
+          attendance_marked_at: string | null
+          attendance_marked_by: string | null
+          attended: boolean | null
           created_at: string
           id: string
           meeting_id: string
@@ -913,6 +916,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          attendance_marked_at?: string | null
+          attendance_marked_by?: string | null
+          attended?: boolean | null
           created_at?: string
           id?: string
           meeting_id: string
@@ -920,6 +926,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          attendance_marked_at?: string | null
+          attendance_marked_by?: string | null
+          attended?: boolean | null
           created_at?: string
           id?: string
           meeting_id?: string
@@ -927,6 +936,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "meeting_participants_attendance_marked_by_fkey"
+            columns: ["attendance_marked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "meeting_participants_meeting_id_fkey"
             columns: ["meeting_id"]

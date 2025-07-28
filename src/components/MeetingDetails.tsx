@@ -16,6 +16,7 @@ import { AgendaItem } from './AgendaItem';
 import { MeetingStatusSelector } from './MeetingStatusSelector';
 import { MeetingParticipants } from './MeetingParticipants';
 import { ExportMeetingButton } from './ExportMeetingButton';
+import { AttendanceRecorder } from './AttendanceRecorder';
 
 interface MeetingDetailsProps {
   meetingId: string;
@@ -83,14 +84,20 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
   const handleAddLink = async () => {
     if (!newLink.name.trim() || !newLink.url.trim()) return;
     
-    console.log('Would add attachment:', {
-      meeting_id: meetingId,
-      name: newLink.name,
-      type: 'link',
-      url: newLink.url,
-      created_by: user?.id || '',
-    });
-    setNewLink({ name: '', url: '' });
+    try {
+      await uploadAttachment.mutateAsync({
+        meeting_id: meetingId,
+        name: newLink.name,
+        type: 'link',
+        url: newLink.url,
+        created_by: user?.id || '',
+        file_size: null,
+        mime_type: null,
+      });
+      setNewLink({ name: '', url: '' });
+    } catch (error) {
+      console.error('Error adding link:', error);
+    }
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,12 +120,14 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
         .from('meeting-attachments')
         .getPublicUrl(filePath);
 
-      console.log('Would add file attachment:', {
+      await uploadAttachment.mutateAsync({
         meeting_id: meetingId,
         name: file.name,
         url: publicUrl,
         file_size: file.size,
         mime_type: file.type,
+        type: 'file',
+        created_by: user?.id || '',
       });
 
       toast({ title: 'Arquivo enviado com sucesso!' });
@@ -199,9 +208,10 @@ export const MeetingDetails = ({ meetingId, onBack }: MeetingDetailsProps) => {
         </Card>
       )}
 
-      {/* Seção de Participantes */}
-      <div className="mb-6">
+      {/* Seção de Participantes e Presença */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <MeetingParticipants meetingId={meetingId} />
+        <AttendanceRecorder meetingId={meetingId} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

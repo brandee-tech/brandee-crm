@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Plus, UserX, Crown, User } from 'lucide-react';
+import { Plus, UserX, Crown, User, UserCheck, UserMinus, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +31,7 @@ interface MeetingParticipantsProps {
 }
 
 export const MeetingParticipants = ({ meetingId }: MeetingParticipantsProps) => {
-  const { participants, addParticipant, removeParticipant, updateParticipantRole } = useMeetingParticipants(meetingId);
+  const { participants, addParticipant, removeParticipant, updateParticipantRole, markAttendance } = useMeetingParticipants(meetingId);
   const { profiles } = useProfiles();
   const { user } = useAuth();
   const [selectedUserId, setSelectedUserId] = useState<string>('');
@@ -60,12 +60,26 @@ export const MeetingParticipants = ({ meetingId }: MeetingParticipantsProps) => 
     await updateParticipantRole.mutateAsync({ participantId, role });
   };
 
+  const handleAttendanceChange = async (participantId: string, attended: boolean) => {
+    await markAttendance.mutateAsync({ participantId, attended });
+  };
+
   const getRoleIcon = (role: string) => {
     return role === 'organizer' ? <Crown className="w-4 h-4" /> : <User className="w-4 h-4" />;
   };
 
   const getRoleBadgeVariant = (role: string) => {
     return role === 'organizer' ? 'default' : 'secondary';
+  };
+
+  const getAttendanceBadge = (attended: boolean | null) => {
+    if (attended === null) {
+      return <Badge variant="outline" className="text-gray-500"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>;
+    }
+    if (attended) {
+      return <Badge variant="default" className="bg-green-100 text-green-800 border-green-300"><UserCheck className="w-3 h-3 mr-1" />Presente</Badge>;
+    }
+    return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-300"><UserMinus className="w-3 h-3 mr-1" />Ausente</Badge>;
   };
 
   return (
@@ -81,19 +95,42 @@ export const MeetingParticipants = ({ meetingId }: MeetingParticipantsProps) => 
         <div className="space-y-2">
           {participants.map((participant) => (
             <div key={participant.id} className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1">
                 <div className="flex items-center gap-2">
                   {getRoleIcon(participant.role)}
                   <span className="font-medium">
                     {participant.profiles?.full_name || participant.profiles?.email || 'Usuário'}
                   </span>
                 </div>
-                <Badge variant={getRoleBadgeVariant(participant.role)}>
-                  {participant.role === 'organizer' ? 'Organizador' : 'Participante'}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={getRoleBadgeVariant(participant.role)}>
+                    {participant.role === 'organizer' ? 'Organizador' : 'Participante'}
+                  </Badge>
+                  {getAttendanceBadge(participant.attended)}
+                </div>
               </div>
               
               <div className="flex items-center gap-2">
+                {/* Controles de presença */}
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant={participant.attended === true ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleAttendanceChange(participant.id, true)}
+                    className="px-2"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant={participant.attended === false ? "destructive" : "outline"}
+                    size="sm"
+                    onClick={() => handleAttendanceChange(participant.id, false)}
+                    className="px-2"
+                  >
+                    <UserMinus className="w-4 h-4" />
+                  </Button>
+                </div>
+
                 {/* Seletor de papel */}
                 <Select 
                   value={participant.role} 

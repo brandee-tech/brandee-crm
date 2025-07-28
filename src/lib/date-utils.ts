@@ -13,11 +13,11 @@ export const formatDateToLocal = (date: Date): string => {
 
 /**
  * Cria uma data local a partir de uma string no formato YYYY-MM-DD
- * Evita problemas de timezone ao criar o objeto Date
+ * Evita problemas de timezone ao criar o objeto Date no meio-dia
  */
 export const parseDateFromLocal = (dateString: string): Date => {
   const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day);
+  return new Date(year, month - 1, day, 12, 0, 0);
 };
 
 /**

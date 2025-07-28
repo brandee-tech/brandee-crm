@@ -94,40 +94,42 @@ export const MeetingParticipants = ({ meetingId }: MeetingParticipantsProps) => 
         {/* Lista de participantes */}
         <div className="space-y-2">
           {participants.map((participant) => (
-            <div key={participant.id} className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="flex items-center gap-2">
+            <div key={participant.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 border rounded-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
                   {getRoleIcon(participant.role)}
-                  <span className="font-medium">
+                  <span className="font-medium truncate">
                     {participant.profiles?.full_name || participant.profiles?.email || 'Usuário'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={getRoleBadgeVariant(participant.role)}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={getRoleBadgeVariant(participant.role)} className="shrink-0">
                     {participant.role === 'organizer' ? 'Organizador' : 'Participante'}
                   </Badge>
                   {getAttendanceBadge(participant.attended)}
                 </div>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 {/* Controles de presença */}
                 <div className="flex items-center gap-1">
                   <Button 
                     variant={participant.attended === true ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleAttendanceChange(participant.id, true)}
-                    className="px-2"
+                    className="px-2 flex-1 sm:flex-none"
                   >
                     <UserCheck className="w-4 h-4" />
+                    <span className="ml-1 sm:hidden">Presente</span>
                   </Button>
                   <Button 
                     variant={participant.attended === false ? "destructive" : "outline"}
                     size="sm"
                     onClick={() => handleAttendanceChange(participant.id, false)}
-                    className="px-2"
+                    className="px-2 flex-1 sm:flex-none"
                   >
                     <UserMinus className="w-4 h-4" />
+                    <span className="ml-1 sm:hidden">Ausente</span>
                   </Button>
                 </div>
 
@@ -138,7 +140,7 @@ export const MeetingParticipants = ({ meetingId }: MeetingParticipantsProps) => 
                     handleRoleChange(participant.id, role)
                   }
                 >
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-full sm:w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -150,8 +152,9 @@ export const MeetingParticipants = ({ meetingId }: MeetingParticipantsProps) => 
                 {/* Botão de remover */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
                       <UserX className="w-4 h-4" />
+                      <span className="ml-1 sm:hidden">Remover</span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>

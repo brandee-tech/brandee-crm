@@ -14,7 +14,7 @@ interface WhatsAppLeadButtonProps {
 
 export const WhatsAppLeadButton = ({ phone, leadName, size = 'sm' }: WhatsAppLeadButtonProps) => {
   const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState(`Olá ${leadName}! Vi seu contato em nossa base de leads. Como posso ajudá-lo?`);
+  const [message, setMessage] = useState(`Olá ${leadName}`);
 
   if (!isValidPhoneForWhatsApp(phone)) {
     return null;

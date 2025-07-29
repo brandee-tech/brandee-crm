@@ -111,7 +111,13 @@ export const ScriptAttachments = ({ scriptId, showManageButton = false }: Script
                   <Link className="w-4 h-4 text-blue-500" />
                 )}
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{attachment.name}</p>
+                  <button
+                    onClick={() => window.open(attachment.url, '_blank')}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-800 underline cursor-pointer text-left"
+                    title={attachment.type === 'file' ? 'Clique para visualizar o arquivo' : 'Clique para abrir o link'}
+                  >
+                    {attachment.name}
+                  </button>
                   {attachment.type === 'file' && attachment.file_size && (
                     <p className="text-xs text-gray-500">{formatFileSize(attachment.file_size)}</p>
                   )}

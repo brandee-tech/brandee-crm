@@ -371,6 +371,7 @@ export const LeadsPipeline = () => {
       <AddAppointmentDialog 
         open={addAppointmentDialogOpen} 
         onOpenChange={setAddAppointmentDialogOpen}
+        preselectedLead={selectedLead}
       />
 
       <ViewAppointmentDialog 

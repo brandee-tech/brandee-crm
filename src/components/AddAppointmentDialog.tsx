@@ -30,9 +30,10 @@ import { useScheduleBlocks } from '@/hooks/useScheduleBlocks';
 interface AddAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  preselectedLead?: any;
 }
 
-export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialogProps) => {
+export const AddAppointmentDialog = ({ open, onOpenChange, preselectedLead }: AddAppointmentDialogProps) => {
   const { createAppointment } = useAppointments();
   const { leads } = useRealtimeLeads();
   const { closers, loading: closersLoading } = useClosers();
@@ -61,7 +62,8 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
       user: user?.id, 
       assigned_to: formData.assigned_to,
       userPermissions: userPermissions ? 'Definidas' : 'Não definidas',
-      canCreate: hasPermission('appointments', 'create')
+      canCreate: hasPermission('appointments', 'create'),
+      preselectedLead: preselectedLead?.id || null
     });
     
     if (!formData.assigned_to && user && closers.length > 0) {
@@ -75,7 +77,36 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
         setFormData(prev => ({ ...prev, assigned_to: closers[0].id }));
       }
     }
-  }, [closers, user, formData.assigned_to, userPermissions, hasPermission]);
+  }, [closers, user, formData.assigned_to, userPermissions, hasPermission, preselectedLead]);
+
+  // Auto-select preselected lead when dialog opens
+  useEffect(() => {
+    if (preselectedLead && open) {
+      console.log('✅ [DEBUG] AddAppointmentDialog - Pré-selecionando lead:', preselectedLead);
+      setFormData(prev => ({ 
+        ...prev, 
+        lead_id: preselectedLead.id,
+        title: `Reunião com ${preselectedLead.name}`
+      }));
+    }
+  }, [preselectedLead, open]);
+
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setFormData({
+        title: '',
+        description: '',
+        date: '',
+        time: '',
+        duration: 60,
+        lead_id: '',
+        assigned_to: '',
+        status: 'Agendado',
+        meeting_url: ''
+      });
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,18 +165,6 @@ export const AddAppointmentDialog = ({ open, onOpenChange }: AddAppointmentDialo
       const created = await createAppointment(appointmentData);
       
       if (created) {
-        // Reset form
-        setFormData({
-          title: '',
-          description: '',
-          date: '',
-          time: '',
-          duration: 60,
-          lead_id: '',
-          assigned_to: '',
-          status: 'Agendado',
-          meeting_url: ''
-        });
         onOpenChange(false);
       }
     } catch (error) {

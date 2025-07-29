@@ -26,8 +26,6 @@ export const CreateGoalDialog = ({ open, onOpenChange, editingGoal, closers }: C
     goal_type: 'vendas' as 'vendas' | 'agendamentos' | 'conversoes' | 'receita',
     target_value: '',
     period: 'mensal' as 'mensal' | 'trimestral' | 'anual',
-    start_date: '',
-    end_date: '',
     status: 'ativa' as 'ativa' | 'pausada' | 'concluida'
   });
 
@@ -38,56 +36,23 @@ export const CreateGoalDialog = ({ open, onOpenChange, editingGoal, closers }: C
         goal_type: editingGoal.goal_type,
         target_value: editingGoal.target_value.toString(),
         period: editingGoal.period,
-        start_date: editingGoal.start_date,
-        end_date: editingGoal.end_date,
         status: editingGoal.status
       });
     } else {
-      // Calcular datas padrão baseado no período
-      const now = new Date();
-      const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      
       setFormData({
         user_id: '',
         goal_type: 'vendas',
         target_value: '',
         period: 'mensal',
-        start_date: startDate.toISOString().split('T')[0],
-        end_date: endDate.toISOString().split('T')[0],
         status: 'ativa'
       });
     }
   }, [editingGoal, open]);
 
   const handlePeriodChange = (period: string) => {
-    const now = new Date();
-    let startDate: Date;
-    let endDate: Date;
-
-    switch (period) {
-      case 'mensal':
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        break;
-      case 'trimestral':
-        const quarter = Math.floor(now.getMonth() / 3);
-        startDate = new Date(now.getFullYear(), quarter * 3, 1);
-        endDate = new Date(now.getFullYear(), (quarter + 1) * 3, 0);
-        break;
-      case 'anual':
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear(), 11, 31);
-        break;
-      default:
-        return;
-    }
-
     setFormData(prev => ({
       ...prev,
-      period: period as any,
-      start_date: startDate.toISOString().split('T')[0],
-      end_date: endDate.toISOString().split('T')[0]
+      period: period as any
     }));
   };
 
@@ -105,8 +70,6 @@ export const CreateGoalDialog = ({ open, onOpenChange, editingGoal, closers }: C
         goal_type: formData.goal_type,
         target_value: parseFloat(formData.target_value),
         period: formData.period,
-        start_date: formData.start_date,
-        end_date: formData.end_date,
         created_by: user.id,
         status: formData.status
       };
@@ -208,28 +171,6 @@ export const CreateGoalDialog = ({ open, onOpenChange, editingGoal, closers }: C
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="start_date">Data Início</Label>
-              <Input
-                id="start_date"
-                type="date"
-                value={formData.start_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="end_date">Data Fim</Label>
-              <Input
-                id="end_date"
-                type="date"
-                value={formData.end_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
-                required
-              />
-            </div>
-          </div>
 
           {editingGoal && (
             <div className="space-y-2">

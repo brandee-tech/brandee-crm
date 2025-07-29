@@ -11,8 +11,6 @@ export interface UserGoal {
   target_value: number;
   current_value: number;
   period: 'mensal' | 'trimestral' | 'anual';
-  start_date: string;
-  end_date: string;
   created_by: string;
   status: 'ativa' | 'pausada' | 'concluida';
   created_at: string;

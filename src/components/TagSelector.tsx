@@ -7,6 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { TagBadge } from './TagBadge';
 import { useLeadTags } from '@/hooks/useLeadTags';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { cn } from '@/lib/utils';
 
 interface TagSelectorProps {
@@ -29,7 +30,11 @@ export const TagSelector = ({ selectedTags = [], onTagsChange, placeholder = "Se
   const [editingTag, setEditingTag] = useState<{ id: string; name: string; color: string } | null>(null);
   const [tagToDelete, setTagToDelete] = useState<{ id: string; name: string } | null>(null);
   
-  const { tags = [], createTag, updateTag, deleteTag } = useLeadTags();
+  const { tags = [], createTag, updateTag, deleteTag, loading } = useLeadTags();
+  const { hasCompany } = useCurrentUser();
+  
+  // Disable tag management if user doesn't have a company configured
+  const isTagManagementDisabled = !hasCompany;
 
   const handleCreateTag = async () => {
     if (!newTagName.trim()) return;
@@ -136,9 +141,10 @@ export const TagSelector = ({ selectedTags = [], onTagsChange, placeholder = "Se
                     size="sm"
                     onClick={() => setShowCreateForm(true)}
                     className="gap-2"
+                    disabled={isTagManagementDisabled}
                   >
                     <Plus className="w-4 h-4" />
-                    Criar nova tag
+                    {isTagManagementDisabled ? 'Configure sua empresa primeiro' : 'Criar nova tag'}
                   </Button>
                 </div>
               </CommandEmpty>
@@ -162,6 +168,7 @@ export const TagSelector = ({ selectedTags = [], onTagsChange, placeholder = "Se
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0"
+                          disabled={isTagManagementDisabled}
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditingTag({ id: tag.id, name: tag.name, color: tag.color });
@@ -173,6 +180,7 @@ export const TagSelector = ({ selectedTags = [], onTagsChange, placeholder = "Se
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                          disabled={isTagManagementDisabled}
                           onClick={(e) => {
                             e.stopPropagation();
                             setTagToDelete({ id: tag.id, name: tag.name });
@@ -190,7 +198,7 @@ export const TagSelector = ({ selectedTags = [], onTagsChange, placeholder = "Se
                     </CommandItem>
                   ))}
                   
-                  {filteredTags.length > 0 && (
+                  {filteredTags.length > 0 && !isTagManagementDisabled && (
                     <CommandItem onSelect={() => setShowCreateForm(true)} className="border-t">
                       <Plus className="w-4 h-4 mr-2" />
                       Criar nova tag

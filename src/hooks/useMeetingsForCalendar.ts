@@ -15,7 +15,8 @@ export const useMeetingsForCalendar = () => {
   const userRole = currentUserProfile?.roles;
   const isAdmin = userRole?.permissions && 
     typeof userRole.permissions === 'object' && 
-    (userRole.permissions as any).admin === true;
+    (userRole.permissions as any).admin && 
+    typeof (userRole.permissions as any).admin === 'object';
 
   const { data: meetings = [], isLoading } = useQuery({
     queryKey: ['meetings-for-calendar', user?.id, isAdmin],
@@ -33,27 +34,36 @@ export const useMeetingsForCalendar = () => {
         if (error) throw error;
         return data as Meeting[];
       } else {
-        // Primeiro buscar os IDs das reuniões onde o usuário é participante
+        console.log('Buscando reuniões para usuário não-admin:', user.id);
+        
+        // Buscar reuniões onde o usuário é participante
         const { data: participantData, error: participantError } = await supabase
           .from('meeting_participants')
           .select('meeting_id')
           .eq('user_id', user.id);
         
-        if (participantError) throw participantError;
+        if (participantError) {
+          console.error('Erro ao buscar participações:', participantError);
+          throw participantError;
+        }
         
-        const meetingIds = participantData.map(p => p.meeting_id);
+        const participantMeetingIds = participantData.map(p => p.meeting_id);
+        console.log('IDs de reuniões como participante:', participantMeetingIds);
         
-        if (meetingIds.length === 0) return [];
-        
-        // Buscar as reuniões usando os IDs encontrados
+        // Buscar reuniões onde o usuário é organizador OU participante
         const { data, error } = await supabase
           .from('meetings')
           .select('*')
           .eq('company_id', currentUserProfile.company_id)
-          .in('id', meetingIds)
+          .or(`organizer_id.eq.${user.id},id.in.(${participantMeetingIds.length > 0 ? participantMeetingIds.join(',') : 'null'})`)
           .order('date', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao buscar reuniões:', error);
+          throw error;
+        }
+        
+        console.log('Reuniões encontradas:', data?.length || 0);
         return data as Meeting[];
       }
     },

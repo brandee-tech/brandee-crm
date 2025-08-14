@@ -64,7 +64,7 @@ const Index = () => {
       case 'kanban':
         return <Kanban />;
       case 'appointments':
-        return <Appointments />;
+        return <Appointments setActiveTab={setActiveTab} />;
       case 'meetings':
         return <Meetings />;
       case 'calendar':

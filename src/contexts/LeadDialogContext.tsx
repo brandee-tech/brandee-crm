@@ -42,10 +42,32 @@ const initialFormData = {
 const LeadDialogContext = createContext<LeadDialogContextType | undefined>(undefined);
 
 export const LeadDialogProvider = ({ children }: { children: ReactNode }) => {
-  const [state, setState] = useState<LeadDialogState>({
-    isOpen: false,
-    formData: initialFormData,
-  });
+  // Load initial state from sessionStorage
+  const getInitialState = (): LeadDialogState => {
+    try {
+      const saved = sessionStorage.getItem('leadDialogState');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (error) {
+      console.error('Error loading lead dialog state:', error);
+    }
+    return {
+      isOpen: false,
+      formData: initialFormData,
+    };
+  };
+
+  const [state, setState] = useState<LeadDialogState>(getInitialState);
+
+  // Save state to sessionStorage whenever it changes
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('leadDialogState', JSON.stringify(state));
+    } catch (error) {
+      console.error('Error saving lead dialog state:', error);
+    }
+  }, [state]);
 
   const openDialog = () => {
     setState(prev => ({ ...prev, isOpen: true }));
@@ -67,6 +89,12 @@ export const LeadDialogProvider = ({ children }: { children: ReactNode }) => {
       ...prev,
       formData: initialFormData
     }));
+    // Clear from sessionStorage when resetting
+    try {
+      sessionStorage.removeItem('leadDialogState');
+    } catch (error) {
+      console.error('Error clearing lead dialog state:', error);
+    }
   };
 
   return (

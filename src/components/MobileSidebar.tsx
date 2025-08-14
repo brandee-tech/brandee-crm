@@ -60,7 +60,8 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
   };
 
   const handleAdminSaasClick = () => {
-    window.location.href = '/admin';
+    // Use react-router navigation instead of window.location
+    setActiveTab('admin');
     setIsOpen(false);
   };
 

@@ -13,7 +13,7 @@ import { Appointment } from '@/types/appointment';
 import { Card, CardContent } from '@/components/ui/card';
 import { PermissionGuard } from '@/components/PermissionGuard';
 
-export const Appointments = () => {
+export const Appointments = ({ setActiveTab }: { setActiveTab?: (tab: string) => void }) => {
   const { appointments, loading, isUpdating } = useAppointments();
   const { userInfo } = useCurrentUser();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -43,7 +43,7 @@ export const Appointments = () => {
               <p className="text-gray-600 mb-6">
                 Para acessar os agendamentos, você precisa primeiro configurar sua empresa.
               </p>
-              <Button onClick={() => window.location.href = '/company-registration'}>
+              <Button onClick={() => setActiveTab?.('company-registration')}>
                 Configurar Empresa
               </Button>
             </CardContent>

@@ -34,7 +34,7 @@ export const LeadsPipeline = () => {
     createLead
   } = useLeadsPipeline();
 
-  const { state: leadDialogState, openDialog: openLeadDialog } = useLeadDialog();
+  const { state: leadDialogState, openDialog: openLeadDialog, closeDialog: closeLeadDialog } = useLeadDialog();
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState(false);
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
   const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
@@ -364,7 +364,11 @@ export const LeadsPipeline = () => {
 
       <AddLeadDialog 
         open={leadDialogState.isOpen} 
-        onOpenChange={(open) => {}} 
+        onOpenChange={(open) => {
+          if (!open) {
+            closeLeadDialog();
+          }
+        }} 
         onCreateLead={createLead}
       />
 

@@ -56,6 +56,8 @@ const LEAD_SOURCES = [
 
 export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialogProps) => {
   const { state, updateFormData, resetFormData, closeDialog } = useLeadDialog();
+  // Usar o estado do context como priority, mas respeitar props quando necessário
+  const isOpen = state.isOpen || open;
   const formData = state.formData;
   const { assignTagsToLead } = useLeadTagAssignments();
   const { partners, loading: partnersLoading } = usePartners();
@@ -88,7 +90,12 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        closeDialog();
+        onOpenChange(false);
+      }
+    }}>
       <DialogContent className="max-h-[90vh] overflow-y-auto mx-4 sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Novo Lead</DialogTitle>
@@ -265,7 +272,10 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
           </div>
           
           <DialogFooter className="flex-col sm:flex-row gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+            <Button type="button" variant="outline" onClick={() => {
+              closeDialog();
+              onOpenChange(false);
+            }} className="w-full sm:w-auto">
               Cancelar
             </Button>
             <Button 

@@ -21,6 +21,7 @@ import { Partners } from '@/components/Partners';
 import { ScheduleBlockManagement } from '@/components/ScheduleBlockManagement';
 import { OnboardingCheck } from '@/components/OnboardingCheck';
 import { useAuth } from '@/hooks/useAuth';
+import { LeadDialogProvider } from '@/contexts/LeadDialogContext';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -95,33 +96,35 @@ const Index = () => {
   };
 
   return (
-    <OnboardingCheck>
-      <div className="min-h-screen bg-gray-50 flex flex-col w-full">
-        <div className="flex flex-1">
-          {/* Desktop Sidebar */}
-          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-          
-          <main className="flex-1 flex flex-col overflow-hidden">
-            {/* Mobile Header */}
-            <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
-              <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-              <h1 className="font-semibold text-lg">We CRM</h1>
-              <div className="w-10"></div> {/* Spacer for balance */}
-            </div>
+    <LeadDialogProvider>
+      <OnboardingCheck>
+        <div className="min-h-screen bg-gray-50 flex flex-col w-full">
+          <div className="flex flex-1">
+            {/* Desktop Sidebar */}
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
             
-            {/* TopBar - visível apenas no desktop */}
-            <div className="hidden md:block">
-              <TopBar />
-            </div>
-            
-            {/* Main Content */}
-            <div className="flex-1 overflow-auto">
-              {renderContent()}
-            </div>
-          </main>
+            <main className="flex-1 flex flex-col overflow-hidden">
+              {/* Mobile Header */}
+              <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
+                <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+                <h1 className="font-semibold text-lg">We CRM</h1>
+                <div className="w-10"></div> {/* Spacer for balance */}
+              </div>
+              
+              {/* TopBar - visível apenas no desktop */}
+              <div className="hidden md:block">
+                <TopBar />
+              </div>
+              
+              {/* Main Content */}
+              <div className="flex-1 overflow-auto">
+                {renderContent()}
+              </div>
+            </main>
+          </div>
         </div>
-      </div>
-    </OnboardingCheck>
+      </OnboardingCheck>
+    </LeadDialogProvider>
   );
 };
 

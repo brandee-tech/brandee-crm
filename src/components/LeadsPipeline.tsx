@@ -8,6 +8,7 @@ import { useLeadsPipeline } from '@/hooks/useLeadsPipeline';
 
 import { AddLeadDialog } from '@/components/AddLeadDialog';
 import { EditLeadDialog } from '@/components/EditLeadDialog';
+import { useLeadDialog } from '@/contexts/LeadDialogContext';
 import { PipelineStatusIndicator } from '@/components/PipelineStatusIndicator';
 import { PipelineColumnManager } from '@/components/PipelineColumnManager';
 import { PipelineFilters } from '@/components/PipelineFilters';
@@ -33,7 +34,7 @@ export const LeadsPipeline = () => {
     createLead
   } = useLeadsPipeline();
 
-  const [addLeadDialogOpen, setAddLeadDialogOpen] = useState(false);
+  const { state: leadDialogState, openDialog: openLeadDialog } = useLeadDialog();
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState(false);
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
   const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
@@ -136,7 +137,7 @@ export const LeadsPipeline = () => {
             >
               Gerenciar Colunas
             </Button>
-            <Button onClick={() => setAddLeadDialogOpen(true)}>
+            <Button onClick={openLeadDialog}>
               <Plus className="w-4 h-4 mr-2" />
               Novo Lead
             </Button>
@@ -362,8 +363,8 @@ export const LeadsPipeline = () => {
       </DragDropContext>
 
       <AddLeadDialog 
-        open={addLeadDialogOpen} 
-        onOpenChange={setAddLeadDialogOpen} 
+        open={leadDialogState.isOpen} 
+        onOpenChange={(open) => {}} 
         onCreateLead={createLead}
       />
 

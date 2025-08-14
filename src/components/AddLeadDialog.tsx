@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +20,7 @@ import { TagSelector } from './TagSelector';
 import { useLeadTagAssignments } from '@/hooks/useLeadTagAssignments';
 import { usePartners } from '@/hooks/usePartners';
 import { useProducts } from '@/hooks/useProducts';
+import { useLeadDialog } from '@/contexts/LeadDialogContext';
 
 interface AddLeadDialogProps {
   open: boolean;
@@ -55,19 +55,8 @@ const LEAD_SOURCES = [
 ];
 
 export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialogProps) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    status: '',
-    source: '' as string,
-    partner_id: '' as string,
-    temperature: 'Frio' as string,
-    tags: [] as Array<{ id: string; name: string; color: string }>,
-    product_id: '' as string,
-    product_name: '',
-    product_value: ''
-  });
+  const { state, updateFormData, resetFormData, closeDialog } = useLeadDialog();
+  const formData = state.formData;
   const { assignTagsToLead } = useLeadTagAssignments();
   const { partners, loading: partnersLoading } = usePartners();
   const { products, loading: productsLoading } = useProducts();
@@ -93,20 +82,8 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
     }
 
     // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      status: '',
-      source: '',
-      partner_id: '',
-      temperature: 'Frio',
-      tags: [],
-      product_id: '',
-      product_name: '',
-      product_value: ''
-    });
-    
+    resetFormData();
+    closeDialog();
     onOpenChange(false);
   };
 
@@ -124,7 +101,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => updateFormData({ name: e.target.value })}
                 required
               />
             </div>
@@ -135,7 +112,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                onChange={(e) => updateFormData({ email: e.target.value })}
               />
             </div>
             
@@ -144,7 +121,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
               <Input
                 id="phone"
                 value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                onChange={(e) => updateFormData({ phone: e.target.value })}
               />
             </div>
           </div>
@@ -155,11 +132,10 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             <Select
               value={formData.source || undefined}
               onValueChange={(value) => {
-                setFormData(prev => ({ 
-                  ...prev, 
+                updateFormData({ 
                   source: value || '',
-                  partner_id: value === 'Parceiro' ? prev.partner_id : ''
-                }));
+                  partner_id: value === 'Parceiro' ? formData.partner_id : ''
+                });
               }}
             >
               <SelectTrigger>
@@ -188,7 +164,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
               ) : (
                 <Select
                   value={formData.partner_id || undefined}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, partner_id: value || '' }))}
+                  onValueChange={(value) => updateFormData({ partner_id: value || '' })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione um parceiro" />
@@ -212,7 +188,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             <Label htmlFor="temperature">Temperatura</Label>
             <Select
               value={formData.temperature}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, temperature: value }))}
+              onValueChange={(value) => updateFormData({ temperature: value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione a temperatura" />
@@ -232,12 +208,11 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
               value={formData.product_id}
               onValueChange={(value) => {
                 const selectedProduct = products.find(p => p.id === value);
-                setFormData(prev => ({ 
-                  ...prev, 
+                updateFormData({ 
                   product_id: value || '',
                   product_name: selectedProduct?.name || '',
                   product_value: selectedProduct?.price?.toString() || ''
-                }));
+                });
               }}
             >
               <SelectTrigger>
@@ -260,7 +235,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
               <Input
                 id="product_name"
                 value={formData.product_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
+                onChange={(e) => updateFormData({ product_name: e.target.value })}
                 placeholder="Ou digite um produto personalizado"
               />
             </div>
@@ -273,7 +248,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
                 step="0.01"
                 min="0"
                 value={formData.product_value}
-                onChange={(e) => setFormData(prev => ({ ...prev, product_value: e.target.value }))}
+                onChange={(e) => updateFormData({ product_value: e.target.value })}
                 placeholder="0,00"
               />
             </div>
@@ -284,7 +259,7 @@ export const AddLeadDialog = ({ open, onOpenChange, onCreateLead }: AddLeadDialo
             <Label htmlFor="tags">Tags</Label>
             <TagSelector
               selectedTags={formData.tags}
-              onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+              onTagsChange={(tags) => updateFormData({ tags })}
               placeholder="Selecionar tags..."
             />
           </div>

@@ -28,7 +28,7 @@ export const useRealtimePartners = () => {
   const isSubscribedRef = useRef(false);
 
   const fetchPartners = async () => {
-    if (!user) {
+    if (!user || !userInfo?.company_id) {
       setLoading(false);
       return;
     }
@@ -37,6 +37,7 @@ export const useRealtimePartners = () => {
       const { data, error } = await supabase
         .from('partners')
         .select('*')
+        .eq('company_id', userInfo.company_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -47,11 +48,6 @@ export const useRealtimePartners = () => {
       setPartners(data || []);
     } catch (error) {
       console.error('Erro ao buscar parceiros:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os parceiros",
-        variant: "destructive"
-      });
       setPartners([]);
     } finally {
       setLoading(false);
@@ -169,7 +165,7 @@ export const useRealtimePartners = () => {
   };
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || !userInfo?.company_id) return;
     
     fetchPartners();
 
@@ -219,7 +215,7 @@ export const useRealtimePartners = () => {
     channelRef.current = channel;
 
     return cleanup;
-  }, [user?.id]);
+  }, [user?.id, userInfo?.company_id]);
 
   return {
     partners,

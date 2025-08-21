@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useToast } from '@/hooks/use-toast';
 
 interface Lead {
@@ -66,49 +67,18 @@ export const useLeads = () => {
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
+  const { userInfo } = useCurrentUser();
   const { toast } = useToast();
   const channelNameRef = useRef<string | null>(null);
 
   const fetchLeads = useCallback(async () => {
-    if (!user) {
+    if (!user || !userInfo?.company_id) {
       setLoading(false);
       return;
     }
 
     try {
       console.log('Fetching leads for user:', user.id);
-      
-      // Primeiro buscar o company_id do usuário atual
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Error fetching user profile:', profileError);
-        toast({
-          title: "Erro",
-          description: "Erro ao buscar perfil do usuário",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (!profileData?.company_id) {
-        console.error('User has no company_id configured');
-        toast({
-          title: "Erro",
-          description: "Usuário não tem empresa configurada",
-          variant: "destructive"
-        });
-        setLeads([]);
-        setLoading(false);
-        return;
-      }
-
-      console.log('User company_id:', profileData.company_id);
 
       // Buscar todos os leads da empresa primeiro
       const { data, error } = await supabase
@@ -121,7 +91,7 @@ export const useLeads = () => {
           partners(id, name),
           assigned_user:profiles!leads_assigned_to_fkey(id, full_name)
         `)
-        .eq('company_id', profileData.company_id)
+        .eq('company_id', userInfo.company_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -176,10 +146,10 @@ export const useLeads = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, toast]);
+  }, [user?.id, userInfo?.company_id, toast]);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || !userInfo?.company_id) return;
     
     fetchLeads();
 
@@ -207,7 +177,7 @@ export const useLeads = () => {
         subscriptionManager.cleanup(channelNameRef.current);
       }
     };
-  }, [user?.id, fetchLeads]);
+  }, [user?.id, userInfo?.company_id, fetchLeads]);
 
   const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'> & { partner_id?: string | null }) => {
     if (!user) {

@@ -44,6 +44,9 @@ export const Leads = () => {
   const { exportFilteredLeads } = useExportLeads();
   const { userInfo } = useCurrentUser();
   
+  // Only render dialogs when needed to prevent unnecessary mounting
+  const shouldRenderDialogs = !!userInfo?.company_id;
+  
   // Debug logs importantes
   console.log('🔍 Leads component state:', {
     leadsCount: leads?.length || 0,
@@ -385,41 +388,45 @@ export const Leads = () => {
         </div>
       )}
 
-      <EditLeadDialog
-        lead={editingLead}
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
-      />
+      {shouldRenderDialogs && (
+        <>
+          <EditLeadDialog
+            lead={editingLead}
+            open={editDialogOpen}
+            onOpenChange={setEditDialogOpen}
+          />
 
-      <AddLeadDialog
-        open={leadDialogState.isOpen}
-        onOpenChange={(open) => {
-          if (!open) {
-            closeLeadDialog();
-          }
-        }}
-        onCreateLead={createLead}
-      />
+          <AddLeadDialog
+            open={leadDialogState.isOpen}
+            onOpenChange={(open) => {
+              if (!open) {
+                closeLeadDialog();
+              }
+            }}
+            onCreateLead={createLead}
+          />
 
-      <ImportLeadsDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-      />
+          <ImportLeadsDialog
+            open={importDialogOpen}
+            onOpenChange={setImportDialogOpen}
+          />
 
-      <ViewLeadJourneyDialog
-        leadId={selectedLeadForJourney?.id || null}
-        leadName={selectedLeadForJourney?.name || ''}
-        open={journeyDialogOpen}
-        onOpenChange={setJourneyDialogOpen}
-      />
+          <ViewLeadJourneyDialog
+            leadId={selectedLeadForJourney?.id || null}
+            leadName={selectedLeadForJourney?.name || ''}
+            open={journeyDialogOpen}
+            onOpenChange={setJourneyDialogOpen}
+          />
 
-      <TransferLeadDialog
-        leadId={selectedLeadForTransfer?.id || null}
-        leadName={selectedLeadForTransfer?.name || ''}
-        currentAssignedTo={selectedLeadForTransfer?.assignedTo || null}
-        open={transferDialogOpen}
-        onOpenChange={setTransferDialogOpen}
-      />
+          <TransferLeadDialog
+            leadId={selectedLeadForTransfer?.id || null}
+            leadName={selectedLeadForTransfer?.name || ''}
+            currentAssignedTo={selectedLeadForTransfer?.assignedTo || null}
+            open={transferDialogOpen}
+            onOpenChange={setTransferDialogOpen}
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePermissions } from '@/hooks/usePermissions';
+import { usePermissions } from '@/contexts/PermissionsContext';
 import { PermissionModule, PermissionAction } from '@/types/permissions';
 
 interface PermissionGuardProps {
@@ -19,16 +19,7 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 }) => {
   const { hasPermission } = usePermissions();
 
-  // Verificação simplificada para evitar problemas de tipos
-  const hasAccess = (() => {
-    const permissions = usePermissions().getUserPermissions();
-    if (!permissions) return false;
-    
-    const modulePerms = permissions[module];
-    if (!modulePerms) return false;
-    
-    return (modulePerms as any)[action] === true;
-  })();
+  const hasAccess = hasPermission(module, action as PermissionAction<typeof module>);
 
   if (hasAccess) {
     return <>{children}</>;

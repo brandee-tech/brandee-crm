@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useToast } from '@/hooks/use-toast';
 
 interface LeadTag {
@@ -16,34 +17,21 @@ export const useLeadTags = () => {
   const [tags, setTags] = useState<LeadTag[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { userInfo } = useCurrentUser();
   const { toast } = useToast();
 
   const fetchTags = useCallback(async () => {
-    if (!user) {
+    if (!user || !userInfo?.company_id) {
       setLoading(false);
       return;
     }
 
     try {
-      // Buscar company_id do usuário
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError || !profileData?.company_id) {
-        console.error('Error fetching user profile or no company_id');
-        setTags([]);
-        setLoading(false);
-        return;
-      }
-
       // Buscar tags da empresa
       const { data, error } = await supabase
         .from('lead_tags')
         .select('*')
-        .eq('company_id', profileData.company_id)
+        .eq('company_id', userInfo.company_id)
         .order('name');
 
       if (error) {
@@ -62,7 +50,7 @@ export const useLeadTags = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, toast]);
+  }, [user?.id, userInfo?.company_id, toast]);
 
   useEffect(() => {
     fetchTags();

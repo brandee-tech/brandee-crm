@@ -332,12 +332,19 @@ export const useDashboard = (closerId?: string) => {
       // Calculate pipeline value (total leads count as proxy)
       const totalPipelineValue = allLeads?.length || 0;
 
-      // Calculate conversion rate
-      const qualifiedLeads = allLeads?.filter(lead => 
-        ['Quente', 'Hot', 'Qualified'].includes(lead.status)
+      // Calculate conversion rate (últimos 30 dias)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const leadsCreatedLast30Days = allLeads?.filter(lead => 
+        new Date(lead.created_at) >= thirtyDaysAgo
       ).length || 0;
-      const totalLeadsCount = allLeads?.length || 0;
-      const conversionRate = totalLeadsCount > 0 ? (qualifiedLeads / totalLeadsCount) * 100 : 0;
+      
+      const leadsSoldLast30Days = allLeads?.filter(lead => 
+        lead.status === 'Vendido' && new Date(lead.updated_at) >= thirtyDaysAgo
+      ).length || 0;
+      
+      const conversionRate = leadsCreatedLast30Days > 0 ? (leadsSoldLast30Days / leadsCreatedLast30Days) * 100 : 0;
 
       // Average deal value (placeholder)
       const avgDealValue = 0;

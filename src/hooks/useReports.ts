@@ -112,9 +112,9 @@ export const useReports = (closerId?: string) => {
 
       // Calcular métricas
       const totalLeads = allLeads?.length || 0;
-      const qualifiedLeads = allLeads?.filter(lead => lead.status === 'Quente').length || 0;
       const soldLeads = allLeads?.filter(lead => lead.status === 'Vendido') || [];
-      const conversionRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0;
+      const qualifiedLeads = soldLeads.length; // Agora baseado em vendas reais
+      const conversionRate = totalLeads > 0 ? (soldLeads.length / totalLeads) * 100 : 0;
       
       // Calcular receita total dos leads vendidos
       const totalRevenue = soldLeads.reduce((sum, lead) => sum + (lead.revenue_generated || 0), 0);

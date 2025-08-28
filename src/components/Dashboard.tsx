@@ -71,7 +71,7 @@ export const Dashboard = () => {
       icon: TrendingUp,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
-      description: 'Taxa de fechamento'
+      description: 'Taxa de conversão (últimos 30 dias)'
     },
     {
       title: 'Hoje',

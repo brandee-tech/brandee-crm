@@ -246,29 +246,41 @@ export const useLeadsPipeline = () => {
 
     setDragLoading(leadId);
     try {
+      console.log('🔄 Updating lead status:', leadId, 'to:', newStatus);
+
       // Atualização otimística
       setLeads(prev => prev.map(lead => 
         lead.id === leadId ? { ...lead, status: newStatus } : lead
       ));
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('leads')
-        .update({ status: newStatus })
-        .eq('id', leadId);
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', leadId)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database error updating lead status:', error);
+        throw error;
+      }
 
+      console.log('✅ Lead status updated successfully:', data);
+      
       toast({
         title: "Sucesso",
-        description: "Status do lead atualizado"
+        description: `Lead movido para "${newStatus}" com sucesso`
       });
     } catch (error) {
-      console.error('Erro ao atualizar status do lead:', error);
+      console.error('❌ Error updating lead status:', error);
       // Reverter mudança otimística
       await fetchLeads();
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o status do lead",
+        description: `Não foi possível mover o lead para "${newStatus}". ${error.message || ''}`,
         variant: "destructive"
       });
     } finally {
@@ -285,18 +297,44 @@ export const useLeadsPipeline = () => {
 
     if (sourceStatus === newStatus) return;
 
-    await updateLeadStatus(leadId, newStatus);
-  }, [updateLeadStatus]);
-
-  // Agrupar leads por status
-  const leadsByStatus = leads.reduce((acc, lead) => {
-    const status = lead.status || 'Novas Leads';
-    if (!acc[status]) {
-      acc[status] = [];
+    console.log('🔄 Drag end - Moving lead:', leadId, 'from:', sourceStatus, 'to:', newStatus);
+    
+    // Verificar se a coluna de destino existe
+    const targetColumn = columns.find(col => col.name === newStatus);
+    if (!targetColumn) {
+      console.error('❌ Target column not found:', newStatus);
+      toast({
+        title: "Erro",
+        description: "Coluna de destino não encontrada",
+        variant: "destructive"
+      });
+      return;
     }
-    acc[status].push(lead);
+
+    await updateLeadStatus(leadId, newStatus);
+  }, [updateLeadStatus, columns, toast]);
+
+  // Agrupar leads por status, garantindo que todas as colunas existam
+  const leadsByStatus = columns.reduce((acc, column) => {
+    acc[column.name] = [];
     return acc;
   }, {} as Record<string, Lead[]>);
+
+  // Adicionar leads aos seus respectivos status
+  leads.forEach(lead => {
+    const status = lead.status || 'Novo Lead';
+    // Se o status do lead corresponde a uma coluna, adiciona lá
+    if (leadsByStatus[status] !== undefined) {
+      leadsByStatus[status].push(lead);
+    } else {
+      // Se não corresponde a nenhuma coluna, adiciona na primeira coluna
+      const firstColumn = columns[0];
+      if (firstColumn) {
+        console.warn(`⚠️ Lead ${lead.id} tem status "${status}" que não corresponde a nenhuma coluna. Movendo para "${firstColumn.name}"`);
+        leadsByStatus[firstColumn.name].push(lead);
+      }
+    }
+  });
 
   useEffect(() => {
     if (user) {

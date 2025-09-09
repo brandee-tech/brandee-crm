@@ -245,12 +245,20 @@ export const useLeadsPipeline = () => {
     if (!user) return;
 
     setDragLoading(leadId);
+    
+    // Desativar temporariamente o realtime para evitar conflitos
+    setIsUpdating(true);
+    
     try {
       console.log('🔄 Updating lead status:', leadId, 'to:', newStatus);
 
-      // Atualização otimística
+      // Atualização otimística mais robusta
       setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { ...lead, status: newStatus } : lead
+        lead.id === leadId ? { 
+          ...lead, 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        } : lead
       ));
 
       const { data, error } = await supabase
@@ -270,13 +278,19 @@ export const useLeadsPipeline = () => {
 
       console.log('✅ Lead status updated successfully:', data);
       
+      // Aguardar um pouco antes de reativar o realtime
+      setTimeout(() => {
+        setIsUpdating(false);
+      }, 1000);
+      
       toast({
         title: "Sucesso",
         description: `Lead movido para "${newStatus}" com sucesso`
       });
     } catch (error) {
       console.error('❌ Error updating lead status:', error);
-      // Reverter mudança otimística
+      // Reverter mudança otimística e reativar realtime
+      setIsUpdating(false);
       await fetchLeads();
       toast({
         title: "Erro",
@@ -352,13 +366,17 @@ export const useLeadsPipeline = () => {
           },
           (payload) => {
             console.log('Lead pipeline change detected:', payload);
-            setIsUpdating(true);
             
-            setTimeout(() => {
-              fetchLeads().finally(() => {
-                setIsUpdating(false);
-              });
-            }, 200);
+            // Evitar refetch automático durante drag and drop
+            if (!dragLoading && !isUpdating) {
+              setIsUpdating(true);
+              
+              setTimeout(() => {
+                fetchLeads().finally(() => {
+                  setIsUpdating(false);
+                });
+              }, 500);
+            }
           }
         )
         .subscribe();

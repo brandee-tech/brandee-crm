@@ -44,24 +44,26 @@ export const Reports = () => {
     return `${sign}${value.toFixed(1)}%`;
   };
 
-  // Função utilitária para converter dados em CSV
+  // Função utilitária para converter dados em CSV (formato brasileiro)
   const convertToCSV = (data: any[], headers: { [key: string]: string }) => {
-    const headerRow = Object.values(headers).join(',');
+    const headerRow = Object.values(headers).join(';');
     const dataRows = data.map(row => {
       return Object.keys(headers).map(key => {
         const value = row[key];
-        if (typeof value === 'string' && value.includes(',')) {
-          return `"${value}"`;
+        if (typeof value === 'string' && (value.includes(';') || value.includes('"'))) {
+          return `"${value.replace(/"/g, '""')}"`;
         }
         return value || '';
-      }).join(',');
+      }).join(';');
     });
     return [headerRow, ...dataRows].join('\n');
   };
 
-  // Função para fazer download do CSV
+  // Função para fazer download do CSV (formato brasileiro com BOM)
   const downloadCSV = (csvContent: string, filename: string) => {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Adicionar BOM para suporte a acentuação
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

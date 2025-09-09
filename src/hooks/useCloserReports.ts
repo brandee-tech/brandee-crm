@@ -63,21 +63,29 @@ export const useCloserReports = (closerId?: string, periodDays: number = 30) => 
 
       if (!closerProfile) return null;
 
-      // Buscar leads do closer
-      const { data: leads } = await supabase
-        .from('leads')
-        .select('*')
-        .eq('company_id', userInfo.company_id)
-        .eq('assigned_to', closerId)
-        .gte('created_at', startDate.toISOString());
-
-      // Buscar agendamentos do closer
+      // Buscar agendamentos do closer no período
       const { data: appointments } = await supabase
         .from('appointments')
         .select('*')
         .eq('company_id', userInfo.company_id)
         .eq('assigned_to', closerId)
         .gte('created_at', startDate.toISOString());
+
+      // Extrair lead_ids únicos dos agendamentos
+      const leadIdsFromAppointments = [...new Set(
+        appointments?.map(apt => apt.lead_id).filter(Boolean) || []
+      )];
+
+      // Buscar leads baseado nos agendamentos (independente da data de criação)
+      let leads: any[] = [];
+      if (leadIdsFromAppointments.length > 0) {
+        const { data: leadsData } = await supabase
+          .from('leads')
+          .select('*')
+          .eq('company_id', userInfo.company_id)
+          .in('id', leadIdsFromAppointments);
+        leads = leadsData || [];
+      }
 
       // Buscar tarefas do closer
       const { data: tasks } = await supabase
@@ -227,21 +235,29 @@ export const useClosersComparison = (periodDays: number = 30) => {
       // Buscar dados para cada closer
       const closersData = await Promise.all(
         closers.map(async (closer) => {
-          // Leads do closer
-          const { data: leads } = await supabase
-            .from('leads')
-            .select('*')
-            .eq('company_id', userInfo.company_id)
-            .eq('assigned_to', closer.id)
-            .gte('created_at', startDate.toISOString());
-
-          // Agendamentos do closer
+          // Agendamentos do closer no período
           const { data: appointments } = await supabase
             .from('appointments')
             .select('*')
             .eq('company_id', userInfo.company_id)
             .eq('assigned_to', closer.id)
             .gte('created_at', startDate.toISOString());
+
+          // Extrair lead_ids únicos dos agendamentos
+          const leadIdsFromAppointments = [...new Set(
+            appointments?.map(apt => apt.lead_id).filter(Boolean) || []
+          )];
+
+          // Buscar leads baseado nos agendamentos
+          let leads: any[] = [];
+          if (leadIdsFromAppointments.length > 0) {
+            const { data: leadsData } = await supabase
+              .from('leads')
+              .select('*')
+              .eq('company_id', userInfo.company_id)
+              .in('id', leadIdsFromAppointments);
+            leads = leadsData || [];
+          }
 
           const totalLeads = leads?.length || 0;
           const conversions = leads?.filter(lead => lead.status === 'Vendido').length || 0;

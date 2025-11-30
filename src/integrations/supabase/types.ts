@@ -2043,6 +2043,7 @@ export type Database = {
           qr_code: string | null
           status: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           company_id: string
@@ -2054,6 +2055,7 @@ export type Database = {
           qr_code?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           company_id?: string
@@ -2065,6 +2067,7 @@ export type Database = {
           qr_code?: string | null
           status?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2079,6 +2082,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_instances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

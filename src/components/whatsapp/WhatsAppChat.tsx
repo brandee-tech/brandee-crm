@@ -2,18 +2,17 @@ import { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { ConversationList } from './ConversationList';
 import { ChatMessages } from './ChatMessages';
-import { WhatsAppSettings } from './WhatsAppSettings';
+import { UserWhatsAppSettings } from './UserWhatsAppSettings';
 import { useCurrentCompany } from '@/hooks/useCurrentCompany';
-import { useWhatsAppInstance } from '@/hooks/useWhatsAppInstance';
+import { useUserWhatsAppInstance } from '@/hooks/useUserWhatsAppInstance';
 import { useWhatsAppConversations } from '@/hooks/useWhatsAppConversations';
 import { useRealtimeWhatsApp } from '@/hooks/useRealtimeWhatsApp';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const WhatsAppChat = () => {
   const { company } = useCurrentCompany();
-  const { instance } = useWhatsAppInstance(company?.id);
-  const { conversations } = useWhatsAppConversations(company?.id);
+  const { instance, isLoading } = useUserWhatsAppInstance();
+  const { conversations } = useWhatsAppConversations(company?.id, instance?.id);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
@@ -21,7 +20,7 @@ export const WhatsAppChat = () => {
 
   const selectedConversation = conversations?.find(c => c.id === selectedConversationId);
 
-  if (!company) {
+  if (!company || isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-muted-foreground">Carregando...</p>
@@ -37,10 +36,10 @@ export const WhatsAppChat = () => {
             <MessageCircle className="w-16 h-16 mx-auto mb-4 text-green-600" />
             <h1 className="text-3xl font-bold mb-2">WhatsApp Chat</h1>
             <p className="text-muted-foreground">
-              Conecte uma instância do WhatsApp para começar
+              Conecte seu WhatsApp para começar a atender
             </p>
           </div>
-          <WhatsAppSettings companyId={company.id} />
+          <UserWhatsAppSettings />
         </div>
       </div>
     );
@@ -63,7 +62,7 @@ export const WhatsAppChat = () => {
 
         {showSettings ? (
           <div className="flex-1 overflow-auto p-4">
-            <WhatsAppSettings companyId={company.id} />
+            <UserWhatsAppSettings />
           </div>
         ) : (
           <ConversationList

@@ -7,7 +7,8 @@ import {
   Users, 
   Settings as SettingsIcon, 
   Shield,
-  Mail
+  Mail,
+  MessageCircle
 } from 'lucide-react';
 import { CompanyInfoSettings } from './settings/CompanyInfoSettings';
 import { SystemSettings } from './settings/SystemSettings';
@@ -15,6 +16,8 @@ import { UserRoleManagement } from './settings/UserRoleManagement';
 import { AdvancedSettings } from './settings/AdvancedSettings';
 import { InvitationSettings } from './settings/InvitationSettings';
 import { UserGoalsSettings } from './settings/UserGoalsSettings';
+import { UserWhatsAppSettings } from './whatsapp/UserWhatsAppSettings';
+import { CompanyWhatsAppInstances } from './whatsapp/CompanyWhatsAppInstances';
 import { usePermissions } from '@/hooks/usePermissions';
 
 export const Settings = () => {
@@ -39,6 +42,17 @@ export const Settings = () => {
       label: 'Convites',
       icon: Mail,
       component: InvitationSettings,
+    },
+    {
+      id: 'whatsapp',
+      label: 'WhatsApp',
+      icon: MessageCircle,
+      component: () => (
+        <div className="space-y-6">
+          <UserWhatsAppSettings />
+          {isAdmin && <CompanyWhatsAppInstances />}
+        </div>
+      ),
     },
     {
       id: 'goals',

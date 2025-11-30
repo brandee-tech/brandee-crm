@@ -1,6 +1,7 @@
 export interface WhatsAppInstance {
   id: string;
   company_id: string;
+  user_id?: string;
   instance_name: string;
   instance_token?: string;
   status: 'connected' | 'disconnected' | 'pending';
@@ -8,6 +9,10 @@ export interface WhatsAppInstance {
   qr_code?: string;
   created_at: string;
   updated_at: string;
+  user?: {
+    id: string;
+    full_name: string;
+  };
 }
 
 export interface WhatsAppContact {

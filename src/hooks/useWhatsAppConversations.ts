@@ -3,23 +3,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { WhatsAppConversation } from '@/types/whatsapp';
 import { toast } from 'sonner';
 
-export const useWhatsAppConversations = (companyId?: string) => {
+export const useWhatsAppConversations = (companyId?: string, instanceId?: string) => {
   const queryClient = useQueryClient();
 
   const { data: conversations, isLoading } = useQuery({
-    queryKey: ['whatsapp-conversations', companyId],
+    queryKey: ['whatsapp-conversations', companyId, instanceId],
     queryFn: async () => {
       if (!companyId) return [];
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('whatsapp_conversations')
         .select(`
           *,
           contact:whatsapp_contacts(*),
           assigned_user:profiles(id, full_name)
         `)
-        .eq('company_id', companyId)
-        .order('last_message_at', { ascending: false, nullsFirst: false });
+        .eq('company_id', companyId);
+
+      // Se tiver instanceId, filtrar por instância (visão do closer)
+      if (instanceId) {
+        query = query.eq('instance_id', instanceId);
+      }
+
+      const { data, error } = await query.order('last_message_at', { ascending: false, nullsFirst: false });
 
       if (error) throw error;
       return data as WhatsAppConversation[];

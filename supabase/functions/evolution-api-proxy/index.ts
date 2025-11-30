@@ -54,7 +54,7 @@ serve(async (req) => {
 
     switch (action) {
       case 'createInstance': {
-        const { instanceName } = data;
+        const { instanceName, userId } = data;
         evolutionResponse = await fetch(`${evolutionApiUrl}/instance/create`, {
           method: 'POST',
           headers: {

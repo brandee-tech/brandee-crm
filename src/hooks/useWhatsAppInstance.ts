@@ -68,10 +68,10 @@ export const useWhatsAppInstance = (companyId?: string) => {
 
       if (error) throw error;
       
-      // A Evolution API retorna o QR code no campo "code"
+      // A Evolution API retorna o QR code no campo "base64"
       return {
         qrcode: {
-          base64: data.code
+          base64: data.base64
         }
       };
     },

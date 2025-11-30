@@ -87,7 +87,7 @@ serve(async (req) => {
       case 'getQRCode': {
         const { instanceName } = data;
         evolutionResponse = await fetch(
-          `${evolutionApiUrl}/instance/qrcode/${instanceName}`,
+          `${evolutionApiUrl}/instance/connect/${instanceName}`,
           {
             method: 'GET',
             headers: {

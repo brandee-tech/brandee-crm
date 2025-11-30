@@ -29,8 +29,14 @@ export const WhatsAppSettings = ({ companyId }: WhatsAppSettingsProps) => {
     setIsLoadingQR(true);
     try {
       const result = await getQRCode.mutateAsync(instance.instance_name);
+      console.log('QR Code result:', result);
       if (result.qrcode?.base64) {
-        setQrCode(result.qrcode.base64);
+        // Verificar se já é uma URL base64 completa ou apenas o código
+        const base64Code = result.qrcode.base64;
+        const qrCodeUrl = base64Code.startsWith('data:image')
+          ? base64Code
+          : `data:image/png;base64,${base64Code}`;
+        setQrCode(qrCodeUrl);
       }
     } catch (error) {
       console.error('Erro ao carregar QR Code:', error);

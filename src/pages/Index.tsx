@@ -149,8 +149,8 @@ const Index = () => {
               )}
               
               {/* Main Content */}
-              <div className={`flex-1 ${activeTab === 'whatsapp' ? 'overflow-hidden' : 'overflow-auto'}`}>
-                <div className={activeTab === 'whatsapp' ? 'h-full' : ''}>
+              <div className={`flex-1 flex flex-col ${activeTab === 'whatsapp' ? 'overflow-hidden' : 'overflow-auto'}`}>
+                <div className={activeTab === 'whatsapp' ? 'flex-1 min-h-0 h-full' : ''}>
                   {renderContent()}
                 </div>
               </div>

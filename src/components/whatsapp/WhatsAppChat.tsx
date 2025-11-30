@@ -47,7 +47,7 @@ export const WhatsAppChat = () => {
   }
 
   return (
-    <div className="flex h-full bg-background overflow-hidden">
+    <div className="flex h-full min-h-0 bg-background overflow-hidden">
       {/* Lista de conversas */}
       <div className="w-full md:w-96 border-r border-border flex flex-col min-h-0 bg-background">
         <div className="p-4 border-b border-border flex items-center justify-between">

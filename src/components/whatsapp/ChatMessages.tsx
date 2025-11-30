@@ -3,7 +3,6 @@ import { Phone, Video, MoreVertical, Link2, UserPlus, X, ExternalLink } from 'lu
 import { WhatsAppConversation } from '@/types/whatsapp';
 import { useWhatsAppMessages } from '@/hooks/useWhatsAppMessages';
 import { useWhatsAppConversations } from '@/hooks/useWhatsAppConversations';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -71,10 +70,7 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
 
   useEffect(() => {
     if (scrollRef.current) {
-      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -120,7 +116,7 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-border bg-background max-h-[40%] overflow-y-auto">
+      <div className="flex-shrink-0 p-4 border-b border-border bg-background max-h-48 overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <Avatar>
@@ -235,14 +231,15 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
       </div>
 
       {/* Messages */}
-      <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full" ref={scrollRef}>
-          <div className="space-y-4 p-4">
-            {messages?.map((message) => (
-              <MessageBubble key={message.id} message={message} />
-            ))}
-          </div>
-        </ScrollArea>
+      <div 
+        className="flex-1 min-h-0 overflow-y-auto p-4" 
+        ref={scrollRef}
+      >
+        <div className="space-y-4">
+          {messages?.map((message) => (
+            <MessageBubble key={message.id} message={message} />
+          ))}
+        </div>
       </div>
 
       {/* Input */}

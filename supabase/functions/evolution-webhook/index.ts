@@ -41,23 +41,33 @@ serve(async (req) => {
     switch (event) {
       case 'MESSAGES_UPSERT':
       case 'messages.upsert': {
-        const message = data.messages?.[0];
-        if (!message) break;
+        // Suportar ambos os formatos: array (antigo) ou objeto direto (v2)
+        const message = Array.isArray(data.messages) ? data.messages[0] : data;
+        
+        if (!message || !message.key) {
+          console.log('Message or message.key is missing, skipping');
+          break;
+        }
 
         const remoteJid = message.key.remoteJid;
         const fromMe = message.key.fromMe;
         const messageContent = message.message?.conversation || 
                                message.message?.extendedTextMessage?.text || 
                                '';
+        
+        console.log('Processing message from:', remoteJid, 'fromMe:', fromMe, 'content:', messageContent);
 
         // Criar ou obter contato
+        const senderName = message.pushName || remoteJid.split('@')[0];
+        const timestamp = message.messageTimestamp;
+        
         const { data: contact, error: contactError } = await supabaseAdmin
           .from('whatsapp_contacts')
           .upsert({
             company_id: instanceData.company_id,
             whatsapp_id: remoteJid,
             phone: remoteJid.split('@')[0],
-            name: message.pushName || remoteJid.split('@')[0],
+            name: senderName,
           }, {
             onConflict: 'company_id,whatsapp_id',
             ignoreDuplicates: false,
@@ -69,6 +79,8 @@ serve(async (req) => {
           console.error('Error creating/updating contact:', contactError);
           break;
         }
+        
+        console.log('Contact created/updated:', contact.id, contact.name);
 
         // Criar ou obter conversa
         const { data: conversation, error: conversationError } = await supabaseAdmin
@@ -87,20 +99,22 @@ serve(async (req) => {
               contact_id: contact.id,
               instance_id: instanceData.id,
               last_message: messageContent,
-              last_message_at: new Date(message.messageTimestamp * 1000).toISOString(),
+              last_message_at: new Date(timestamp * 1000).toISOString(),
               unread_count: fromMe ? 0 : 1,
             })
             .select()
             .single();
           conversationId = newConversation?.id;
+          console.log('New conversation created:', conversationId);
         } else {
           conversationId = conversation.id;
+          console.log('Updating existing conversation:', conversationId);
           // Atualizar conversa
           await supabaseAdmin
             .from('whatsapp_conversations')
             .update({
               last_message: messageContent,
-              last_message_at: new Date(message.messageTimestamp * 1000).toISOString(),
+              last_message_at: new Date(timestamp * 1000).toISOString(),
               unread_count: fromMe ? 0 : supabaseAdmin.rpc('increment', { row_id: conversation.id }),
             })
             .eq('id', conversation.id);
@@ -130,7 +144,7 @@ serve(async (req) => {
         }
 
         // Inserir mensagem
-        await supabaseAdmin
+        const { error: messageError } = await supabaseAdmin
           .from('whatsapp_messages')
           .insert({
             conversation_id: conversationId,
@@ -142,9 +156,15 @@ serve(async (req) => {
             media_url: mediaUrl,
             media_mimetype: mediaMimetype,
             status: fromMe ? 'sent' : 'delivered',
-            sender_name: message.pushName || null,
-            created_at: new Date(message.messageTimestamp * 1000).toISOString(),
+            sender_name: senderName,
+            created_at: new Date(timestamp * 1000).toISOString(),
           });
+        
+        if (messageError) {
+          console.error('Error inserting message:', messageError);
+        } else {
+          console.log('Message inserted successfully');
+        }
 
         break;
       }

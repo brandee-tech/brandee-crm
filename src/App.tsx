@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { AppointmentsProvider } from "@/contexts/AppointmentsContext";
@@ -14,7 +14,6 @@ import CompanyRegistration from "./pages/CompanyRegistration";
 import NotFound from "./pages/NotFound";
 import { CompanyEditPage } from "./pages/admin/CompanyEditPage";
 import { WhatsAppButton } from "./components/WhatsAppButton";
-import { WhatsAppChat } from "./components/whatsapp/WhatsAppChat";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -38,7 +37,7 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/whatsapp" element={<WhatsAppChat />} />
+                    <Route path="/whatsapp" element={<Home />} />
                     <Route path="/admin" element={<AdminSaas />} />
                     <Route path="/admin/companies/:id/edit" element={<CompanyEditPage />} />
                     <Route path="/landing" element={<Landing />} />

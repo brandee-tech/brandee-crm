@@ -1,5 +1,6 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { MobileSidebar } from '@/components/MobileSidebar';
 import { TopBar } from '@/components/TopBar';
@@ -19,13 +20,38 @@ import { UserManagement } from '@/components/UserManagement';
 import { Settings } from '@/components/Settings';
 import { Partners } from '@/components/Partners';
 import { ScheduleBlockManagement } from '@/components/ScheduleBlockManagement';
+import { WhatsAppChat } from '@/components/whatsapp/WhatsAppChat';
 import { OnboardingCheck } from '@/components/OnboardingCheck';
 import { useAuth } from '@/hooks/useAuth';
 import { LeadDialogProvider } from '@/contexts/LeadDialogContext';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Detectar rota e definir aba inicial
+  const getInitialTab = () => {
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get('tab');
+    if (tabParam) return tabParam;
+    
+    // Se vier de /whatsapp, ativar aba whatsapp
+    if (location.pathname === '/whatsapp') return 'whatsapp';
+    
+    return 'dashboard';
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [addScriptDialogOpen, setAddScriptDialogOpen] = useState(false);
+  
+  // Atualizar URL quando mudar de aba
+  useEffect(() => {
+    if (activeTab === 'whatsapp' && location.pathname !== '/whatsapp') {
+      navigate('/whatsapp', { replace: true });
+    } else if (activeTab !== 'whatsapp' && location.pathname === '/whatsapp') {
+      navigate('/', { replace: true });
+    }
+  }, [activeTab, location.pathname, navigate]);
   
   // Script form state
   const [scriptFormData, setScriptFormData] = useState({
@@ -86,6 +112,8 @@ const Index = () => {
         return <Reports />;
       case 'partners':
         return <Partners />;
+      case 'whatsapp':
+        return <WhatsAppChat />;
       case 'users':
         return <UserManagement />;
       case 'settings':
@@ -117,8 +145,10 @@ const Index = () => {
               </div>
               
               {/* Main Content */}
-              <div className="flex-1 overflow-auto">
-                {renderContent()}
+              <div className={`flex-1 ${activeTab === 'whatsapp' ? 'overflow-hidden p-4' : 'overflow-auto'}`}>
+                <div className={activeTab === 'whatsapp' ? 'h-full' : ''}>
+                  {renderContent()}
+                </div>
               </div>
             </main>
           </div>

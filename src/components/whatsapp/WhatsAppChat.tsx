@@ -47,9 +47,9 @@ export const WhatsAppChat = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-full bg-background border rounded-lg overflow-hidden">
       {/* Lista de conversas */}
-      <div className="w-full md:w-96 border-r border-border flex flex-col">
+      <div className="w-full md:w-96 border-r border-border flex flex-col bg-background">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <h2 className="text-xl font-bold">Conversas</h2>
           <Button
@@ -75,7 +75,7 @@ export const WhatsAppChat = () => {
       </div>
 
       {/* Área de mensagens */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col bg-background">
         {selectedConversation ? (
           <ChatMessages
             conversation={selectedConversation}

@@ -15,8 +15,10 @@ import { TransferLeadDialog } from './TransferLeadDialog';
 import { LeadFilters, LeadFilterState } from './LeadFilters';
 import { TagBadge } from './TagBadge';
 import { WhatsAppLeadButton } from './WhatsAppLeadButton';
+import { LeadWhatsAppBadge } from './whatsapp/LeadWhatsAppBadge';
 import { useExportLeads } from '@/hooks/useExportLeads';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useWhatsAppConversations } from '@/hooks/useWhatsAppConversations';
 import { PermissionGuard } from '@/components/PermissionGuard';
 import { useLeadDialog } from '@/contexts/LeadDialogContext';
 
@@ -43,6 +45,7 @@ export const Leads = () => {
   const { leads, loading, isUpdating, deleteLead, createLead } = useLeads();
   const { exportFilteredLeads } = useExportLeads();
   const { userInfo } = useCurrentUser();
+  const { conversations } = useWhatsAppConversations(userInfo?.company_id);
   
   // Only render dialogs when needed to prevent unnecessary mounting
   const shouldRenderDialogs = !!userInfo?.company_id;
@@ -238,24 +241,36 @@ export const Leads = () => {
       </div>
 
       <div className="grid gap-4 px-4 md:px-8">
-        {filteredLeads.map((lead) => (
-          <Card key={lead.id} className="p-4 md:p-6 hover:shadow-lg transition-shadow duration-200">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{lead.name}</h3>
-                  <Badge className={getStatusColor(lead.status || 'Novo Lead')}>{lead.status || 'Novo Lead'}</Badge>
-                  {lead.temperature && (
-                    <Badge className={getTemperatureColor(lead.temperature)} variant="outline">
-                      {lead.temperature}
-                    </Badge>
-                  )}
-                  {lead.product_value && (
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      R$ {lead.product_value.toFixed(2)}
-                    </Badge>
-                  )}
-                </div>
+        {filteredLeads.map((lead) => {
+          // Encontrar conversa WhatsApp vinculada a este lead
+          const whatsappConversation = conversations?.find(
+            conv => conv.contact?.lead_id === lead.id
+          );
+
+          return (
+            <Card key={lead.id} className="p-4 md:p-6 hover:shadow-lg transition-shadow duration-200">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{lead.name}</h3>
+                    <Badge className={getStatusColor(lead.status || 'Novo Lead')}>{lead.status || 'Novo Lead'}</Badge>
+                    {lead.temperature && (
+                      <Badge className={getTemperatureColor(lead.temperature)} variant="outline">
+                        {lead.temperature}
+                      </Badge>
+                    )}
+                    {lead.product_value && (
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        R$ {lead.product_value.toFixed(2)}
+                      </Badge>
+                    )}
+                    <LeadWhatsAppBadge
+                      leadId={lead.id}
+                      hasConversation={!!whatsappConversation}
+                      conversationId={whatsappConversation?.id}
+                      lastMessageAt={whatsappConversation?.last_message_at}
+                    />
+                  </div>
                 {lead.product_name && (
                   <div className="text-sm text-gray-600 mb-2">
                     Produto: {lead.product_name}
@@ -373,7 +388,8 @@ export const Leads = () => {
               </div>
             </div>
           </Card>
-        ))}
+        );
+        })}
       </div>
 
       {filteredLeads.length === 0 && (

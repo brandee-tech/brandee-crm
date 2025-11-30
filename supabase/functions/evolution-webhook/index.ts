@@ -217,15 +217,24 @@ serve(async (req) => {
         } else {
           conversationId = conversation.id;
           console.log('Updating existing conversation:', conversationId);
-          // Atualizar conversa
+          
+          // Atualizar last_message e last_message_at
           await supabaseAdmin
             .from('whatsapp_conversations')
             .update({
               last_message: messageContent,
               last_message_at: new Date(timestamp * 1000).toISOString(),
-              unread_count: fromMe ? 0 : supabaseAdmin.rpc('increment', { row_id: conversation.id }),
+              unread_count: fromMe ? 0 : conversation.unread_count || 0,
             })
             .eq('id', conversation.id);
+          
+          // Incrementar unread_count apenas para mensagens recebidas (!fromMe)
+          if (!fromMe) {
+            await supabaseAdmin.rpc('increment_unread_count', { 
+              conversation_uuid: conversation.id 
+            });
+            console.log('Incremented unread_count for conversation:', conversation.id);
+          }
         }
 
         // Detectar tipo de mensagem

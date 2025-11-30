@@ -2194,6 +2194,10 @@ export type Database = {
           total_users: number
         }[]
       }
+      increment_unread_count: {
+        Args: { conversation_uuid: string }
+        Returns: undefined
+      }
       is_current_user_admin: { Args: never; Returns: boolean }
       is_saas_admin: { Args: never; Returns: boolean }
       is_saas_admin_for_company_management: { Args: never; Returns: boolean }

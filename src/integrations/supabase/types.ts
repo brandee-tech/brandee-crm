@@ -1918,6 +1918,42 @@ export type Database = {
           },
         ]
       }
+      whatsapp_conversation_tag_assignments: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_conversation_tag_assignments_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_conversation_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "lead_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_conversations: {
         Row: {
           assigned_to: string | null

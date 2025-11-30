@@ -16,6 +16,8 @@ import { useLeads } from '@/hooks/useLeads';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { TagSelector } from '@/components/TagSelector';
+import { useWhatsAppConversationTags } from '@/hooks/useWhatsAppConversationTags';
 
 interface ChatMessagesProps {
   conversation: WhatsAppConversation;
@@ -33,6 +35,8 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
 
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [createLeadDialogOpen, setCreateLeadDialogOpen] = useState(false);
+
+  const { assignedTags, assignTag, removeTag } = useWhatsAppConversationTags(conversation.id);
 
   const contactName = conversation.contact?.name || conversation.contact?.phone || 'Desconhecido';
   const initials = contactName.substring(0, 2).toUpperCase();
@@ -203,6 +207,28 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
             </Button>
           </div>
         )}
+
+        {/* Tags */}
+        <div className="mt-3">
+          <TagSelector
+            selectedTags={assignedTags || []}
+            onTagsChange={(tags) => {
+              const currentTagIds = assignedTags?.map(t => t.id) || [];
+              const newTagIds = tags.map(t => t.id);
+              const added = newTagIds.filter(id => !currentTagIds.includes(id));
+              const removed = currentTagIds.filter(id => !newTagIds.includes(id));
+
+              added.forEach(tagId => {
+                assignTag.mutate({ conversationId: conversation.id, tagId });
+              });
+
+              removed.forEach(tagId => {
+                removeTag.mutate({ conversationId: conversation.id, tagId });
+              });
+            }}
+            placeholder="Adicionar tags à conversa..."
+          />
+        </div>
       </div>
 
       {/* Messages */}

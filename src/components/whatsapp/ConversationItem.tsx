@@ -3,6 +3,8 @@ import { ptBR } from 'date-fns/locale';
 import { WhatsAppConversation } from '@/types/whatsapp';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { TagBadge } from '@/components/TagBadge';
+import { useWhatsAppConversationTags } from '@/hooks/useWhatsAppConversationTags';
 import { cn } from '@/lib/utils';
 
 interface ConversationItemProps {
@@ -14,6 +16,7 @@ interface ConversationItemProps {
 export const ConversationItem = ({ conversation, isSelected, onClick }: ConversationItemProps) => {
   const contactName = conversation.contact?.name || conversation.contact?.phone || 'Desconhecido';
   const initials = contactName.substring(0, 2).toUpperCase();
+  const { assignedTags } = useWhatsAppConversationTags(conversation.id);
 
   return (
     <div
@@ -42,7 +45,7 @@ export const ConversationItem = ({ conversation, isSelected, onClick }: Conversa
             )}
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-1">
             <p className="text-sm text-muted-foreground truncate">
               {conversation.last_message || 'Sem mensagens'}
             </p>
@@ -52,6 +55,25 @@ export const ConversationItem = ({ conversation, isSelected, onClick }: Conversa
               </Badge>
             )}
           </div>
+
+          {/* Tags */}
+          {assignedTags && assignedTags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {assignedTags.slice(0, 3).map((tag) => (
+                <TagBadge
+                  key={tag.id}
+                  name={tag.name}
+                  color={tag.color}
+                  size="sm"
+                />
+              ))}
+              {assignedTags.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{assignedTags.length - 3}
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

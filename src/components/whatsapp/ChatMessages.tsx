@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MessageBubble } from './MessageBubble';
@@ -37,9 +38,10 @@ import { useWhatsAppConversationTags } from '@/hooks/useWhatsAppConversationTags
 interface ChatMessagesProps {
   conversation: WhatsAppConversation;
   instanceName: string;
+  onConversationDeleted?: () => void;
 }
 
-export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) => {
+export const ChatMessages = ({ conversation, instanceName, onConversationDeleted }: ChatMessagesProps) => {
   const { messages } = useWhatsAppMessages(conversation.id, instanceName);
   const { markAsRead } = useWhatsAppConversations(conversation.company_id);
   const { unlinkContactFromLead } = useWhatsAppLeadLink();
@@ -47,6 +49,7 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
   const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [createLeadDialogOpen, setCreateLeadDialogOpen] = useState(false);
@@ -97,32 +100,57 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
 
       queryClient.invalidateQueries({ queryKey: ['whatsapp-messages', conversation.id] });
       setClearMessagesOpen(false);
+      
+      toast({
+        title: "Mensagens limpas",
+        description: "Todas as mensagens desta conversa foram removidas.",
+      });
     } catch (error) {
       console.error('Error clearing messages:', error);
+      toast({
+        title: "Erro ao limpar mensagens",
+        description: "Não foi possível limpar as mensagens. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDeleteConversation = async () => {
     try {
       // Deletar mensagens primeiro
-      await supabase
+      const { error: messagesError } = await supabase
         .from('whatsapp_messages')
         .delete()
         .eq('conversation_id', conversation.id);
 
+      if (messagesError) throw messagesError;
+
       // Deletar conversa
-      const { error } = await supabase
+      const { error: conversationError } = await supabase
         .from('whatsapp_conversations')
         .delete()
         .eq('id', conversation.id);
 
-      if (error) throw error;
+      if (conversationError) throw conversationError;
 
+      // Invalidar queries
       queryClient.invalidateQueries({ queryKey: ['whatsapp-conversations'] });
       setDeleteConversationOpen(false);
-      // A conversa será removida da lista e o chat será limpo
+      
+      // Notificar o componente pai para limpar a seleção
+      onConversationDeleted?.();
+      
+      toast({
+        title: "Conversa deletada",
+        description: "A conversa foi removida permanentemente.",
+      });
     } catch (error) {
       console.error('Error deleting conversation:', error);
+      toast({
+        title: "Erro ao deletar conversa",
+        description: "Não foi possível deletar a conversa. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 

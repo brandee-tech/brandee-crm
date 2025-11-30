@@ -80,6 +80,7 @@ export const WhatsAppChat = () => {
           <ChatMessages
             conversation={selectedConversation}
             instanceName={instance.instance_name}
+            onConversationDeleted={() => setSelectedConversationId(null)}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center">

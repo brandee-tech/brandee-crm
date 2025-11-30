@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 export type MediaType = 'image' | 'audio' | 'video' | 'document';
 
@@ -11,6 +12,7 @@ interface UploadResult {
 }
 
 export const useMediaUpload = () => {
+  const { user } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -26,8 +28,7 @@ export const useMediaUpload = () => {
     setUploadProgress(0);
 
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      // Check if user is authenticated
       if (!user) {
         throw new Error('Usuário não autenticado');
       }

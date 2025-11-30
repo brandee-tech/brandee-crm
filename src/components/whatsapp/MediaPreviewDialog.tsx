@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,6 +59,9 @@ export const MediaPreviewDialog = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Enviar arquivo</DialogTitle>
+          <DialogDescription>
+            Adicione uma legenda opcional e clique em enviar para compartilhar o arquivo
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

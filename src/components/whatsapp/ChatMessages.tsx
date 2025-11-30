@@ -235,9 +235,9 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
       </div>
 
       {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <ScrollArea className="h-full p-4" ref={scrollRef}>
-          <div className="space-y-4">
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full" ref={scrollRef}>
+          <div className="space-y-4 p-4">
             {messages?.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}

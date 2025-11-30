@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { TagBadge } from '@/components/TagBadge';
 import { useWhatsAppConversationTags } from '@/hooks/useWhatsAppConversationTags';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface ConversationItemProps {
@@ -17,6 +19,10 @@ export const ConversationItem = ({ conversation, isSelected, onClick }: Conversa
   const contactName = conversation.contact?.name || conversation.contact?.phone || 'Desconhecido';
   const initials = contactName.substring(0, 2).toUpperCase();
   const { assignedTags } = useWhatsAppConversationTags(conversation.id);
+  const { userInfo } = useCurrentUser();
+
+  const isMyConversation = conversation.assigned_to === userInfo?.user_id;
+  const agentName = conversation.assigned_user?.full_name || 'Atendente';
 
   return (
     <div
@@ -27,10 +33,30 @@ export const ConversationItem = ({ conversation, isSelected, onClick }: Conversa
       )}
     >
       <div className="flex items-start gap-3">
-        <Avatar>
-          <AvatarImage src={conversation.contact?.profile_picture_url} />
-          <AvatarFallback className="bg-green-600 text-white">{initials}</AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar>
+            <AvatarImage src={conversation.contact?.profile_picture_url} />
+            <AvatarFallback className="bg-green-600 text-white">{initials}</AvatarFallback>
+          </Avatar>
+          {conversation.assigned_to && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute -bottom-1 -right-1">
+                    <Avatar className="w-5 h-5 border-2 border-background">
+                      <AvatarFallback className="text-[8px] bg-primary text-primary-foreground">
+                        {isMyConversation ? 'EU' : agentName.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{isMyConversation ? 'Seu atendimento' : `Atribuído a ${agentName}`}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">

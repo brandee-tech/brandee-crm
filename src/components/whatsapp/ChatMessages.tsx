@@ -20,6 +20,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { TagSelector } from '@/components/TagSelector';
 import { useWhatsAppConversationTags } from '@/hooks/useWhatsAppConversationTags';
+import { AssignAgentDropdown } from './AssignAgentDropdown';
 interface ChatMessagesProps {
   conversation: WhatsAppConversation;
   instanceName: string;
@@ -190,7 +191,11 @@ export const ChatMessages = ({
           </div>
 
           <div className="flex items-center gap-2">
-            
+            <AssignAgentDropdown 
+              conversationId={conversation.id}
+              currentAgentId={conversation.assigned_to}
+              companyId={conversation.company_id}
+            />
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

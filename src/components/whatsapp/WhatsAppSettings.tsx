@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { QrCode, Power, Check, X, Loader2 } from 'lucide-react';
+import QRCodeLib from 'qrcode';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,13 +31,18 @@ export const WhatsAppSettings = ({ companyId }: WhatsAppSettingsProps) => {
     try {
       const result = await getQRCode.mutateAsync(instance.instance_name);
       console.log('QR Code result:', result);
-      if (result.qrcode?.base64) {
-        // Verificar se já é uma URL base64 completa ou apenas o código
-        const base64Code = result.qrcode.base64;
-        const qrCodeUrl = base64Code.startsWith('data:image')
-          ? base64Code
-          : `data:image/png;base64,${base64Code}`;
-        setQrCode(qrCodeUrl);
+      
+      if (result.code) {
+        // Gerar imagem QR code a partir do código retornado pela API
+        const qrCodeDataUrl = await QRCodeLib.toDataURL(result.code, {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
+        });
+        setQrCode(qrCodeDataUrl);
       }
     } catch (error) {
       console.error('Erro ao carregar QR Code:', error);

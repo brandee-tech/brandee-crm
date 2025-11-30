@@ -68,11 +68,11 @@ export const useWhatsAppInstance = (companyId?: string) => {
 
       if (error) throw error;
       
-      // A Evolution API retorna o QR code no campo "base64"
+      // A Evolution API retorna o código do QR no campo "code"
+      // Esse código precisa ser convertido em imagem no frontend
       return {
-        qrcode: {
-          base64: data.base64
-        }
+        code: data.code,
+        pairingCode: data.pairingCode
       };
     },
   });

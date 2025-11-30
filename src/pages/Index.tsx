@@ -126,7 +126,7 @@ const Index = () => {
   return (
     <LeadDialogProvider>
       <OnboardingCheck>
-        <div className="min-h-screen bg-gray-50 flex flex-col w-full">
+        <div className="h-screen bg-gray-50 flex flex-col w-full overflow-hidden">
           <div className="flex flex-1">
             {/* Desktop Sidebar */}
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />

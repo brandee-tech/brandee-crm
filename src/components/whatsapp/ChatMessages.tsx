@@ -71,7 +71,10 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
 
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
     }
   }, [messages]);
 
@@ -117,7 +120,7 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-border bg-background">
+      <div className="flex-shrink-0 p-4 border-b border-border bg-background max-h-[40%] overflow-y-auto">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <Avatar>
@@ -232,19 +235,23 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        <div className="space-y-4">
-          {messages?.map((message) => (
-            <MessageBubble key={message.id} message={message} />
-          ))}
-        </div>
-      </ScrollArea>
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ScrollArea className="h-full p-4" ref={scrollRef}>
+          <div className="space-y-4">
+            {messages?.map((message) => (
+              <MessageBubble key={message.id} message={message} />
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Input */}
-      <MessageInput
-        conversation={conversation}
-        instanceName={instanceName}
-      />
+      <div className="flex-shrink-0">
+        <MessageInput
+          conversation={conversation}
+          instanceName={instanceName}
+        />
+      </div>
 
       {/* Dialogs */}
       {conversation.contact && (

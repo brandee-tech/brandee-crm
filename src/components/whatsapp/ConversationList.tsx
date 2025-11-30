@@ -24,8 +24,8 @@ export const ConversationList = ({ conversations, selectedId, onSelect }: Conver
   });
 
   return (
-    <>
-      <div className="p-4 border-b border-border">
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex-shrink-0 p-4 border-b border-border">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
@@ -37,24 +37,26 @@ export const ConversationList = ({ conversations, selectedId, onSelect }: Conver
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
-        {filteredConversations.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            {searchTerm ? 'Nenhuma conversa encontrada' : 'Nenhuma conversa ainda'}
-          </div>
-        ) : (
-          <div className="divide-y divide-border">
-            {filteredConversations.map((conversation) => (
-              <ConversationItem
-                key={conversation.id}
-                conversation={conversation}
-                isSelected={conversation.id === selectedId}
-                onClick={() => onSelect(conversation.id)}
-              />
-            ))}
-          </div>
-        )}
-      </ScrollArea>
-    </>
+      <div className="flex-1 min-h-0">
+        <ScrollArea className="h-full">
+          {filteredConversations.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              {searchTerm ? 'Nenhuma conversa encontrada' : 'Nenhuma conversa ainda'}
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {filteredConversations.map((conversation) => (
+                <ConversationItem
+                  key={conversation.id}
+                  conversation={conversation}
+                  isSelected={conversation.id === selectedId}
+                  onClick={() => onSelect(conversation.id)}
+                />
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+    </div>
   );
 };

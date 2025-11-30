@@ -1,9 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
-import { Phone, Video, MoreVertical, Link2, UserPlus, X, ExternalLink } from 'lucide-react';
+import { Phone, Video, MoreVertical, Link2, UserPlus, X, ExternalLink, Trash2, MessageSquareX } from 'lucide-react';
 import { WhatsAppConversation } from '@/types/whatsapp';
 import { useWhatsAppMessages } from '@/hooks/useWhatsAppMessages';
 import { useWhatsAppConversations } from '@/hooks/useWhatsAppConversations';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MessageBubble } from './MessageBubble';
@@ -34,6 +50,8 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
 
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [createLeadDialogOpen, setCreateLeadDialogOpen] = useState(false);
+  const [deleteConversationOpen, setDeleteConversationOpen] = useState(false);
+  const [clearMessagesOpen, setClearMessagesOpen] = useState(false);
 
   const { assignedTags, assignTag, removeTag } = useWhatsAppConversationTags(conversation.id);
 
@@ -66,6 +84,46 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
       'Perdido': 'bg-red-100 text-red-700',
     };
     return colors[status] || 'bg-gray-100 text-gray-700';
+  };
+
+  const handleClearMessages = async () => {
+    try {
+      const { error } = await supabase
+        .from('whatsapp_messages')
+        .delete()
+        .eq('conversation_id', conversation.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['whatsapp-messages', conversation.id] });
+      setClearMessagesOpen(false);
+    } catch (error) {
+      console.error('Error clearing messages:', error);
+    }
+  };
+
+  const handleDeleteConversation = async () => {
+    try {
+      // Deletar mensagens primeiro
+      await supabase
+        .from('whatsapp_messages')
+        .delete()
+        .eq('conversation_id', conversation.id);
+
+      // Deletar conversa
+      const { error } = await supabase
+        .from('whatsapp_conversations')
+        .delete()
+        .eq('id', conversation.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['whatsapp-conversations'] });
+      setDeleteConversationOpen(false);
+      // A conversa será removida da lista e o chat será limpo
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+    }
   };
 
   useEffect(() => {
@@ -136,9 +194,29 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
             <Button variant="ghost" size="icon">
               <Video className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="w-5 h-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-background z-50">
+                <DropdownMenuItem 
+                  onClick={() => setClearMessagesOpen(true)}
+                  className="cursor-pointer"
+                >
+                  <MessageSquareX className="w-4 h-4 mr-2" />
+                  Limpar mensagens
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setDeleteConversationOpen(true)}
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Deletar conversa
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -270,6 +348,47 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
           />
         </>
       )}
+
+      {/* Clear Messages Dialog */}
+      <AlertDialog open={clearMessagesOpen} onOpenChange={setClearMessagesOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar mensagens</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja limpar todas as mensagens desta conversa? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearMessages}>
+              Limpar mensagens
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Conversation Dialog */}
+      <AlertDialog open={deleteConversationOpen} onOpenChange={setDeleteConversationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar conversa</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar esta conversa permanentemente? 
+              Todas as mensagens também serão removidas. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteConversation}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Deletar conversa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

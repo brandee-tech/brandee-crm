@@ -1,11 +1,18 @@
 
 import { useState, useEffect } from 'react';
 import { MessageCircle, X } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useCurrentCompany } from '@/hooks/useCurrentCompany';
 
 export const WhatsAppButton = () => {
   const { company, loading } = useCurrentCompany();
+  const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
+  
+  // Não mostrar na página do WhatsApp
+  if (location.pathname === '/whatsapp') {
+    return null;
+  }
 
   useEffect(() => {
     // Mostrar o botão após 2 segundos para não ser intrusivo

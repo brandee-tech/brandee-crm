@@ -6,6 +6,88 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Função para buscar e salvar foto de perfil do contato
+async function fetchAndSaveProfilePicture(
+  supabaseAdmin: any,
+  evolutionApiUrl: string,
+  evolutionApiKey: string,
+  instanceName: string,
+  phoneNumber: string,
+  contactId: string
+) {
+  try {
+    console.log(`Buscando foto de perfil para ${phoneNumber}...`);
+    
+    // 1. Buscar URL da foto na Evolution API
+    const response = await fetch(
+      `${evolutionApiUrl}/chat/fetchProfilePictureUrl/${instanceName}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': evolutionApiKey,
+        },
+        body: JSON.stringify({ number: phoneNumber }),
+      }
+    );
+
+    if (!response.ok) {
+      console.log(`Foto de perfil não disponível para: ${phoneNumber}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const pictureUrl = data.profilePictureUrl;
+
+    if (!pictureUrl) {
+      console.log(`Contato ${phoneNumber} não possui foto de perfil`);
+      return null;
+    }
+
+    console.log(`URL da foto encontrada: ${pictureUrl}`);
+
+    // 2. Baixar a imagem
+    const imageResponse = await fetch(pictureUrl);
+    if (!imageResponse.ok) {
+      console.error(`Erro ao baixar imagem: ${imageResponse.status}`);
+      return null;
+    }
+    
+    const imageBlob = await imageResponse.arrayBuffer();
+    console.log(`Imagem baixada, tamanho: ${imageBlob.byteLength} bytes`);
+
+    // 3. Upload para o Storage
+    const fileName = `${contactId}.jpg`;
+    const { data: uploadData, error: uploadError } = await supabaseAdmin
+      .storage
+      .from('whatsapp-avatars')
+      .upload(fileName, imageBlob, {
+        contentType: 'image/jpeg',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error('Erro ao fazer upload da foto:', uploadError);
+      return null;
+    }
+
+    console.log(`Upload realizado: ${fileName}`);
+
+    // 4. Gerar URL pública
+    const { data: publicUrlData } = supabaseAdmin
+      .storage
+      .from('whatsapp-avatars')
+      .getPublicUrl(fileName);
+
+    console.log(`URL pública gerada: ${publicUrlData.publicUrl}`);
+    return publicUrlData.publicUrl;
+
+  } catch (error) {
+    console.error('Erro ao buscar foto de perfil:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -81,6 +163,32 @@ serve(async (req) => {
         }
         
         console.log('Contact created/updated:', contact.id, contact.name);
+
+        // Buscar foto de perfil se o contato não tiver uma
+        if (!contact.profile_picture_url) {
+          console.log('Contato sem foto de perfil, buscando...');
+          
+          const evolutionApiUrl = Deno.env.get('EVOLUTION_API_URL') ?? '';
+          const evolutionApiKey = Deno.env.get('EVOLUTION_API_KEY') ?? '';
+          
+          const profilePicUrl = await fetchAndSaveProfilePicture(
+            supabaseAdmin,
+            evolutionApiUrl,
+            evolutionApiKey,
+            instance,
+            contact.phone || remoteJid.split('@')[0],
+            contact.id
+          );
+
+          if (profilePicUrl) {
+            await supabaseAdmin
+              .from('whatsapp_contacts')
+              .update({ profile_picture_url: profilePicUrl })
+              .eq('id', contact.id);
+            
+            console.log('Foto de perfil salva com sucesso:', profilePicUrl);
+          }
+        }
 
         // Criar ou obter conversa
         const { data: conversation, error: conversationError } = await supabaseAdmin

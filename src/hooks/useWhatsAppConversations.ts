@@ -67,10 +67,35 @@ export const useWhatsAppConversations = (companyId?: string) => {
     },
   });
 
+  const assignAgent = useMutation({
+    mutationFn: async ({ 
+      conversationId, 
+      agentId 
+    }: { 
+      conversationId: string; 
+      agentId: string | null 
+    }) => {
+      const { error } = await supabase
+        .from('whatsapp_conversations')
+        .update({ assigned_to: agentId })
+        .eq('id', conversationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['whatsapp-conversations'] });
+      toast.success('Atendente atribuído com sucesso');
+    },
+    onError: (error: any) => {
+      toast.error(`Erro ao atribuir atendente: ${error.message}`);
+    },
+  });
+
   return {
     conversations,
     isLoading,
     updateConversation,
     markAsRead,
+    assignAgent,
   };
 };

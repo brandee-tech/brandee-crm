@@ -1892,18 +1892,24 @@ export type Database = {
         Args: { target_company_id: string }
         Returns: undefined
       }
-      get_advanced_saas_analytics: {
-        Args:
-          | Record<PropertyKey, never>
-          | { company_filter?: string; period_days?: number }
-        Returns: Json
-      }
-      get_current_user_company_id: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      get_advanced_saas_analytics:
+        | {
+            Args: { company_filter?: string; period_days?: number }
+            Returns: Json
+          }
+        | {
+            Args: never
+            Returns: {
+              active_companies: number
+              total_appointments: number
+              total_companies: number
+              total_leads: number
+              total_users: number
+            }[]
+          }
+      get_current_user_company_id: { Args: never; Returns: string }
       get_current_user_info: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           company_id: string
           company_name: string
@@ -1915,7 +1921,7 @@ export type Database = {
         }[]
       }
       get_saas_metrics: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_companies: number
           total_appointments: number
@@ -1924,30 +1930,15 @@ export type Database = {
           total_users: number
         }[]
       }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_saas_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_saas_admin_for_company_management: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_current_user_admin: { Args: never; Returns: boolean }
+      is_saas_admin: { Args: never; Returns: boolean }
+      is_saas_admin_for_company_management: { Args: never; Returns: boolean }
       setup_company_admin: {
         Args: { company_id: string; user_id: string }
         Returns: undefined
       }
-      sync_appointment_status_with_pipeline: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      update_goal_progress: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      sync_appointment_status_with_pipeline: { Args: never; Returns: undefined }
+      update_goal_progress: { Args: never; Returns: undefined }
       user_has_permission: {
         Args: { permission_path: string }
         Returns: boolean

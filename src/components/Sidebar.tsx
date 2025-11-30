@@ -22,6 +22,7 @@ import {
   Handshake,
   Clock,
   Tag,
+  MessageCircle,
 } from "lucide-react";
 import { PermissionGuard } from "@/components/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -51,6 +52,7 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'scripts', label: 'Materiais', icon: FileText, permission: 'scripts' },
     { id: 'reports', label: 'Relatórios', icon: BarChart3, permission: 'reports' },
     { id: 'partners', label: 'Parceiros', icon: Handshake, permission: 'partners' },
+    { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, permission: null, route: '/whatsapp' },
     { id: 'users', label: 'Usuários', icon: Users, permission: 'user-management' },
     { id: 'settings', label: 'Configurações', icon: Settings, permission: 'settings' },
   ];
@@ -95,7 +97,13 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 "w-full justify-start",
                 activeTab === item.id && "bg-primary text-primary-foreground"
               )}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                if (item.route) {
+                  navigate(item.route);
+                } else {
+                  setActiveTab(item.id);
+                }
+              }}
             >
               <Icon className="mr-2 h-4 w-4" />
               {item.label}

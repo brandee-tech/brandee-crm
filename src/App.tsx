@@ -14,6 +14,7 @@ import CompanyRegistration from "./pages/CompanyRegistration";
 import NotFound from "./pages/NotFound";
 import { CompanyEditPage } from "./pages/admin/CompanyEditPage";
 import { WhatsAppButton } from "./components/WhatsAppButton";
+import { WhatsAppChat } from "./components/whatsapp/WhatsAppChat";
 import "./App.css";
 
 const queryClient = new QueryClient({
@@ -37,6 +38,7 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/whatsapp" element={<WhatsAppChat />} />
                     <Route path="/admin" element={<AdminSaas />} />
                     <Route path="/admin/companies/:id/edit" element={<CompanyEditPage />} />
                     <Route path="/landing" element={<Landing />} />

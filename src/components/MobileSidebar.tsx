@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useCompanySettings } from '@/hooks/useCompanySettings';
 import { useSaasAdmin } from '@/hooks/useSaasAdmin';
+import { useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import {
   LayoutDashboard,
@@ -23,6 +24,7 @@ import {
   Handshake,
   Clock,
   Tag,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +37,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
   const [isOpen, setIsOpen] = useState(false);
   const { company, isLoading } = useCompanySettings();
   const { isSaasAdmin } = useSaasAdmin();
+  const navigate = useNavigate();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -50,12 +53,17 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
     { id: 'scripts', label: 'Materiais', icon: FileText },
     { id: 'reports', label: 'Relatórios', icon: BarChart3 },
     { id: 'partners', label: 'Parceiros', icon: Handshake },
+    { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, route: '/whatsapp' },
     { id: 'users', label: 'Usuários', icon: Users },
     { id: 'settings', label: 'Configurações', icon: Settings },
   ];
 
-  const handleItemClick = (tab: string) => {
-    setActiveTab(tab);
+  const handleItemClick = (item: any) => {
+    if (item.route) {
+      navigate(item.route);
+    } else {
+      setActiveTab(item.id);
+    }
     setIsOpen(false);
   };
 
@@ -101,7 +109,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
                     "w-full justify-start",
                     activeTab === item.id && "bg-primary text-primary-foreground"
                   )}
-                  onClick={() => handleItemClick(item.id)}
+                  onClick={() => handleItemClick(item)}
                 >
                   <Icon className="mr-2 h-4 w-4" />
                   {item.label}

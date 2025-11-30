@@ -8,62 +8,63 @@ export const useRealtimeWhatsApp = (companyId?: string) => {
   useEffect(() => {
     if (!companyId) return;
 
-    // Listener para instâncias
-    const instanceChannel = supabase
-      .channel('whatsapp-instances-changes')
+    console.log('[Realtime] Subscribing to WhatsApp updates for company:', companyId);
+
+    // Canal único para todas as mudanças do WhatsApp
+    const channel = supabase
+      .channel(`whatsapp-realtime-${companyId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'whatsapp_instances',
-          filter: `company_id=eq.${companyId}`,
         },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['whatsapp-instance'] });
+        (payload) => {
+          if ((payload.new as any)?.company_id === companyId || (payload.old as any)?.company_id === companyId) {
+            console.log('[Realtime] Instance change detected');
+            queryClient.invalidateQueries({ queryKey: ['whatsapp-instance'] });
+          }
         }
       )
-      .subscribe();
-
-    // Listener para conversas
-    const conversationsChannel = supabase
-      .channel('whatsapp-conversations-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'whatsapp_conversations',
-          filter: `company_id=eq.${companyId}`,
         },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['whatsapp-conversations'] });
+        (payload) => {
+          const record = payload.new || payload.old;
+          if ((record as any)?.company_id === companyId) {
+            console.log('[Realtime] Conversation change detected');
+            queryClient.invalidateQueries({ queryKey: ['whatsapp-conversations'] });
+          }
         }
       )
-      .subscribe();
-
-    // Listener para mensagens
-    const messagesChannel = supabase
-      .channel('whatsapp-messages-changes')
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'whatsapp_messages',
-          filter: `company_id=eq.${companyId}`,
         },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['whatsapp-messages'] });
-          queryClient.invalidateQueries({ queryKey: ['whatsapp-conversations'] });
+        (payload) => {
+          const record = payload.new || payload.old;
+          if ((record as any)?.company_id === companyId) {
+            console.log('[Realtime] Message change detected:', payload.eventType);
+            queryClient.invalidateQueries({ queryKey: ['whatsapp-messages'] });
+            queryClient.invalidateQueries({ queryKey: ['whatsapp-conversations'] });
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('[Realtime] Subscription status:', status);
+      });
 
     return () => {
-      supabase.removeChannel(instanceChannel);
-      supabase.removeChannel(conversationsChannel);
-      supabase.removeChannel(messagesChannel);
+      console.log('[Realtime] Unsubscribing from channel');
+      supabase.removeChannel(channel);
     };
   }, [companyId, queryClient]);
 };

@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ChatMessagesProps {
   conversation: WhatsAppConversation;
@@ -18,6 +20,7 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
   const { messages } = useWhatsAppMessages(conversation.id, instanceName);
   const { markAsRead } = useWhatsAppConversations(conversation.company_id);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   const contactName = conversation.contact?.name || conversation.contact?.phone || 'Desconhecido';
   const initials = contactName.substring(0, 2).toUpperCase();
@@ -33,6 +36,39 @@ export const ChatMessages = ({ conversation, instanceName }: ChatMessagesProps) 
       markAsRead.mutate(conversation.id);
     }
   }, [conversation.id, conversation.unread_count]);
+
+  // Listener específico para mensagens desta conversa
+  useEffect(() => {
+    console.log('[ChatMessages] Setting up realtime for conversation:', conversation.id);
+    
+    const channel = supabase
+      .channel(`chat-messages-${conversation.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'whatsapp_messages',
+        },
+        (payload) => {
+          const record = payload.new || payload.old;
+          if ((record as any)?.conversation_id === conversation.id) {
+            console.log('[ChatMessages] Message change detected:', payload.eventType);
+            queryClient.invalidateQueries({ 
+              queryKey: ['whatsapp-messages', conversation.id] 
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[ChatMessages] Subscription status:', status);
+      });
+
+    return () => {
+      console.log('[ChatMessages] Cleaning up realtime for conversation:', conversation.id);
+      supabase.removeChannel(channel);
+    };
+  }, [conversation.id, queryClient]);
 
   return (
     <div className="flex flex-col h-full">

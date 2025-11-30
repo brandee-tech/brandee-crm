@@ -279,19 +279,38 @@ serve(async (req) => {
 
       case 'MESSAGES_UPDATE':
       case 'messages.update': {
-        const updates = data;
-        for (const update of updates) {
-          const messageId = update.key.id;
-          let status = 'sent';
+        console.log('Processing message status update:', data);
+        
+        // Evolution API v2 envia objeto único, não array
+        const update = data;
+        const messageId = update.keyId || update.key?.id;
+        
+        if (!messageId) {
+          console.log('Skipping update without messageId');
+          break;
+        }
+        
+        let status = 'sent';
+        if (update.status === 'DELIVERY_ACK' || update.update?.status === 3) {
+          status = 'delivered';
+        }
+        if (update.status === 'READ' || update.update?.status === 4) {
+          status = 'read';
+        }
+        if (update.status === 'SERVER_ACK') {
+          status = 'sent';
+        }
 
-          if (update.update?.status === 3) status = 'delivered';
-          if (update.update?.status === 4) status = 'read';
+        const { error: updateError } = await supabaseAdmin
+          .from('whatsapp_messages')
+          .update({ status })
+          .eq('whatsapp_message_id', messageId)
+          .eq('company_id', instanceData.company_id);
 
-          await supabaseAdmin
-            .from('whatsapp_messages')
-            .update({ status })
-            .eq('whatsapp_message_id', messageId)
-            .eq('company_id', instanceData.company_id);
+        if (updateError) {
+          console.error('Error updating message status:', updateError);
+        } else {
+          console.log(`Message ${messageId} status updated to: ${status}`);
         }
         break;
       }

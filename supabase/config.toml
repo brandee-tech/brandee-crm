@@ -2,3 +2,6 @@ project_id = "lujqguffwpqozzcstuuc"
 
 [functions.evolution-webhook]
 verify_jwt = false
+
+[functions.submit-lead-form]
+verify_jwt = false

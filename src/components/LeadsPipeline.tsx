@@ -131,7 +131,7 @@ export const LeadsPipeline = () => {
   }
 
   return (
-    <div className="p-8 space-y-6 h-full flex flex-col">
+    <div className="p-8 space-y-6 h-full flex flex-col overflow-hidden">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Pipeline de Leads</h1>
@@ -160,7 +160,7 @@ export const LeadsPipeline = () => {
       {showColumnManager && <PipelineColumnManager />}
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-4 flex-1 min-h-0">
+        <div className="flex gap-6 overflow-x-auto pb-4 flex-1 min-h-0 -mx-8 px-8">
           {columns.map(column => (
             <div key={column.id} className="flex-shrink-0 w-[300px] space-y-4">
               <Card className="shrink-0">

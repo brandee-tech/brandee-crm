@@ -6,17 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap, MoreVertical, Settings2, Download, Upload, Copy, ArrowDownAZ, Check, Filter, Search, X } from 'lucide-react';
 import { useLeadsPipeline, SortOrder } from '@/hooks/useLeadsPipeline';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AddLeadDialog } from '@/components/AddLeadDialog';
 import { EditLeadDialog } from '@/components/EditLeadDialog';
 import { useLeadDialog } from '@/contexts/LeadDialogContext';
@@ -42,7 +32,6 @@ import { ptBR } from 'date-fns/locale';
 // Formatar data relativa (Ontem, Hoje, etc.)
 const formatRelativeDate = (dateString: string) => {
   const date = new Date(dateString);
-  
   if (isToday(date)) {
     return `Hoje ${format(date, 'HH:mm')}`;
   } else if (isYesterday(date)) {
@@ -53,18 +42,16 @@ const formatRelativeDate = (dateString: string) => {
 
 // Formatar valor monetário
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', { 
-    style: 'currency', 
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
     currency: 'BRL',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(value);
 };
-
 export const LeadsPipeline = () => {
   console.log('🔍 LeadsPipeline component rendering');
   const navigate = useNavigate();
-  
   const {
     leads,
     leadsByStatus,
@@ -78,13 +65,23 @@ export const LeadsPipeline = () => {
     sortOrder,
     setSortOrder
   } = useLeadsPipeline();
-
-  const { state: leadDialogState, openDialog: openLeadDialog, closeDialog: closeLeadDialog } = useLeadDialog();
-  const { exportFilteredLeads } = useExportLeads();
-  const { toast } = useToast();
-  const { partners } = usePartners();
-  const { tags } = useLeadTags();
-  
+  const {
+    state: leadDialogState,
+    openDialog: openLeadDialog,
+    closeDialog: closeLeadDialog
+  } = useLeadDialog();
+  const {
+    exportFilteredLeads
+  } = useExportLeads();
+  const {
+    toast
+  } = useToast();
+  const {
+    partners
+  } = usePartners();
+  const {
+    tags
+  } = useLeadTags();
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState(false);
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
   const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
@@ -96,7 +93,6 @@ export const LeadsPipeline = () => {
   const [transferLead, setTransferLead] = useState<any>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-
   const getActiveFiltersCount = () => {
     let count = 0;
     if (filters.searchTerm) count++;
@@ -106,19 +102,20 @@ export const LeadsPipeline = () => {
     if (filters.dateRange.from || filters.dateRange.to) count++;
     return count;
   };
-
   const clearAllFilters = () => {
     setFilters({
       searchTerm: '',
       temperature: 'todos',
       partner_id: 'todos',
       tags: [],
-      dateRange: { from: '', to: '' }
+      dateRange: {
+        from: '',
+        to: ''
+      }
     });
   };
-
   const activeFiltersCount = getActiveFiltersCount();
-  
+
   // Debug logs importantes para o pipeline
   console.log('🔍 LeadsPipeline component state:', {
     columnsCount: columns?.length || 0,
@@ -128,40 +125,34 @@ export const LeadsPipeline = () => {
     selectedLead: selectedLead?.id || null,
     dragLoading
   });
-
   const handleEditLead = (lead: any) => {
     console.log('Pipeline - Handle edit lead clicked, lead:', lead);
     console.log('Current editLeadDialogOpen state:', editLeadDialogOpen);
     console.log('Current selectedLead state:', selectedLead);
-    
     try {
       if (!lead) {
         console.error('Pipeline - Lead is null or undefined');
         return;
       }
-      
       if (!lead.id) {
         console.error('Pipeline - Lead ID is missing');
         return;
       }
-      
       setSelectedLead(lead);
       setEditLeadDialogOpen(true);
       console.log('Pipeline - Edit dialog state set to true, lead set to:', lead);
-      
+
       // Force re-render check
       setTimeout(() => {
         console.log('Pipeline - After timeout - editLeadDialogOpen:', editLeadDialogOpen, 'selectedLead:', selectedLead);
       }, 100);
-      
     } catch (error) {
       console.error('Pipeline - Error in handleEditLead:', error);
     }
   };
-
   const handleAppointmentAction = useCallback((lead: any) => {
     console.log('🔥 [DEBUG] handleAppointmentAction chamado com lead:', lead?.id, lead?.name);
-    
+
     // Se o lead tem agendamentos, mostra o agendamento existente
     if (lead.appointments_count > 0 && lead.latest_appointment) {
       setSelectedLead(lead);
@@ -173,17 +164,14 @@ export const LeadsPipeline = () => {
       setAddAppointmentDialogOpen(true);
     }
   }, []);
-
   const handleViewJourney = (lead: any) => {
     setSelectedLead(lead);
     setViewJourneyDialogOpen(true);
   };
-
   const handleTransferLead = (lead: any) => {
     setTransferLead(lead);
     setTransferLeadDialogOpen(true);
   };
-
   const handleExportLeads = () => {
     if (leads.length === 0) {
       toast({
@@ -199,23 +187,23 @@ export const LeadsPipeline = () => {
       status: 'todos',
       source: 'todas',
       tags: filters.tags,
-      valueRange: { min: '', max: '' },
+      valueRange: {
+        min: '',
+        max: ''
+      },
       dateRange: filters.dateRange
     };
     exportFilteredLeads(leads, adaptedFilters);
   };
-
   const handleFindDuplicates = () => {
     toast({
       title: "Em breve",
       description: "Funcionalidade de localização de duplicatas será implementada em breve."
     });
   };
-
   const handleSort = (order: SortOrder) => {
     setSortOrder(order);
   };
-
   const formatDateTime = (date: string, time: string) => {
     try {
       const dateTime = new Date(`${date}T${time}`);
@@ -226,17 +214,12 @@ export const LeadsPipeline = () => {
       return `${date} às ${time}`;
     }
   };
-
   if (loading) {
-    return (
-      <div className="p-8 flex items-center justify-center min-h-screen">
+    return <div className="p-8 flex items-center justify-center min-h-screen">
         <div className="text-lg">Carregando pipeline de leads...</div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="p-4 h-full flex flex-col overflow-hidden">
+  return <div className="p-4 h-full flex flex-col overflow-hidden">
       {/* Header fixo */}
       <div className="shrink-0 space-y-3 pb-3">
         <div className="flex justify-between items-center">
@@ -247,44 +230,29 @@ export const LeadsPipeline = () => {
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Buscar por nome ou email..."
-                value={filters.searchTerm}
-                onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
-                className="pl-10 w-64"
-              />
+              
             </div>
             
             <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="relative">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filtros
-                  {activeFiltersCount > 0 && (
-                    <Badge variant="secondary" className="ml-2">
-                      {activeFiltersCount}
-                    </Badge>
-                  )}
-                </Button>
+                
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4" align="end">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium">Filtros</h4>
-                    {activeFiltersCount > 0 && (
-                      <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                    {activeFiltersCount > 0 && <Button variant="ghost" size="sm" onClick={clearAllFilters}>
                         <X className="w-4 h-4 mr-1" />
                         Limpar
-                      </Button>
-                    )}
+                      </Button>}
                   </div>
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Temperatura</label>
-                    <Select
-                      value={filters.temperature}
-                      onValueChange={(value) => setFilters({ ...filters, temperature: value })}
-                    >
+                    <Select value={filters.temperature} onValueChange={value => setFilters({
+                    ...filters,
+                    temperature: value
+                  })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -299,22 +267,18 @@ export const LeadsPipeline = () => {
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Parceiro</label>
-                    <Select
-                      value={filters.partner_id}
-                      onValueChange={(value) => setFilters({ ...filters, partner_id: value })}
-                    >
+                    <Select value={filters.partner_id} onValueChange={value => setFilters({
+                    ...filters,
+                    partner_id: value
+                  })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="todos">Todos</SelectItem>
-                        {partners
-                          .filter(partner => partner.status === 'ativo')
-                          .map((partner) => (
-                            <SelectItem key={partner.id} value={partner.id}>
+                        {partners.filter(partner => partner.status === 'ativo').map(partner => <SelectItem key={partner.id} value={partner.id}>
                               {partner.name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -322,18 +286,20 @@ export const LeadsPipeline = () => {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Período</label>
                     <div className="flex gap-2">
-                      <Input
-                        type="date"
-                        value={filters.dateRange.from}
-                        onChange={(e) => setFilters({ ...filters, dateRange: { ...filters.dateRange, from: e.target.value } })}
-                        className="text-sm"
-                      />
-                      <Input
-                        type="date"
-                        value={filters.dateRange.to}
-                        onChange={(e) => setFilters({ ...filters, dateRange: { ...filters.dateRange, to: e.target.value } })}
-                        className="text-sm"
-                      />
+                      <Input type="date" value={filters.dateRange.from} onChange={e => setFilters({
+                      ...filters,
+                      dateRange: {
+                        ...filters.dateRange,
+                        from: e.target.value
+                      }
+                    })} className="text-sm" />
+                      <Input type="date" value={filters.dateRange.to} onChange={e => setFilters({
+                      ...filters,
+                      dateRange: {
+                        ...filters.dateRange,
+                        to: e.target.value
+                      }
+                    })} className="text-sm" />
                     </div>
                   </div>
                 </div>
@@ -417,17 +383,15 @@ export const LeadsPipeline = () => {
         <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
           <div className="flex gap-6 h-full pb-4">
             {columns.map(column => {
-              const columnLeads = leadsByStatus[column.name] || [];
-              const leadsCount = columnLeads.length;
-              const totalValue = columnLeads.reduce((sum, lead) => sum + (lead.product_value || 0), 0);
-              
-              return (
-              <div key={column.id} className="flex-shrink-0 w-[300px] flex flex-col">
+            const columnLeads = leadsByStatus[column.name] || [];
+            const leadsCount = columnLeads.length;
+            const totalValue = columnLeads.reduce((sum, lead) => sum + (lead.product_value || 0), 0);
+            return <div key={column.id} className="flex-shrink-0 w-[300px] flex flex-col">
                 {/* Header da coluna com borda superior colorida */}
-                <div 
-                  className="bg-white border rounded-lg shadow-sm mb-3"
-                  style={{ borderTopWidth: '4px', borderTopColor: column.color }}
-                >
+                <div className="bg-white border rounded-lg shadow-sm mb-3" style={{
+                borderTopWidth: '4px',
+                borderTopColor: column.color
+              }}>
                   <div className="p-3 text-center">
                     <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-700">
                       {column.name}
@@ -439,40 +403,12 @@ export const LeadsPipeline = () => {
                 </div>
 
               <Droppable droppableId={column.name}>
-                {(provided, snapshot) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className={`flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent space-y-3 p-2 rounded-lg transition-colors ${
-                      snapshot.isDraggingOver ? 'bg-gray-100' : ''
-                    }`}
-                  >
-                    {(leadsByStatus[column.name] || []).map((lead, index) => (
-                      <Draggable 
-                        key={lead.id} 
-                        draggableId={lead.id} 
-                        index={index}
-                        isDragDisabled={dragLoading === lead.id}
-                      >
-                        {(provided, snapshot) => (
-                          <Card
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`cursor-move transition-all duration-200 shrink-0 border-l-4 ${
-                              snapshot.isDragging 
-                                ? 'shadow-lg rotate-2 scale-105' 
-                                : 'hover:shadow-md'
-                            } ${
-                              dragLoading === lead.id 
-                                ? 'opacity-50 pointer-events-none' 
-                                : ''
-                            }`}
-                            style={{ 
-                              borderLeftColor: column.color,
-                              ...provided.draggableProps.style 
-                            }}
-                          >
+                {(provided, snapshot) => <div {...provided.droppableProps} ref={provided.innerRef} className={`flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent space-y-3 p-2 rounded-lg transition-colors ${snapshot.isDraggingOver ? 'bg-gray-100' : ''}`}>
+                    {(leadsByStatus[column.name] || []).map((lead, index) => <Draggable key={lead.id} draggableId={lead.id} index={index} isDragDisabled={dragLoading === lead.id}>
+                        {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`cursor-move transition-all duration-200 shrink-0 border-l-4 ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105' : 'hover:shadow-md'} ${dragLoading === lead.id ? 'opacity-50 pointer-events-none' : ''}`} style={{
+                      borderLeftColor: column.color,
+                      ...provided.draggableProps.style
+                    }}>
                             <CardContent className="p-3">
                               {/* Header: Avatar + Nome/Empresa + Data */}
                               <div className="flex items-start gap-3">
@@ -509,17 +445,13 @@ export const LeadsPipeline = () => {
                                 </div>
                                 
                                 <div className="flex items-center gap-2">
-                                  {lead.appointments_count > 0 ? (
-                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                  {lead.appointments_count > 0 ? <div className="flex items-center gap-1 text-xs text-gray-500">
                                       <span>{lead.appointments_count} agend.</span>
                                       <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    </div> : <div className="flex items-center gap-1 text-xs text-gray-500">
                                       <span>Sem Tarefas</span>
                                       <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                                    </div>
-                                  )}
+                                    </div>}
                                 </div>
                               </div>
 
@@ -527,12 +459,7 @@ export const LeadsPipeline = () => {
                               <div className="flex justify-end mt-2 pt-2 border-t border-gray-100">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-7 px-2 text-gray-500"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
+                                    <Button variant="ghost" size="sm" className="h-7 px-2 text-gray-500" onClick={e => e.stopPropagation()}>
                                       <MoreVertical className="w-4 h-4" />
                                     </Button>
                                   </DropdownMenuTrigger>
@@ -553,99 +480,56 @@ export const LeadsPipeline = () => {
                                       <ArrowRightLeft className="w-4 h-4 mr-2" />
                                       Transferir
                                     </DropdownMenuItem>
-                                    {lead.phone && (
-                                      <DropdownMenuItem>
-                                        <WhatsAppLeadButton 
-                                          phone={lead.phone} 
-                                          leadName={lead.name} 
-                                          size="sm"
-                                        />
+                                    {lead.phone && <DropdownMenuItem>
+                                        <WhatsAppLeadButton phone={lead.phone} leadName={lead.name} size="sm" />
                                         <span className="ml-2">WhatsApp</span>
-                                      </DropdownMenuItem>
-                                    )}
+                                      </DropdownMenuItem>}
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </div>
 
-                              {dragLoading === lead.id && (
-                                <div className="flex items-center gap-2 text-xs text-blue-600 mt-2">
+                              {dragLoading === lead.id && <div className="flex items-center gap-2 text-xs text-blue-600 mt-2">
                                   <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                   Movendo...
-                                </div>
-                              )}
+                                </div>}
                             </CardContent>
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
+                          </Card>}
+                      </Draggable>)}
                     {provided.placeholder}
-                  </div>
-                )}
+                  </div>}
               </Droppable>
-              </div>
-              );
-            })}
+              </div>;
+          })}
           </div>
         </div>
       </DragDropContext>
 
-      <AddLeadDialog 
-        open={leadDialogState.isOpen} 
-        onOpenChange={(open) => {
-          if (!open) {
-            closeLeadDialog();
-          }
-        }} 
-        onCreateLead={createLead}
-      />
+      <AddLeadDialog open={leadDialogState.isOpen} onOpenChange={open => {
+      if (!open) {
+        closeLeadDialog();
+      }
+    }} onCreateLead={createLead} />
 
-      <EditLeadDialog 
-        open={editLeadDialogOpen} 
-        onOpenChange={setEditLeadDialogOpen} 
-        lead={selectedLead} 
-      />
+      <EditLeadDialog open={editLeadDialogOpen} onOpenChange={setEditLeadDialogOpen} lead={selectedLead} />
 
-      <AddAppointmentDialog 
-        open={addAppointmentDialogOpen} 
-        onOpenChange={(open) => {
-          setAddAppointmentDialogOpen(open);
-          if (!open) {
-            setAppointmentLead(null);
-          }
-        }}
-        preselectedLead={appointmentLead}
-      />
+      <AddAppointmentDialog open={addAppointmentDialogOpen} onOpenChange={open => {
+      setAddAppointmentDialogOpen(open);
+      if (!open) {
+        setAppointmentLead(null);
+      }
+    }} preselectedLead={appointmentLead} />
 
-      <ViewAppointmentDialog 
-        open={viewAppointmentDialogOpen}
-        onOpenChange={setViewAppointmentDialogOpen}
-        appointment={selectedLead?.latest_appointment || null}
-      />
+      <ViewAppointmentDialog open={viewAppointmentDialogOpen} onOpenChange={setViewAppointmentDialogOpen} appointment={selectedLead?.latest_appointment || null} />
 
-      <ViewLeadJourneyDialog
-        leadId={selectedLead?.id || null}
-        leadName={selectedLead?.name || ''}
-        open={viewJourneyDialogOpen}
-        onOpenChange={setViewJourneyDialogOpen}
-      />
+      <ViewLeadJourneyDialog leadId={selectedLead?.id || null} leadName={selectedLead?.name || ''} open={viewJourneyDialogOpen} onOpenChange={setViewJourneyDialogOpen} />
 
-      <TransferLeadDialog
-        leadId={transferLead?.id || null}
-        leadName={transferLead?.name || ''}
-        currentAssignedTo={transferLead?.assigned_to || null}
-        open={transferLeadDialogOpen}
-        onOpenChange={(open) => {
-          setTransferLeadDialogOpen(open);
-          if (!open) {
-            setTransferLead(null);
-          }
-        }}
-      />
+      <TransferLeadDialog leadId={transferLead?.id || null} leadName={transferLead?.name || ''} currentAssignedTo={transferLead?.assigned_to || null} open={transferLeadDialogOpen} onOpenChange={open => {
+      setTransferLeadDialogOpen(open);
+      if (!open) {
+        setTransferLead(null);
+      }
+    }} />
 
-      <ImportLeadsDialog
-        open={importDialogOpen}
-        onOpenChange={setImportDialogOpen}
-      />
-    </div>
-  );
+      <ImportLeadsDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+    </div>;
 };

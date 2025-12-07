@@ -8,7 +8,7 @@ import { SidebarGroup } from "@/components/SidebarGroup";
 import { 
   LayoutDashboard, Users, CheckSquare, BarChart3, Settings, UserPlus, 
   Kanban, FileText, Calendar, CalendarDays, Video, Shield, Package, 
-  Handshake, Clock, Tag, MessageCircle, LucideIcon, Zap 
+  Handshake, Clock, Tag, MessageCircle, LucideIcon, Zap, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,6 +16,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 const menuStructure = [{
@@ -152,7 +154,9 @@ const menuStructure = [{
 
 export const Sidebar = ({
   activeTab,
-  setActiveTab
+  setActiveTab,
+  collapsed = false,
+  onToggleCollapse
 }: SidebarProps) => {
   const { company, loading } = useCurrentCompany();
   const { isSaasAdmin } = useSaasAdmin();
@@ -165,31 +169,62 @@ export const Sidebar = ({
 
   return (
     <TooltipProvider>
-      <div className="hidden md:flex w-64 bg-sidebar border-r border-sidebar-border flex-col shadow-sm">
+      <div className={cn(
+        "hidden md:flex bg-sidebar border-r border-sidebar-border flex-col shadow-sm relative transition-all duration-300 ease-in-out",
+        collapsed ? "w-20" : "w-64"
+      )}>
+        {/* Toggle Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute -right-3 top-8 z-10 w-6 h-6 rounded-full bg-background shadow-md border hover:bg-accent"
+          onClick={onToggleCollapse}
+        >
+          {collapsed ? (
+            <ChevronRight className="h-3 w-3" />
+          ) : (
+            <ChevronLeft className="h-3 w-3" />
+          )}
+        </Button>
+
         {/* Company Header */}
-        <div className="p-5 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-10 h-10 ring-2 ring-primary/10 transition-all duration-200 hover:ring-primary/30">
+        <div className={cn(
+          "border-b border-sidebar-border transition-all duration-300",
+          collapsed ? "p-3" : "p-5"
+        )}>
+          <div className={cn(
+            "flex items-center",
+            collapsed ? "justify-center" : "gap-3"
+          )}>
+            <Avatar className={cn(
+              "ring-2 ring-primary/10 transition-all duration-200 hover:ring-primary/30",
+              collapsed ? "w-10 h-10" : "w-10 h-10"
+            )}>
               <AvatarImage src={company?.logo_url} alt={company?.name} />
               <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
                 {company?.name?.charAt(0) || 'C'}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-base font-semibold text-sidebar-foreground truncate">
-                {loading ? 'Carregando...' : company?.name || 'CRM System'}
-              </h1>
-              {company?.industry && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {company.industry}
-                </p>
-              )}
-            </div>
+            {!collapsed && (
+              <div className="flex-1 min-w-0">
+                <h1 className="text-base font-semibold text-sidebar-foreground truncate">
+                  {loading ? 'Carregando...' : company?.name || 'CRM System'}
+                </h1>
+                {company?.industry && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {company.industry}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
         
         {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-none">
+        <nav className={cn(
+          "flex-1 space-y-1 overflow-y-auto scrollbar-none",
+          collapsed ? "p-2" : "p-3"
+        )}>
           {menuStructure.map((item, index) => {
             if (item.type === 'group') {
               return (
@@ -202,7 +237,8 @@ export const Sidebar = ({
                   activeTab={activeTab} 
                   setActiveTab={setActiveTab} 
                   canAccess={canAccess} 
-                  onNavigate={handleNavigate} 
+                  onNavigate={handleNavigate}
+                  collapsed={collapsed}
                 />
               );
             }
@@ -213,6 +249,38 @@ export const Sidebar = ({
 
             const Icon = item.icon;
             const isActive = activeTab === item.id;
+
+            if (collapsed) {
+              return (
+                <Tooltip key={item.id}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={isActive ? "default" : "ghost"}
+                      className={cn(
+                        "w-full flex flex-col items-center justify-center h-14 gap-1 px-1 transition-all duration-200",
+                        isActive && "bg-primary text-primary-foreground shadow-md",
+                        !isActive && "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        "opacity-0 animate-fade-in animation-fill-both"
+                      )}
+                      style={{ animationDelay: `${index * 50}ms` }}
+                      onClick={() => {
+                        if (item.route) {
+                          navigate(item.route);
+                        }
+                      }}
+                    >
+                      <Icon className={cn("h-5 w-5 transition-transform duration-200", isActive && "scale-110")} />
+                      <span className="text-[10px] leading-tight text-center truncate w-full">
+                        {item.label}
+                      </span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
 
             return (
               <Tooltip key={item.id}>
@@ -249,26 +317,54 @@ export const Sidebar = ({
           {/* SaaS Admin Section */}
           {isSaasAdmin && (
             <div className="border-t border-sidebar-border pt-3 mt-3">
-              <p className="text-xs text-muted-foreground px-3 pb-2 font-medium uppercase tracking-wider">
-                Administração SaaS
-              </p>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-sidebar-primary hover:text-sidebar-primary hover:bg-sidebar-primary/10 transition-colors"
-                onClick={() => navigate('/admin')}
-              >
-                <Shield className="mr-2 h-4 w-4" />
-                Admin SaaS
-              </Button>
+              {!collapsed && (
+                <p className="text-xs text-muted-foreground px-3 pb-2 font-medium uppercase tracking-wider">
+                  Administração SaaS
+                </p>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {collapsed ? (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full flex flex-col items-center justify-center h-14 gap-1 px-1 text-sidebar-primary hover:text-sidebar-primary hover:bg-sidebar-primary/10 transition-colors"
+                      onClick={() => navigate('/admin')}
+                    >
+                      <Shield className="h-5 w-5" />
+                      <span className="text-[10px] leading-tight text-center truncate w-full">
+                        Admin
+                      </span>
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-sidebar-primary hover:text-sidebar-primary hover:bg-sidebar-primary/10 transition-colors"
+                      onClick={() => navigate('/admin')}
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+                      Admin SaaS
+                    </Button>
+                  )}
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Administração SaaS
+                </TooltipContent>
+              </Tooltip>
             </div>
           )}
         </nav>
 
         {/* Footer */}
-        <div className="p-3 border-t border-sidebar-border">
-          <div className="px-3 py-2 rounded-lg bg-muted/50">
+        <div className={cn(
+          "border-t border-sidebar-border",
+          collapsed ? "p-2" : "p-3"
+        )}>
+          <div className={cn(
+            "rounded-lg bg-muted/50",
+            collapsed ? "p-2" : "px-3 py-2"
+          )}>
             <p className="text-xs text-muted-foreground text-center">
-              © 2024 CRM System
+              {collapsed ? "©" : "© 2024 CRM System"}
             </p>
           </div>
         </div>

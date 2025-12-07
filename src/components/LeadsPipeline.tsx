@@ -160,9 +160,9 @@ export const LeadsPipeline = () => {
       {showColumnManager && <PipelineColumnManager />}
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto scrollbar-none pb-4">
+        <div className="flex gap-6 overflow-x-auto pb-4 -mx-8 px-8">
           {columns.map(column => (
-            <div key={column.id} className="flex-1 min-w-[300px] max-w-[350px] space-y-4">
+            <div key={column.id} className="flex-shrink-0 w-[300px] space-y-4">
               <Card className="shrink-0">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">

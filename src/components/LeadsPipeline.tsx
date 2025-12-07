@@ -21,7 +21,7 @@ import { AddLeadDialog } from '@/components/AddLeadDialog';
 import { EditLeadDialog } from '@/components/EditLeadDialog';
 import { useLeadDialog } from '@/contexts/LeadDialogContext';
 import { PipelineStatusIndicator } from '@/components/PipelineStatusIndicator';
-import { PipelineColumnManager } from '@/components/PipelineColumnManager';
+import { PipelineColumnManagerDialog } from '@/components/PipelineColumnManagerDialog';
 import { PipelineFilters } from '@/components/PipelineFilters';
 import { TagBadge } from '@/components/TagBadge';
 import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
@@ -63,7 +63,7 @@ export const LeadsPipeline = () => {
   const [viewJourneyDialogOpen, setViewJourneyDialogOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [appointmentLead, setAppointmentLead] = useState<any>(null);
-  const [showColumnManager, setShowColumnManager] = useState(false);
+  const [pipelineDialogOpen, setPipelineDialogOpen] = useState(false);
   const [transferLeadDialogOpen, setTransferLeadDialogOpen] = useState(false);
   const [transferLead, setTransferLead] = useState<any>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -210,7 +210,7 @@ export const LeadsPipeline = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background border">
-                <DropdownMenuItem onClick={() => setShowColumnManager(!showColumnManager)}>
+                <DropdownMenuItem onClick={() => setPipelineDialogOpen(true)}>
                   <Settings2 className="w-4 h-4 mr-2" />
                   Editar funil de vendas
                 </DropdownMenuItem>
@@ -265,7 +265,7 @@ export const LeadsPipeline = () => {
 
         <PipelineFilters filters={filters} onFiltersChange={setFilters} />
 
-        {showColumnManager && <PipelineColumnManager />}
+        <PipelineColumnManagerDialog open={pipelineDialogOpen} onOpenChange={setPipelineDialogOpen} />
       </div>
 
       {/* Área scrollável das colunas */}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { LeadForm, LeadFormField, LeadFormSettings } from '@/types/leadForm';
+import { Json } from '@/integrations/supabase/types';
 
 export const useLeadForms = () => {
   const [forms, setForms] = useState<LeadForm[]>([]);
@@ -86,14 +87,14 @@ export const useLeadForms = () => {
 
       const { data: form, error: formError } = await supabase
         .from('lead_forms')
-        .insert({
+        .insert([{
           company_id: profile.company_id,
           name,
           template_id: templateId,
           slug,
-          settings: settings as unknown as Record<string, unknown>,
+          settings: settings as unknown as Json,
           created_by: user.id,
-        })
+        }])
         .select()
         .single();
 
@@ -140,7 +141,7 @@ export const useLeadForms = () => {
     try {
       const { error: formError } = await supabase
         .from('lead_forms')
-        .update({ name, settings: settings as unknown as Record<string, unknown> })
+        .update({ name, settings: settings as unknown as Json })
         .eq('id', formId);
 
       if (formError) throw formError;

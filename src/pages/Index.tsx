@@ -127,7 +127,7 @@ const Index = () => {
     <LeadDialogProvider>
       <OnboardingCheck>
         <div className="h-screen bg-background flex flex-col w-full">
-          <div className="flex flex-1 min-w-0">
+          <div className="flex flex-1 min-w-0 overflow-hidden">
             {/* Desktop Sidebar */}
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
             
@@ -149,7 +149,7 @@ const Index = () => {
               )}
               
               {/* Main Content */}
-              <div className={`flex-1 ${activeTab === 'whatsapp' ? 'overflow-hidden' : 'overflow-auto'}`}>
+              <div className={`flex-1 ${activeTab === 'whatsapp' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
                 {activeTab === 'whatsapp' ? (
                   <div className="h-full">
                     {renderContent()}

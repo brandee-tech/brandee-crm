@@ -43,7 +43,6 @@ function App() {
                     {/* Main app routes */}
                     <Route path="/dashboard" element={<Home />} />
                     <Route path="/leads" element={<Home />} />
-                    <Route path="/pipeline" element={<Home />} />
                     <Route path="/tags" element={<Home />} />
                     <Route path="/products" element={<Home />} />
                     <Route path="/appointments" element={<Home />} />

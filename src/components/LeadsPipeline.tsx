@@ -224,11 +224,11 @@ export const LeadsPipeline = () => {
     }
   };
   if (loading) {
-    return <div className="p-8 flex items-center justify-center min-h-screen">
+    return <div className="p-6 flex items-center justify-center min-h-screen">
         <div className="text-lg">Carregando pipeline de leads...</div>
       </div>;
   }
-  return <div className="p-4 h-full flex flex-col overflow-hidden">
+  return <div className="p-6 h-full flex flex-col overflow-hidden">
       {/* Header fixo */}
       <div className="shrink-0 space-y-3 pb-3">
         <div className="flex justify-between items-center">

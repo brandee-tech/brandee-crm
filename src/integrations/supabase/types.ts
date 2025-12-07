@@ -612,6 +612,162 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_form_fields: {
+        Row: {
+          created_at: string
+          field_name: string
+          field_type: string
+          form_id: string
+          id: string
+          is_required: boolean
+          label: string
+          maps_to_lead_field: string | null
+          options: Json | null
+          placeholder: string | null
+          position: number
+        }
+        Insert: {
+          created_at?: string
+          field_name: string
+          field_type?: string
+          form_id: string
+          id?: string
+          is_required?: boolean
+          label: string
+          maps_to_lead_field?: string | null
+          options?: Json | null
+          placeholder?: string | null
+          position?: number
+        }
+        Update: {
+          created_at?: string
+          field_name?: string
+          field_type?: string
+          form_id?: string
+          id?: string
+          is_required?: boolean
+          label?: string
+          maps_to_lead_field?: string | null
+          options?: Json | null
+          placeholder?: string | null
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_form_fields_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lead_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_form_submissions: {
+        Row: {
+          created_at: string
+          data: Json
+          form_id: string
+          id: string
+          ip_address: string | null
+          lead_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          form_id: string
+          id?: string
+          ip_address?: string | null
+          lead_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          form_id?: string
+          id?: string
+          ip_address?: string | null
+          lead_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "lead_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_form_submissions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_forms: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          is_active: boolean
+          name: string
+          settings: Json
+          slug: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_active?: boolean
+          name: string
+          settings?: Json
+          slug: string
+          template_id?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          settings?: Json
+          slug?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_forms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_forms_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_forms_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_tag_assignments: {
         Row: {
           created_at: string

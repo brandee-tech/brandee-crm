@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft } from 'lucide-react';
+import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap } from 'lucide-react';
 import { useLeadsPipeline } from '@/hooks/useLeadsPipeline';
 
 import { AddLeadDialog } from '@/components/AddLeadDialog';
@@ -23,6 +24,7 @@ import { ptBR } from 'date-fns/locale';
 
 export const LeadsPipeline = () => {
   console.log('🔍 LeadsPipeline component rendering');
+  const navigate = useNavigate();
   
   const {
     leadsByStatus,
@@ -146,6 +148,10 @@ export const LeadsPipeline = () => {
                 onClick={() => setShowColumnManager(!showColumnManager)}
               >
                 Gerenciar Colunas
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/automation')}>
+                <Zap className="w-4 h-4 mr-2" />
+                Automize
               </Button>
               <Button onClick={openLeadDialog}>
                 <Plus className="w-4 h-4 mr-2" />

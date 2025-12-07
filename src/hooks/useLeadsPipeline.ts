@@ -26,6 +26,10 @@ interface Lead {
   company_id: string;
   created_at: string;
   updated_at: string;
+  product_value: number | null;
+  product_name: string | null;
+  revenue_generated: number | null;
+  revenue_lost: number | null;
   tags?: Array<{ id: string; name: string; color: string }>;
   partner?: { id: string; name: string; } | null;
   assigned_to?: { id: string; full_name: string | null } | null;

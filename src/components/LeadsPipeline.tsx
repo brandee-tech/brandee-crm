@@ -272,7 +272,12 @@ export const LeadsPipeline = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden">
           <div className="flex gap-6 h-full pb-4">
-            {columns.map(column => (
+            {columns.map(column => {
+              const columnLeads = leadsByStatus[column.name] || [];
+              const leadsCount = columnLeads.length;
+              const totalValue = columnLeads.reduce((sum, lead) => sum + (lead.product_value || 0), 0);
+              
+              return (
               <div key={column.id} className="flex-shrink-0 w-[300px] flex flex-col">
               <Card className="shrink-0 mb-4">
                 <CardHeader className="pb-3">
@@ -282,10 +287,10 @@ export const LeadsPipeline = () => {
                       style={{ backgroundColor: column.color }} 
                     />
                     {column.name}
-                    <Badge variant="secondary" className="ml-auto">
-                      {leadsByStatus[column.name]?.length || 0}
-                    </Badge>
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {leadsCount} {leadsCount === 1 ? 'lead' : 'leads'}: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}
+                  </p>
                 </CardHeader>
               </Card>
 
@@ -489,7 +494,8 @@ export const LeadsPipeline = () => {
                 )}
               </Droppable>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </DragDropContext>

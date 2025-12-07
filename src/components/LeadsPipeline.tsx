@@ -24,6 +24,7 @@ import { ViewAppointmentDialog } from '@/components/ViewAppointmentDialog';
 import { ViewLeadJourneyDialog } from '@/components/ViewLeadJourneyDialog';
 import { TransferLeadDialog } from '@/components/TransferLeadDialog';
 import { ImportLeadsDialog } from '@/components/ImportLeadsDialog';
+import { ViewLeadDetailDialog } from '@/components/ViewLeadDetailDialog';
 import { useExportLeads } from '@/hooks/useExportLeads';
 import { useToast } from '@/hooks/use-toast';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -93,6 +94,14 @@ export const LeadsPipeline = () => {
   const [transferLead, setTransferLead] = useState<any>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [viewLeadDetailOpen, setViewLeadDetailOpen] = useState(false);
+  const [selectedLeadForDetail, setSelectedLeadForDetail] = useState<any>(null);
+
+  // Handle opening the lead detail dialog
+  const handleOpenLeadDetail = useCallback((lead: any) => {
+    setSelectedLeadForDetail(lead);
+    setViewLeadDetailOpen(true);
+  }, []);
   const getActiveFiltersCount = () => {
     let count = 0;
     if (filters.searchTerm) count++;
@@ -405,7 +414,7 @@ export const LeadsPipeline = () => {
               <Droppable droppableId={column.name}>
                 {(provided, snapshot) => <div {...provided.droppableProps} ref={provided.innerRef} className={`flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent space-y-3 p-2 rounded-lg transition-colors ${snapshot.isDraggingOver ? 'bg-gray-100' : ''}`}>
                     {(leadsByStatus[column.name] || []).map((lead, index) => <Draggable key={lead.id} draggableId={lead.id} index={index} isDragDisabled={dragLoading === lead.id}>
-                        {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`cursor-move transition-all duration-200 shrink-0 border-l-4 ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105' : 'hover:shadow-md'} ${dragLoading === lead.id ? 'opacity-50 pointer-events-none' : ''}`} style={{
+                        {(provided, snapshot) => <Card ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} onClick={() => handleOpenLeadDetail(lead)} className={`cursor-move transition-all duration-200 shrink-0 border-l-4 ${snapshot.isDragging ? 'shadow-lg rotate-2 scale-105' : 'hover:shadow-md'} ${dragLoading === lead.id ? 'opacity-50 pointer-events-none' : ''}`} style={{
                       borderLeftColor: column.color,
                       ...provided.draggableProps.style
                     }}>
@@ -531,5 +540,14 @@ export const LeadsPipeline = () => {
     }} />
 
       <ImportLeadsDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+
+      <ViewLeadDetailDialog 
+        open={viewLeadDetailOpen} 
+        onOpenChange={setViewLeadDetailOpen} 
+        lead={selectedLeadForDetail}
+        onLeadUpdated={() => {
+          // Refresh will happen automatically via realtime
+        }}
+      />
     </div>;
 };

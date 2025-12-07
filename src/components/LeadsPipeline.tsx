@@ -131,7 +131,7 @@ export const LeadsPipeline = () => {
   }
 
   return (
-    <div className="p-8 space-y-6 h-full flex flex-col overflow-hidden">
+    <div className="p-6 space-y-4 h-full flex flex-col min-h-0 overflow-hidden">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Pipeline de Leads</h1>
@@ -160,10 +160,10 @@ export const LeadsPipeline = () => {
       {showColumnManager && <PipelineColumnManager />}
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-4 flex-1 min-h-0 -mx-8 px-8">
+        <div className="flex gap-6 overflow-x-auto overflow-y-hidden pb-4 flex-1 min-h-0">
           {columns.map(column => (
-            <div key={column.id} className="flex-shrink-0 w-[300px] space-y-4">
-              <Card className="shrink-0">
+            <div key={column.id} className="flex-shrink-0 w-[300px] flex flex-col h-full">
+              <Card className="shrink-0 mb-4">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <div 
@@ -183,7 +183,7 @@ export const LeadsPipeline = () => {
                   <div
                     {...provided.droppableProps}
                     ref={provided.innerRef}
-                    className={`h-[calc(100vh-300px)] lg:h-[calc(100vh-240px)] xl:h-[calc(100vh-200px)] overflow-y-auto scrollbar-none space-y-3 p-2 rounded-lg transition-colors ${
+                    className={`flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent space-y-3 p-2 rounded-lg transition-colors ${
                       snapshot.isDraggingOver ? 'bg-gray-100' : ''
                     }`}
                   >

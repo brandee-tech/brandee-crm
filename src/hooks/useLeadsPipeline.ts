@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
 
+export type SortOrder = 'last_event' | 'created_at' | 'name' | 'sale';
+
 export interface PipelineFilterState {
   searchTerm: string;
   temperature: string;
@@ -43,6 +45,7 @@ export const useLeadsPipeline = () => {
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [dragLoading, setDragLoading] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<SortOrder>('created_at');
   const [filters, setFilters] = useState<PipelineFilterState>({
     searchTerm: '',
     temperature: 'todos',
@@ -319,14 +322,40 @@ export const useLeadsPipeline = () => {
     await updateLeadStatus(leadId, newStatus);
   }, [updateLeadStatus, columns, toast]);
 
+  // Aplicar ordenação aos leads
+  const sortLeads = (leadsToSort: Lead[]): Lead[] => {
+    return [...leadsToSort].sort((a, b) => {
+      switch (sortOrder) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'created_at':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'last_event':
+          const aDate = a.latest_appointment?.date || a.updated_at;
+          const bDate = b.latest_appointment?.date || b.updated_at;
+          return new Date(bDate).getTime() - new Date(aDate).getTime();
+        case 'sale':
+          const saleStatuses = ['Ganho', 'Venda', 'Fechado'];
+          const aIsSale = saleStatuses.includes(a.status || '');
+          const bIsSale = saleStatuses.includes(b.status || '');
+          if (aIsSale && !bIsSale) return -1;
+          if (!aIsSale && bIsSale) return 1;
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        default:
+          return 0;
+      }
+    });
+  };
+
   // Agrupar leads por status, garantindo que todas as colunas existam
   const leadsByStatus = columns.reduce((acc, column) => {
     acc[column.name] = [];
     return acc;
   }, {} as Record<string, Lead[]>);
 
-  // Adicionar leads aos seus respectivos status
-  leads.forEach(lead => {
+  // Aplicar ordenação e adicionar leads aos seus respectivos status
+  const sortedLeads = sortLeads(leads);
+  sortedLeads.forEach(lead => {
     const status = lead.status || 'Novo Lead';
     // Se o status do lead corresponde a uma coluna, adiciona lá
     if (leadsByStatus[status] !== undefined) {
@@ -386,6 +415,8 @@ export const useLeadsPipeline = () => {
     handleDragEnd,
     updateLeadStatus,
     createLead,
-    refetch: fetchLeads
+    refetch: fetchLeads,
+    sortOrder,
+    setSortOrder
   };
 };

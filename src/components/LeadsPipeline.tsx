@@ -4,8 +4,18 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap } from 'lucide-react';
-import { useLeadsPipeline } from '@/hooks/useLeadsPipeline';
+import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap, MoreVertical, Settings2, Download, Upload, Copy, ArrowDownAZ, Check } from 'lucide-react';
+import { useLeadsPipeline, SortOrder } from '@/hooks/useLeadsPipeline';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 import { AddLeadDialog } from '@/components/AddLeadDialog';
 import { EditLeadDialog } from '@/components/EditLeadDialog';
@@ -19,6 +29,9 @@ import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
 import { ViewAppointmentDialog } from '@/components/ViewAppointmentDialog';
 import { ViewLeadJourneyDialog } from '@/components/ViewLeadJourneyDialog';
 import { TransferLeadDialog } from '@/components/TransferLeadDialog';
+import { ImportLeadsDialog } from '@/components/ImportLeadsDialog';
+import { useExportLeads } from '@/hooks/useExportLeads';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -27,6 +40,7 @@ export const LeadsPipeline = () => {
   const navigate = useNavigate();
   
   const {
+    leads,
     leadsByStatus,
     columns,
     loading,
@@ -34,10 +48,15 @@ export const LeadsPipeline = () => {
     filters,
     setFilters,
     handleDragEnd,
-    createLead
+    createLead,
+    sortOrder,
+    setSortOrder
   } = useLeadsPipeline();
 
   const { state: leadDialogState, openDialog: openLeadDialog, closeDialog: closeLeadDialog } = useLeadDialog();
+  const { exportFilteredLeads } = useExportLeads();
+  const { toast } = useToast();
+  
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState(false);
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
   const [viewAppointmentDialogOpen, setViewAppointmentDialogOpen] = useState(false);
@@ -47,6 +66,7 @@ export const LeadsPipeline = () => {
   const [showColumnManager, setShowColumnManager] = useState(false);
   const [transferLeadDialogOpen, setTransferLeadDialogOpen] = useState(false);
   const [transferLead, setTransferLead] = useState<any>(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   
   // Debug logs importantes para o pipeline
   console.log('🔍 LeadsPipeline component state:', {
@@ -113,6 +133,38 @@ export const LeadsPipeline = () => {
     setTransferLeadDialogOpen(true);
   };
 
+  const handleExportLeads = () => {
+    if (leads.length === 0) {
+      toast({
+        title: "Sem leads",
+        description: "Não há leads para exportar.",
+        variant: "destructive"
+      });
+      return;
+    }
+    // Adaptar os filtros do Pipeline para o formato do LeadFilters
+    const adaptedFilters = {
+      searchTerm: filters.searchTerm,
+      status: 'todos',
+      source: 'todas',
+      tags: filters.tags,
+      valueRange: { min: '', max: '' },
+      dateRange: filters.dateRange
+    };
+    exportFilteredLeads(leads, adaptedFilters);
+  };
+
+  const handleFindDuplicates = () => {
+    toast({
+      title: "Em breve",
+      description: "Funcionalidade de localização de duplicatas será implementada em breve."
+    });
+  };
+
+  const handleSort = (order: SortOrder) => {
+    setSortOrder(order);
+  };
+
   const formatDateTime = (date: string, time: string) => {
     try {
       const dateTime = new Date(`${date}T${time}`);
@@ -141,23 +193,71 @@ export const LeadsPipeline = () => {
             <h1 className="text-2xl font-bold text-gray-900">Pipeline de Leads</h1>
             <p className="text-sm text-gray-600">Acompanhe a jornada dos seus leads</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowColumnManager(!showColumnManager)}
-              >
-                Gerenciar Colunas
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/automation')}>
-                <Zap className="w-4 h-4 mr-2" />
-                Automize
-              </Button>
-              <Button onClick={openLeadDialog}>
-                <Plus className="w-4 h-4 mr-2" />
-                Novo Lead
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => navigate('/automation')}>
+              <Zap className="w-4 h-4 mr-2" />
+              Automize
+            </Button>
+            <Button onClick={openLeadDialog}>
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Lead
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-background border">
+                <DropdownMenuItem onClick={() => setShowColumnManager(!showColumnManager)}>
+                  <Settings2 className="w-4 h-4 mr-2" />
+                  Editar funil de vendas
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={() => setImportDialogOpen(true)}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Importar
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={handleExportLeads}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Exportar
+                </DropdownMenuItem>
+                
+                <DropdownMenuItem onClick={handleFindDuplicates}>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Localizar duplicadas
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <ArrowDownAZ className="w-4 h-4 mr-2" />
+                    Ordenar
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="bg-background border">
+                    <DropdownMenuItem onClick={() => handleSort('last_event')}>
+                      Por último evento
+                      {sortOrder === 'last_event' && <Check className="w-4 h-4 ml-auto" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSort('created_at')}>
+                      Por data de criação
+                      {sortOrder === 'created_at' && <Check className="w-4 h-4 ml-auto" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSort('name')}>
+                      Por nome
+                      {sortOrder === 'name' && <Check className="w-4 h-4 ml-auto" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleSort('sale')}>
+                      Por venda
+                      {sortOrder === 'sale' && <Check className="w-4 h-4 ml-auto" />}
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -445,6 +545,11 @@ export const LeadsPipeline = () => {
             setTransferLead(null);
           }
         }}
+      />
+
+      <ImportLeadsDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
       />
     </div>
   );

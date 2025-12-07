@@ -126,15 +126,15 @@ const Index = () => {
   return (
     <LeadDialogProvider>
       <OnboardingCheck>
-        <div className="h-screen bg-gray-50 flex flex-col w-full overflow-hidden">
-          <div className="flex flex-1">
+        <div className="h-screen bg-background flex flex-col w-full">
+          <div className="flex flex-1 overflow-hidden">
             {/* Desktop Sidebar */}
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
             
-            <main className="flex-1 flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col min-h-0">
               {/* Mobile Header */}
               {activeTab !== 'whatsapp' && (
-                <div className="md:hidden bg-white shadow-sm border-b p-4 flex items-center justify-between">
+                <div className="md:hidden bg-card shadow-sm border-b p-4 flex items-center justify-between shrink-0">
                   <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
                   <h1 className="font-semibold text-lg">We CRM</h1>
                   <div className="w-10"></div> {/* Spacer for balance */}
@@ -143,16 +143,20 @@ const Index = () => {
               
               {/* TopBar - visível apenas no desktop e quando não estiver no WhatsApp */}
               {activeTab !== 'whatsapp' && (
-                <div className="hidden md:block">
+                <div className="hidden md:block shrink-0">
                   <TopBar />
                 </div>
               )}
               
               {/* Main Content */}
-              <div className={`flex-1 flex flex-col ${activeTab === 'whatsapp' ? 'overflow-hidden' : 'overflow-auto'}`}>
-                <div className={activeTab === 'whatsapp' ? 'flex-1 min-h-0 h-full' : ''}>
-                  {renderContent()}
-                </div>
+              <div className={`flex-1 ${activeTab === 'whatsapp' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+                {activeTab === 'whatsapp' ? (
+                  <div className="h-full">
+                    {renderContent()}
+                  </div>
+                ) : (
+                  renderContent()
+                )}
               </div>
             </main>
           </div>

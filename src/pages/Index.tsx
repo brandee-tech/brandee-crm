@@ -29,8 +29,7 @@ import LeadAutomation from '@/pages/LeadAutomation';
 // Mapeamento de rota para tab ID
 const pathToTab: Record<string, string> = {
   '/dashboard': 'dashboard',
-  '/leads': 'leads',
-  '/pipeline': 'leadsPipeline',
+  '/leads': 'leadsPipeline',
   '/tags': 'leadTags',
   '/products': 'products',
   '/appointments': 'appointments',
@@ -50,8 +49,7 @@ const pathToTab: Record<string, string> = {
 // Mapeamento inverso: tab ID para rota
 const tabToPath: Record<string, string> = {
   'dashboard': '/dashboard',
-  'leads': '/leads',
-  'leadsPipeline': '/pipeline',
+  'leadsPipeline': '/leads',
   'leadTags': '/tags',
   'products': '/products',
   'appointments': '/appointments',
@@ -112,8 +110,6 @@ const Index = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
-      case 'leads':
-        return <Leads />;
       case 'leadsPipeline':
         return <LeadsPipeline />;
       case 'leadTags':

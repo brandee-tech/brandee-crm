@@ -53,8 +53,7 @@ const menuStructure = [
     label: 'CRM',
     icon: UserPlus,
     items: [
-      { id: 'leads', label: 'Leads', icon: UserPlus, permission: 'leads', route: '/leads' },
-      { id: 'leadsPipeline', label: 'Pipeline', icon: Kanban, permission: 'leads', route: '/pipeline' },
+      { id: 'leadsPipeline', label: 'Leads', icon: Kanban, permission: 'leads', route: '/leads' },
       { id: 'leadTags', label: 'Tags', icon: Tag, permission: 'leads', route: '/tags' },
       { id: 'products', label: 'Produtos', icon: Package, permission: 'products', route: '/products' },
       { id: 'automation', label: 'Automação', icon: Zap, permission: 'leads', route: '/automation' },

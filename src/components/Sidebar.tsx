@@ -33,17 +33,17 @@ const menuStructure = [{
   label: 'CRM',
   icon: UserPlus,
   items: [{
-    id: 'leads',
+    id: 'leadsPipeline',
     label: 'Leads',
-    icon: UserPlus,
+    icon: Kanban,
     permission: 'leads',
     route: '/leads'
   }, {
-    id: 'leadsPipeline',
-    label: 'Pipeline',
-    icon: Kanban,
+    id: 'leadTags',
+    label: 'Tags',
+    icon: Tag,
     permission: 'leads',
-    route: '/pipeline'
+    route: '/tags'
   }, {
     id: 'leadTags',
     label: 'Tags',

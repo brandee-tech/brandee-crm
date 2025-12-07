@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { Plus, Edit2, Trash2, GripVertical, Check, X } from 'lucide-react';
 import {
   Dialog,
@@ -93,31 +94,21 @@ const COLOR_OPTIONS = [
 
 export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColumnManagerDialogProps) => {
   const { columns, createColumn, updateColumn, deleteColumn, reorderColumns, refetch } = usePipelineColumns();
-  type PipelineColumn = typeof columns[number];
   const { createDefaultColumns, syncing } = usePipelineSync();
   
   const [selectedTemplate, setSelectedTemplate] = useState('custom');
-  const [localColumns, setLocalColumns] = useState<PipelineColumn[]>([]);
   const [editingColumnId, setEditingColumnId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [newColumnName, setNewColumnName] = useState('');
   const [showAddColumn, setShowAddColumn] = useState(false);
   const [newColumnColor, setNewColumnColor] = useState('#3B82F6');
-  const [draggedColumnId, setDraggedColumnId] = useState<string | null>(null);
-
-  // Sincronizar colunas locais com as do banco
-  useEffect(() => {
-    if (open) {
-      setLocalColumns(columns);
-    }
-  }, [columns, open]);
 
   // Separar colunas em inicial, ativas e finais
-  const initialColumn = localColumns.find(col => col.position === 0 || col.name === 'Novo Lead');
-  const finalColumns = localColumns.filter(col => 
+  const initialColumn = columns.find(col => col.position === 0 || col.name === 'Novo Lead');
+  const finalColumns = columns.filter(col => 
     col.name === 'Vendido' || col.name === 'Perdido' || col.name === 'Ganho'
   );
-  const activeColumns = localColumns.filter(col => 
+  const activeColumns = columns.filter(col => 
     col !== initialColumn && !finalColumns.includes(col)
   ).sort((a, b) => a.position - b.position);
 
@@ -130,7 +121,7 @@ export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColu
     }
   };
 
-  const handleEditColumn = (column: PipelineColumn) => {
+  const handleEditColumn = (column: typeof columns[0]) => {
     setEditingColumnId(column.id);
     setEditingName(column.name);
   };
@@ -149,7 +140,7 @@ export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColu
   };
 
   const handleDeleteColumn = async (columnId: string) => {
-    const column = localColumns.find(col => col.id === columnId);
+    const column = columns.find(col => col.id === columnId);
     if (column?.is_protected) {
       return;
     }
@@ -162,7 +153,7 @@ export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColu
   const handleAddColumn = async () => {
     if (!newColumnName.trim()) return;
     
-    const maxPosition = Math.max(...localColumns.map(col => col.position), 0);
+    const maxPosition = Math.max(...columns.map(col => col.position), 0);
     await createColumn({
       name: newColumnName,
       color: newColumnColor,
@@ -174,56 +165,33 @@ export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColu
     setShowAddColumn(false);
   };
 
-  const handleDragStart = (e: React.DragEvent, columnId: string) => {
-    setDraggedColumnId(columnId);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = async (e: React.DragEvent, targetColumnId: string) => {
-    e.preventDefault();
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
     
-    if (!draggedColumnId || draggedColumnId === targetColumnId) {
-      setDraggedColumnId(null);
-      return;
-    }
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+    
+    if (sourceIndex === destinationIndex) return;
 
-    const draggedIndex = activeColumns.findIndex(col => col.id === draggedColumnId);
-    const targetIndex = activeColumns.findIndex(col => col.id === targetColumnId);
+    // Reordenar as colunas ativas
+    const reorderedActiveColumns = [...activeColumns];
+    const [removed] = reorderedActiveColumns.splice(sourceIndex, 1);
+    reorderedActiveColumns.splice(destinationIndex, 0, removed);
 
-    if (draggedIndex === -1 || targetIndex === -1) {
-      setDraggedColumnId(null);
-      return;
-    }
-
-    const reorderedColumns = [...activeColumns];
-    const [removed] = reorderedColumns.splice(draggedIndex, 1);
-    reorderedColumns.splice(targetIndex, 0, removed);
-
-    // Recalcular posições mantendo inicial e finais
-    const initialPos = initialColumn ? 0 : -1;
-    const updatedColumns = reorderedColumns.map((col, index) => ({
+    // Recalcular posições para todas as colunas
+    const updatedActiveColumns = reorderedActiveColumns.map((col, index) => ({
       ...col,
       position: index + 1
     }));
 
-    // Incluir todas as colunas com novas posições
-    const allColumns: PipelineColumn[] = [
+    // Combinar todas as colunas com novas posições
+    const allColumns = [
       ...(initialColumn ? [{ ...initialColumn, position: 0 }] : []),
-      ...updatedColumns,
-      ...finalColumns.map((col, i) => ({ ...col, position: updatedColumns.length + 1 + i }))
+      ...updatedActiveColumns,
+      ...finalColumns.map((col, i) => ({ ...col, position: updatedActiveColumns.length + 1 + i }))
     ];
 
-    await reorderColumns(allColumns as PipelineColumn[]);
-    setDraggedColumnId(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedColumnId(null);
+    await reorderColumns(allColumns);
   };
 
   const handleClose = () => {
@@ -284,7 +252,7 @@ export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColu
                       Leads recebidos
                       <span 
                         className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: initialColumn.color }}
+                        style={{ backgroundColor: initialColumn.color || '#6B7280' }}
                       />
                     </h4>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -293,7 +261,7 @@ export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColu
                   </div>
                   <div
                     className="p-3 rounded-lg text-white font-medium"
-                    style={{ backgroundColor: initialColumn.color }}
+                    style={{ backgroundColor: initialColumn.color || '#6B7280' }}
                   >
                     {initialColumn.name}
                   </div>
@@ -309,78 +277,101 @@ export const PipelineColumnManagerDialog = ({ open, onOpenChange }: PipelineColu
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  {activeColumns.map(column => (
-                    <div
-                      key={column.id}
-                      draggable={!column.is_protected}
-                      onDragStart={(e) => handleDragStart(e, column.id)}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, column.id)}
-                      onDragEnd={handleDragEnd}
-                      className={cn(
-                        "flex items-center gap-2 p-3 rounded-lg cursor-move transition-opacity",
-                        draggedColumnId === column.id && "opacity-50"
-                      )}
-                      style={{ backgroundColor: column.color }}
-                    >
-                      <GripVertical className="w-4 h-4 text-white/70" />
-                      
-                      {editingColumnId === column.id ? (
-                        <div className="flex-1 flex items-center gap-2">
-                          <Input
-                            value={editingName}
-                            onChange={(e) => setEditingName(e.target.value)}
-                            className="h-7 bg-white/20 border-white/30 text-white placeholder:text-white/50"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSaveEdit();
-                              if (e.key === 'Escape') handleCancelEdit();
-                            }}
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-white hover:bg-white/20"
-                            onClick={handleSaveEdit}
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="pipeline-columns">
+                    {(provided, snapshot) => (
+                      <div 
+                        ref={provided.innerRef} 
+                        {...provided.droppableProps}
+                        className={cn(
+                          "space-y-2 p-2 rounded-lg transition-colors",
+                          snapshot.isDraggingOver && "bg-accent/50"
+                        )}
+                      >
+                        {activeColumns.map((column, index) => (
+                          <Draggable 
+                            key={column.id} 
+                            draggableId={column.id} 
+                            index={index}
+                            isDragDisabled={column.is_protected}
                           >
-                            <Check className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-white hover:bg-white/20"
-                            onClick={handleCancelEdit}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <>
-                          <span className="flex-1 text-white font-medium">{column.name}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20"
-                            onClick={() => handleEditColumn(column)}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          {!column.is_protected && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20"
-                              onClick={() => handleDeleteColumn(column.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={cn(
+                                  "flex items-center gap-2 p-3 rounded-lg transition-all",
+                                  snapshot.isDragging && "shadow-lg rotate-1 scale-105"
+                                )}
+                                style={{ 
+                                  backgroundColor: column.color || '#3B82F6',
+                                  ...provided.draggableProps.style
+                                }}
+                              >
+                                <GripVertical className="w-4 h-4 text-white/70 cursor-grab" />
+                                
+                                {editingColumnId === column.id ? (
+                                  <div className="flex-1 flex items-center gap-2">
+                                    <Input
+                                      value={editingName}
+                                      onChange={(e) => setEditingName(e.target.value)}
+                                      className="h-7 bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                                      autoFocus
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleSaveEdit();
+                                        if (e.key === 'Escape') handleCancelEdit();
+                                      }}
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-white hover:bg-white/20"
+                                      onClick={handleSaveEdit}
+                                    >
+                                      <Check className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-white hover:bg-white/20"
+                                      onClick={handleCancelEdit}
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <span className="flex-1 text-white font-medium">{column.name}</span>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20"
+                                      onClick={() => handleEditColumn(column)}
+                                    >
+                                      <Edit2 className="w-4 h-4" />
+                                    </Button>
+                                    {!column.is_protected && (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20"
+                                        onClick={() => handleDeleteColumn(column.id)}
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
 
                 {/* Adicionar nova etapa */}
                 {showAddColumn ? (

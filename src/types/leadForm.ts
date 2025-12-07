@@ -68,6 +68,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#3B82F6',
       backgroundColor: '#FFFFFF',
       textColor: '#1F2937',
+      title: 'Entre em contato',
+      subtitle: 'Preencha seus dados abaixo',
+      buttonText: 'Enviar',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome completo', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -84,6 +87,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#8B5CF6',
       backgroundColor: '#111827',
       textColor: '#F9FAFB',
+      title: 'Fale Conosco',
+      subtitle: 'Entraremos em contato em breve',
+      buttonText: 'Enviar mensagem',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome completo', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -100,6 +106,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#FFFFFF',
       backgroundColor: 'linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)',
       textColor: '#FFFFFF',
+      title: 'Vamos conversar?',
+      subtitle: 'Deixe suas informações',
+      buttonText: 'Quero contato',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome completo', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -116,6 +125,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#FFFFFF',
       backgroundColor: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
       textColor: '#FFFFFF',
+      title: 'Conecte-se',
+      subtitle: 'Queremos te conhecer',
+      buttonText: 'Enviar',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome completo', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -132,6 +144,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#FFFFFF',
       backgroundColor: 'linear-gradient(135deg, #14B8A6 0%, #10B981 100%)',
       textColor: '#FFFFFF',
+      title: 'Bem-vindo!',
+      subtitle: 'Deixe seu contato',
+      buttonText: 'Continuar',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome completo', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -148,6 +163,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#1E40AF',
       backgroundColor: '#F1F5F9',
       textColor: '#1E293B',
+      title: 'Contato Comercial',
+      subtitle: 'Preencha os dados para contato',
+      buttonText: 'Solicitar contato',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome completo', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -165,6 +183,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#FFFFFF',
       backgroundColor: 'linear-gradient(135deg, #F97316 0%, #F43F5E 100%)',
       textColor: '#FFFFFF',
+      title: 'Olá!',
+      subtitle: 'Estamos prontos para ajudar',
+      buttonText: 'Falar agora',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Seu nome', placeholder: 'Como podemos te chamar?', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -181,6 +202,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#000000',
       backgroundColor: '#FAFAFA',
       textColor: '#171717',
+      title: 'Contato',
+      subtitle: 'Simples e rápido',
+      buttonText: 'Enviar',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome', placeholder: 'Seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -198,6 +222,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       textColor: '#78350F',
       title: 'Tem alguma dúvida?',
       subtitle: 'Preencha o formulário e entraremos em contato',
+      buttonText: 'Enviar dúvida',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Seu nome', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },
@@ -214,6 +239,9 @@ export const FORM_TEMPLATES: FormTemplate[] = [
       primaryColor: '#86EFAC',
       backgroundColor: 'linear-gradient(135deg, #15803D 0%, #14532D 100%)',
       textColor: '#DCFCE7',
+      title: 'Entre em contato',
+      subtitle: 'Naturalmente simples',
+      buttonText: 'Enviar',
     },
     defaultFields: [
       { field_type: 'text', field_name: 'name', label: 'Nome completo', placeholder: 'Digite seu nome', is_required: true, position: 0, maps_to_lead_field: 'name' },

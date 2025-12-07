@@ -72,8 +72,20 @@ export const FormEditorDialog = ({ open, onOpenChange, form }: FormEditorDialogP
 
   const handleTemplateSelect = (template: FormTemplate) => {
     setSelectedTemplate(template);
+    
+    // Aplicar defaults primeiro, depois sobrescrever com valores do template
+    const defaultSettings: LeadFormSettings = {
+      primaryColor: '#3B82F6',
+      backgroundColor: '#FFFFFF',
+      textColor: '#1F2937',
+      buttonText: 'Enviar',
+      successMessage: 'Obrigado! Entraremos em contato em breve.',
+      title: 'Entre em contato',
+      subtitle: 'Preencha o formulário abaixo',
+    };
+    
     setSettings({
-      ...settings,
+      ...defaultSettings,
       ...template.settings,
     });
     setFields(template.defaultFields);

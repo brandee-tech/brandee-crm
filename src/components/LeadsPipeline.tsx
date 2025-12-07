@@ -133,13 +133,13 @@ export const LeadsPipeline = () => {
   }
 
   return (
-    <div className="p-6 h-full flex flex-col overflow-hidden">
+    <div className="p-4 h-full flex flex-col overflow-hidden">
       {/* Header fixo */}
-      <div className="shrink-0 space-y-4 pb-4">
+      <div className="shrink-0 space-y-3 pb-3">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Pipeline de Leads</h1>
-            <p className="text-gray-600 mt-1">Acompanhe a jornada completa dos seus leads</p>
+            <h1 className="text-2xl font-bold text-gray-900">Pipeline de Leads</h1>
+            <p className="text-sm text-gray-600">Acompanhe a jornada dos seus leads</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex gap-2">

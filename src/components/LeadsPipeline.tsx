@@ -4,7 +4,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap, MoreVertical, Settings2, Download, Upload, Copy, ArrowDownAZ, Check } from 'lucide-react';
+import { Plus, Calendar, Clock, User, Eye, Edit, Trash2, Phone, BarChart3, ArrowRightLeft, Zap, MoreVertical, Settings2, Download, Upload, Copy, ArrowDownAZ, Check, Filter, Search, X } from 'lucide-react';
 import { useLeadsPipeline, SortOrder } from '@/hooks/useLeadsPipeline';
 import {
   DropdownMenu,
@@ -22,7 +22,11 @@ import { EditLeadDialog } from '@/components/EditLeadDialog';
 import { useLeadDialog } from '@/contexts/LeadDialogContext';
 import { PipelineStatusIndicator } from '@/components/PipelineStatusIndicator';
 import { PipelineColumnManagerDialog } from '@/components/PipelineColumnManagerDialog';
-import { PipelineFilters } from '@/components/PipelineFilters';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { usePartners } from '@/hooks/usePartners';
+import { useLeadTags } from '@/hooks/useLeadTags';
 import { TagBadge } from '@/components/TagBadge';
 import { WhatsAppLeadButton } from '@/components/WhatsAppLeadButton';
 import { AddAppointmentDialog } from '@/components/AddAppointmentDialog';
@@ -56,6 +60,8 @@ export const LeadsPipeline = () => {
   const { state: leadDialogState, openDialog: openLeadDialog, closeDialog: closeLeadDialog } = useLeadDialog();
   const { exportFilteredLeads } = useExportLeads();
   const { toast } = useToast();
+  const { partners } = usePartners();
+  const { tags } = useLeadTags();
   
   const [editLeadDialogOpen, setEditLeadDialogOpen] = useState(false);
   const [addAppointmentDialogOpen, setAddAppointmentDialogOpen] = useState(false);
@@ -67,6 +73,29 @@ export const LeadsPipeline = () => {
   const [transferLeadDialogOpen, setTransferLeadDialogOpen] = useState(false);
   const [transferLead, setTransferLead] = useState<any>(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (filters.searchTerm) count++;
+    if (filters.temperature !== 'todos') count++;
+    if (filters.partner_id !== 'todos') count++;
+    if (filters.tags && filters.tags.length > 0) count++;
+    if (filters.dateRange.from || filters.dateRange.to) count++;
+    return count;
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      searchTerm: '',
+      temperature: 'todos',
+      partner_id: 'todos',
+      tags: [],
+      dateRange: { from: '', to: '' }
+    });
+  };
+
+  const activeFiltersCount = getActiveFiltersCount();
   
   // Debug logs importantes para o pipeline
   console.log('🔍 LeadsPipeline component state:', {
@@ -194,6 +223,101 @@ export const LeadsPipeline = () => {
             <p className="text-sm text-gray-600">Acompanhe a jornada dos seus leads</p>
           </div>
           <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="Buscar por nome ou email..."
+                value={filters.searchTerm}
+                onChange={(e) => setFilters({ ...filters, searchTerm: e.target.value })}
+                className="pl-10 w-64"
+              />
+            </div>
+            
+            <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="relative">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filtros
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="end">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Filtros</h4>
+                    {activeFiltersCount > 0 && (
+                      <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                        <X className="w-4 h-4 mr-1" />
+                        Limpar
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Temperatura</label>
+                    <Select
+                      value={filters.temperature}
+                      onValueChange={(value) => setFilters({ ...filters, temperature: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todos">Todas</SelectItem>
+                        <SelectItem value="Quente">🔥 Quente</SelectItem>
+                        <SelectItem value="Morno">🟡 Morno</SelectItem>
+                        <SelectItem value="Frio">❄️ Frio</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Parceiro</label>
+                    <Select
+                      value={filters.partner_id}
+                      onValueChange={(value) => setFilters({ ...filters, partner_id: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todos">Todos</SelectItem>
+                        {partners
+                          .filter(partner => partner.status === 'ativo')
+                          .map((partner) => (
+                            <SelectItem key={partner.id} value={partner.id}>
+                              {partner.name}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Período</label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="date"
+                        value={filters.dateRange.from}
+                        onChange={(e) => setFilters({ ...filters, dateRange: { ...filters.dateRange, from: e.target.value } })}
+                        className="text-sm"
+                      />
+                      <Input
+                        type="date"
+                        value={filters.dateRange.to}
+                        onChange={(e) => setFilters({ ...filters, dateRange: { ...filters.dateRange, to: e.target.value } })}
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            
             <Button variant="outline" onClick={() => navigate('/automation')}>
               <Zap className="w-4 h-4 mr-2" />
               Automize
@@ -262,8 +386,6 @@ export const LeadsPipeline = () => {
         </div>
 
         <PipelineStatusIndicator />
-
-        <PipelineFilters filters={filters} onFiltersChange={setFilters} />
 
         <PipelineColumnManagerDialog open={pipelineDialogOpen} onOpenChange={setPipelineDialogOpen} />
       </div>

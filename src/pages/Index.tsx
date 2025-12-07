@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { MobileSidebar } from '@/components/MobileSidebar';
@@ -25,33 +25,60 @@ import { OnboardingCheck } from '@/components/OnboardingCheck';
 import { useAuth } from '@/hooks/useAuth';
 import { LeadDialogProvider } from '@/contexts/LeadDialogContext';
 
+// Mapeamento de rota para tab ID
+const pathToTab: Record<string, string> = {
+  '/dashboard': 'dashboard',
+  '/leads': 'leads',
+  '/pipeline': 'leadsPipeline',
+  '/tags': 'leadTags',
+  '/products': 'products',
+  '/appointments': 'appointments',
+  '/meetings': 'meetings',
+  '/calendar': 'calendar',
+  '/schedule': 'scheduleBlocks',
+  '/tasks': 'tasks',
+  '/scripts': 'scripts',
+  '/reports': 'reports',
+  '/partners': 'partners',
+  '/users': 'users',
+  '/settings': 'settings',
+  '/whatsapp': 'whatsapp',
+};
+
+// Mapeamento inverso: tab ID para rota
+const tabToPath: Record<string, string> = {
+  'dashboard': '/dashboard',
+  'leads': '/leads',
+  'leadsPipeline': '/pipeline',
+  'leadTags': '/tags',
+  'products': '/products',
+  'appointments': '/appointments',
+  'meetings': '/meetings',
+  'calendar': '/calendar',
+  'scheduleBlocks': '/schedule',
+  'tasks': '/tasks',
+  'scripts': '/scripts',
+  'reports': '/reports',
+  'partners': '/partners',
+  'users': '/users',
+  'settings': '/settings',
+  'whatsapp': '/whatsapp',
+};
+
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Detectar rota e definir aba inicial
-  const getInitialTab = () => {
-    const searchParams = new URLSearchParams(location.search);
-    const tabParam = searchParams.get('tab');
-    if (tabParam) return tabParam;
-    
-    // Se vier de /whatsapp, ativar aba whatsapp
-    if (location.pathname === '/whatsapp') return 'whatsapp';
-    
-    return 'dashboard';
+  // Derivar tab ativa da URL
+  const activeTab = pathToTab[location.pathname] || 'dashboard';
+  
+  // Função para navegar (substitui setActiveTab)
+  const setActiveTab = (tab: string) => {
+    const path = tabToPath[tab] || '/dashboard';
+    navigate(path);
   };
   
-  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [addScriptDialogOpen, setAddScriptDialogOpen] = useState(false);
-  
-  // Atualizar URL quando mudar de aba
-  useEffect(() => {
-    if (activeTab === 'whatsapp' && location.pathname !== '/whatsapp') {
-      navigate('/whatsapp', { replace: true });
-    } else if (activeTab !== 'whatsapp' && location.pathname === '/whatsapp') {
-      navigate('/', { replace: true });
-    }
-  }, [activeTab, location.pathname, navigate]);
   
   // Script form state
   const [scriptFormData, setScriptFormData] = useState({
@@ -150,11 +177,11 @@ const Index = () => {
               
               {/* Main Content */}
               <div className={`flex-1 min-h-0 min-w-0 ${
-                activeTab === 'whatsapp' || activeTab === 'pipeline' 
+                activeTab === 'whatsapp' || activeTab === 'leadsPipeline' 
                   ? 'overflow-hidden' 
                   : 'overflow-y-auto overflow-x-hidden'
               }`}>
-                {activeTab === 'whatsapp' || activeTab === 'pipeline' ? (
+                {activeTab === 'whatsapp' || activeTab === 'leadsPipeline' ? (
                   <div className="h-full">
                     {renderContent()}
                   </div>

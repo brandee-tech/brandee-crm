@@ -37,9 +37,29 @@ function App() {
               <Router>
                 <div className="min-h-screen bg-background">
                   <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/auth" element={<Auth />} />
+                    {/* Redirect root to dashboard */}
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    
+                    {/* Main app routes */}
+                    <Route path="/dashboard" element={<Home />} />
+                    <Route path="/leads" element={<Home />} />
+                    <Route path="/pipeline" element={<Home />} />
+                    <Route path="/tags" element={<Home />} />
+                    <Route path="/products" element={<Home />} />
+                    <Route path="/appointments" element={<Home />} />
+                    <Route path="/meetings" element={<Home />} />
+                    <Route path="/calendar" element={<Home />} />
+                    <Route path="/schedule" element={<Home />} />
+                    <Route path="/tasks" element={<Home />} />
+                    <Route path="/scripts" element={<Home />} />
+                    <Route path="/reports" element={<Home />} />
+                    <Route path="/partners" element={<Home />} />
+                    <Route path="/users" element={<Home />} />
+                    <Route path="/settings" element={<Home />} />
                     <Route path="/whatsapp" element={<Home />} />
+                    
+                    {/* Other routes */}
+                    <Route path="/auth" element={<Auth />} />
                     <Route path="/automation" element={<LeadAutomation />} />
                     <Route path="/form/:slug" element={<PublicLeadForm />} />
                     <Route path="/admin" element={<AdminSaas />} />

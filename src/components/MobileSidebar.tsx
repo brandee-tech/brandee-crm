@@ -44,6 +44,7 @@ const menuStructure = [
     label: 'Dashboard',
     icon: LayoutDashboard,
     permission: null,
+    route: '/dashboard',
   },
   {
     type: 'group' as const,
@@ -51,10 +52,10 @@ const menuStructure = [
     label: 'CRM',
     icon: UserPlus,
     items: [
-      { id: 'leads', label: 'Leads', icon: UserPlus, permission: 'leads' },
-      { id: 'leadsPipeline', label: 'Pipeline', icon: Kanban, permission: 'leads' },
-      { id: 'leadTags', label: 'Tags', icon: Tag, permission: 'leads' },
-      { id: 'products', label: 'Produtos', icon: Package, permission: 'products' },
+      { id: 'leads', label: 'Leads', icon: UserPlus, permission: 'leads', route: '/leads' },
+      { id: 'leadsPipeline', label: 'Pipeline', icon: Kanban, permission: 'leads', route: '/pipeline' },
+      { id: 'leadTags', label: 'Tags', icon: Tag, permission: 'leads', route: '/tags' },
+      { id: 'products', label: 'Produtos', icon: Package, permission: 'products', route: '/products' },
     ],
   },
   {
@@ -63,10 +64,10 @@ const menuStructure = [
     label: 'Agenda',
     icon: CalendarDays,
     items: [
-      { id: 'appointments', label: 'Agendamentos', icon: Calendar, permission: 'appointments' },
-      { id: 'meetings', label: 'Reuniões', icon: Video, permission: 'meetings' },
-      { id: 'calendar', label: 'Calendário', icon: CalendarDays, permission: 'appointments' },
-      { id: 'scheduleBlocks', label: 'Horários', icon: Clock, permission: 'scheduleBlocks' },
+      { id: 'appointments', label: 'Agendamentos', icon: Calendar, permission: 'appointments', route: '/appointments' },
+      { id: 'meetings', label: 'Reuniões', icon: Video, permission: 'meetings', route: '/meetings' },
+      { id: 'calendar', label: 'Calendário', icon: CalendarDays, permission: 'appointments', route: '/calendar' },
+      { id: 'scheduleBlocks', label: 'Horários', icon: Clock, permission: 'scheduleBlocks', route: '/schedule' },
     ],
   },
   {
@@ -83,8 +84,8 @@ const menuStructure = [
     label: 'Operacional',
     icon: CheckSquare,
     items: [
-      { id: 'tasks', label: 'Tarefas', icon: CheckSquare, permission: 'tasks' },
-      { id: 'scripts', label: 'Materiais', icon: FileText, permission: 'scripts' },
+      { id: 'tasks', label: 'Tarefas', icon: CheckSquare, permission: 'tasks', route: '/tasks' },
+      { id: 'scripts', label: 'Materiais', icon: FileText, permission: 'scripts', route: '/scripts' },
     ],
   },
   {
@@ -93,6 +94,7 @@ const menuStructure = [
     label: 'Relatórios',
     icon: BarChart3,
     permission: 'reports',
+    route: '/reports',
   },
   {
     type: 'item' as const,
@@ -100,6 +102,7 @@ const menuStructure = [
     label: 'Parceiros',
     icon: Handshake,
     permission: 'partners',
+    route: '/partners',
   },
   {
     type: 'group' as const,
@@ -107,8 +110,8 @@ const menuStructure = [
     label: 'Administração',
     icon: Settings,
     items: [
-      { id: 'users', label: 'Usuários', icon: Users, permission: 'user-management' },
-      { id: 'settings', label: 'Configurações', icon: Settings, permission: 'settings' },
+      { id: 'users', label: 'Usuários', icon: Users, permission: 'user-management', route: '/users' },
+      { id: 'settings', label: 'Configurações', icon: Settings, permission: 'settings', route: '/settings' },
     ],
   },
 ];
@@ -122,15 +125,6 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
 
   const handleNavigate = (route: string) => {
     navigate(route);
-    setIsOpen(false);
-  };
-
-  const handleItemClick = (itemId: string, route?: string) => {
-    if (route) {
-      navigate(route);
-    } else {
-      setActiveTab(itemId);
-    }
     setIsOpen(false);
   };
 
@@ -152,7 +146,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                <h1 className="text-lg font-semibold text-foreground truncate">
                   {isLoading ? 'Carregando...' : company?.name || 'CRM System'}
                 </h1>
               </div>
@@ -170,10 +164,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
                     icon={item.icon}
                     items={item.items}
                     activeTab={activeTab}
-                    setActiveTab={(id) => {
-                      setActiveTab(id);
-                      setIsOpen(false);
-                    }}
+                    setActiveTab={setActiveTab}
                     canAccess={canAccess}
                     onNavigate={handleNavigate}
                   />
@@ -194,7 +185,7 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
                     "w-full justify-start",
                     activeTab === item.id && "bg-primary text-primary-foreground"
                   )}
-                  onClick={() => handleItemClick(item.id, item.route)}
+                  onClick={() => handleNavigate(item.route)}
                 >
                   <Icon className="mr-2 h-4 w-4" />
                   {item.label}
@@ -204,14 +195,11 @@ export const MobileSidebar = ({ activeTab, setActiveTab }: MobileSidebarProps) =
 
             {isSaasAdmin && (
               <div className="border-t pt-2 mt-2">
-                <p className="text-xs text-gray-500 px-3 pb-2">Administração SaaS</p>
+                <p className="text-xs text-muted-foreground px-3 pb-2">Administração SaaS</p>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  onClick={() => {
-                    navigate('/admin');
-                    setIsOpen(false);
-                  }}
+                  className="w-full justify-start text-primary hover:text-primary hover:bg-primary/10"
+                  onClick={() => handleNavigate('/admin')}
                 >
                   <Shield className="mr-2 h-4 w-4" />
                   Admin SaaS

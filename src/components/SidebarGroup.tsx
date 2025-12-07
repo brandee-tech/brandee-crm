@@ -88,8 +88,6 @@ export const SidebarGroup = ({
               onClick={() => {
                 if (item.route && onNavigate) {
                   onNavigate(item.route);
-                } else {
-                  setActiveTab(item.id);
                 }
               }}
             >

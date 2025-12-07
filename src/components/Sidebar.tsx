@@ -23,7 +23,8 @@ const menuStructure = [{
   id: 'dashboard',
   label: 'Dashboard',
   icon: LayoutDashboard,
-  permission: null
+  permission: null,
+  route: '/dashboard'
 }, {
   type: 'group' as const,
   id: 'crm',
@@ -33,22 +34,26 @@ const menuStructure = [{
     id: 'leads',
     label: 'Leads',
     icon: UserPlus,
-    permission: 'leads'
+    permission: 'leads',
+    route: '/leads'
   }, {
     id: 'leadsPipeline',
     label: 'Pipeline',
     icon: Kanban,
-    permission: 'leads'
+    permission: 'leads',
+    route: '/pipeline'
   }, {
     id: 'leadTags',
     label: 'Tags',
     icon: Tag,
-    permission: 'leads'
+    permission: 'leads',
+    route: '/tags'
   }, {
     id: 'products',
     label: 'Produtos',
     icon: Package,
-    permission: 'products'
+    permission: 'products',
+    route: '/products'
   }]
 }, {
   type: 'group' as const,
@@ -59,22 +64,26 @@ const menuStructure = [{
     id: 'appointments',
     label: 'Agendamentos',
     icon: Calendar,
-    permission: 'appointments'
+    permission: 'appointments',
+    route: '/appointments'
   }, {
     id: 'meetings',
     label: 'Reuniões',
     icon: Video,
-    permission: 'meetings'
+    permission: 'meetings',
+    route: '/meetings'
   }, {
     id: 'calendar',
     label: 'Calendário',
     icon: CalendarDays,
-    permission: 'appointments'
+    permission: 'appointments',
+    route: '/calendar'
   }, {
     id: 'scheduleBlocks',
     label: 'Horários',
     icon: Clock,
-    permission: 'scheduleBlocks'
+    permission: 'scheduleBlocks',
+    route: '/schedule'
   }]
 }, {
   type: 'item' as const,
@@ -92,25 +101,29 @@ const menuStructure = [{
     id: 'tasks',
     label: 'Tarefas',
     icon: CheckSquare,
-    permission: 'tasks'
+    permission: 'tasks',
+    route: '/tasks'
   }, {
     id: 'scripts',
     label: 'Materiais',
     icon: FileText,
-    permission: 'scripts'
+    permission: 'scripts',
+    route: '/scripts'
   }]
 }, {
   type: 'item' as const,
   id: 'reports',
   label: 'Relatórios',
   icon: BarChart3,
-  permission: 'reports'
+  permission: 'reports',
+  route: '/reports'
 }, {
   type: 'item' as const,
   id: 'partners',
   label: 'Parceiros',
   icon: Handshake,
-  permission: 'partners'
+  permission: 'partners',
+  route: '/partners'
 }, {
   type: 'group' as const,
   id: 'admin',
@@ -120,12 +133,14 @@ const menuStructure = [{
     id: 'users',
     label: 'Usuários',
     icon: Users,
-    permission: 'user-management'
+    permission: 'user-management',
+    route: '/users'
   }, {
     id: 'settings',
     label: 'Configurações',
     icon: Settings,
-    permission: 'settings'
+    permission: 'settings',
+    route: '/settings'
   }]
 }];
 
@@ -208,8 +223,6 @@ export const Sidebar = ({
                     onClick={() => {
                       if (item.route) {
                         navigate(item.route);
-                      } else {
-                        setActiveTab(item.id);
                       }
                     }}
                   >

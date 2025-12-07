@@ -206,10 +206,10 @@ export const ViewLeadDetailDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-full w-full h-[100vh] p-0 gap-0 rounded-none border-0">
-        <div className="flex h-full">
+      <DialogContent className="max-w-full w-full h-[100vh] p-0 gap-0 rounded-none border-0 overflow-hidden">
+        <div className="flex h-full overflow-hidden">
           {/* Coluna Esquerda - Formulário */}
-          <div className="w-[45%] bg-slate-800 text-white flex flex-col">
+          <div className="w-[45%] bg-slate-800 text-white flex flex-col overflow-hidden">
             {/* Header */}
             <div className="p-4 border-b border-slate-700">
               <div className="flex items-center justify-between mb-3">
@@ -282,8 +282,8 @@ export const ViewLeadDetailDialog = ({
             </div>
 
             {/* Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-              <TabsList className="bg-slate-700/50 border-b border-slate-700 rounded-none h-auto p-0 w-full justify-start">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+              <TabsList className="bg-slate-700/50 border-b border-slate-700 rounded-none h-auto p-0 w-full justify-start shrink-0">
                 <TabsTrigger value="principal" className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:bg-transparent text-slate-400 data-[state=active]:text-white px-4 py-3">
                   Principal
                 </TabsTrigger>
@@ -301,8 +301,8 @@ export const ViewLeadDetailDialog = ({
                 </TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1">
-                <TabsContent value="principal" className="p-4 space-y-6 mt-0">
+              <ScrollArea className="flex-1 min-h-0">
+                <TabsContent value="principal" className="p-4 space-y-6 mt-0 h-auto">
                   {/* Formulário Principal */}
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -501,9 +501,9 @@ export const ViewLeadDetailDialog = ({
           </div>
 
           {/* Coluna Direita - Timeline */}
-          <div className="flex-1 bg-background flex flex-col">
+          <div className="flex-1 bg-background flex flex-col overflow-hidden">
             {/* Header da Timeline */}
-            <div className="p-4 border-b">
+            <div className="p-4 border-b shrink-0">
               <div className="flex items-center gap-3">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -521,7 +521,7 @@ export const ViewLeadDetailDialog = ({
             </div>
 
             {/* Timeline de Eventos */}
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="p-4 space-y-6">
                 {eventsLoading ? (
                   <div className="text-center text-muted-foreground py-8">
@@ -582,7 +582,7 @@ export const ViewLeadDetailDialog = ({
             </ScrollArea>
 
             {/* Footer - Tarefas e Input */}
-            <div className="border-t p-4 space-y-3">
+            <div className="border-t p-4 space-y-3 shrink-0">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Clock className="w-4 h-4" />

@@ -45,23 +45,11 @@ const menuStructure = [{
     permission: 'leads',
     route: '/tags'
   }, {
-    id: 'leadTags',
-    label: 'Tags',
-    icon: Tag,
-    permission: 'leads',
-    route: '/tags'
-  }, {
     id: 'products',
     label: 'Produtos',
     icon: Package,
     permission: 'products',
     route: '/products'
-  }, {
-    id: 'automation',
-    label: 'Automação',
-    icon: Zap,
-    permission: 'leads',
-    route: '/automation'
   }]
 }, {
   type: 'group' as const,

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useToast } from '@/hooks/use-toast';
+import { useLeadAuditLog } from '@/hooks/useLeadAuditLog';
 
 interface Lead {
   id: string;
@@ -69,6 +70,7 @@ export const useLeads = () => {
   const { user } = useAuth();
   const { userInfo } = useCurrentUser();
   const { toast } = useToast();
+  const { logCreate, logUpdate, logDelete } = useLeadAuditLog();
   const channelNameRef = useRef<string | null>(null);
 
   const fetchLeads = useCallback(async () => {
@@ -231,6 +233,10 @@ export const useLeads = () => {
       }
       
       console.log('Lead created successfully:', data);
+      
+      // Registrar audit log de criação
+      await logCreate(data.id, profileData.company_id, data);
+      
       setLeads(prev => [data, ...prev]);
       toast({
         title: "Sucesso",
@@ -260,6 +266,18 @@ export const useLeads = () => {
     try {
       console.log('Updating lead:', id, updates);
       
+      // Buscar dados atuais do lead antes de atualizar (para audit log)
+      const { data: currentLead, error: fetchError } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current lead:', fetchError);
+        throw fetchError;
+      }
+      
       const { data, error } = await supabase
         .from('leads')
         .update(updates)
@@ -273,6 +291,10 @@ export const useLeads = () => {
       }
       
       console.log('Lead updated successfully:', data);
+      
+      // Registrar audit log das mudanças
+      await logUpdate(id, currentLead.company_id, currentLead, data);
+      
       setLeads(prev => prev.map(lead => lead.id === id ? data : lead));
       toast({
         title: "Sucesso",

@@ -612,6 +612,73 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_audit_logs: {
+        Row: {
+          action: string
+          change_reason: string | null
+          company_id: string
+          created_at: string
+          field_name: string | null
+          id: string
+          lead_id: string
+          metadata: Json | null
+          new_value: string | null
+          old_value: string | null
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          action: string
+          change_reason?: string | null
+          company_id: string
+          created_at?: string
+          field_name?: string | null
+          id?: string
+          lead_id: string
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          action?: string
+          change_reason?: string | null
+          company_id?: string
+          created_at?: string
+          field_name?: string | null
+          id?: string
+          lead_id?: string
+          metadata?: Json | null
+          new_value?: string | null
+          old_value?: string | null
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_audit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_companies_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_audit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_audit_logs_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_form_fields: {
         Row: {
           created_at: string

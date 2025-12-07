@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { 
   ArrowLeft, MoreVertical, Plus, User, Building2, Phone, Mail, 
   Calendar, MessageSquare, Search, Filter, CheckCircle2, Clock, 
-  FileText, UserPlus, Tag
+  FileText, UserPlus, Tag, ArrowRightLeft, Edit3, Trash2, RefreshCw
 } from 'lucide-react';
 import { useLeadJourney, JourneyEvent } from '@/hooks/useLeadJourney';
 import { useClosers } from '@/hooks/useClosers';
@@ -80,6 +80,16 @@ const getEventBadgeColor = (type: string, status?: string) => {
       return status === 'Concluído' ? 'bg-green-500' : 'bg-purple-500';
     case 'task':
       return status === 'Concluída' ? 'bg-green-500' : 'bg-gray-500';
+    case 'status_change':
+      return 'bg-indigo-500';
+    case 'field_update':
+      return 'bg-sky-500';
+    case 'transfer':
+      return 'bg-orange-500';
+    case 'tag_change':
+      return 'bg-pink-500';
+    case 'delete':
+      return 'bg-red-600';
     default:
       return 'bg-gray-500';
   }
@@ -95,6 +105,16 @@ const getEventIcon = (type: string) => {
       return <MessageSquare className="w-4 h-4" />;
     case 'task':
       return <CheckCircle2 className="w-4 h-4" />;
+    case 'status_change':
+      return <RefreshCw className="w-4 h-4" />;
+    case 'field_update':
+      return <Edit3 className="w-4 h-4" />;
+    case 'transfer':
+      return <ArrowRightLeft className="w-4 h-4" />;
+    case 'tag_change':
+      return <Tag className="w-4 h-4" />;
+    case 'delete':
+      return <Trash2 className="w-4 h-4" />;
     default:
       return <Clock className="w-4 h-4" />;
   }
@@ -558,12 +578,17 @@ export const ViewLeadDetailDialog = ({
                                   <p className="text-sm text-muted-foreground line-clamp-2">
                                     {event.description}
                                   </p>
+                                  {event.user_name && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Por: {event.user_name}
+                                    </p>
+                                  )}
                                 </div>
                                 <span className="text-xs text-muted-foreground shrink-0">
                                   {formatEventTime(event.time)}
                                 </span>
                               </div>
-                              {event.status && (
+                              {event.status && !['status_change', 'field_update', 'transfer', 'tag_change'].includes(event.type) && (
                                 <Badge 
                                   variant="secondary" 
                                   className="mt-2 text-xs"

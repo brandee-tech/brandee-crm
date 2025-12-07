@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { usePipelineColumns } from '@/hooks/usePipelineColumns';
+import { useLeadAuditLog } from '@/hooks/useLeadAuditLog';
 
 export type SortOrder = 'last_event' | 'created_at' | 'name' | 'sale';
 
@@ -60,6 +61,7 @@ export const useLeadsPipeline = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { columns } = usePipelineColumns();
+  const { logCreate, logStatusChange } = useLeadAuditLog();
 
   const fetchLeads = useCallback(async () => {
     if (!user) {
@@ -229,6 +231,9 @@ export const useLeadsPipeline = () => {
 
       if (error) throw error;
 
+      // Registrar audit log de criação
+      await logCreate(data.id, profileData.company_id, data);
+
       await fetchLeads();
       
       toast({
@@ -246,7 +251,7 @@ export const useLeadsPipeline = () => {
       });
       return null;
     }
-  }, [user, fetchLeads, toast]);
+  }, [user, fetchLeads, toast, logCreate]);
 
   const updateLeadStatus = useCallback(async (leadId: string, newStatus: string) => {
     if (!user) return;
@@ -255,6 +260,20 @@ export const useLeadsPipeline = () => {
     
     try {
       console.log('🔄 Updating lead status:', leadId, 'to:', newStatus);
+
+      // Buscar dados atuais do lead para audit log
+      const { data: currentLead, error: fetchError } = await supabase
+        .from('leads')
+        .select('status, company_id')
+        .eq('id', leadId)
+        .single();
+
+      if (fetchError) {
+        console.error('❌ Error fetching current lead:', fetchError);
+        throw fetchError;
+      }
+
+      const oldStatus = currentLead.status || 'Novo Lead';
 
       const { data, error } = await supabase
         .from('leads')
@@ -272,6 +291,9 @@ export const useLeadsPipeline = () => {
       }
 
       console.log('✅ Lead status updated successfully:', data);
+      
+      // Registrar audit log de mudança de status
+      await logStatusChange(leadId, currentLead.company_id, oldStatus, newStatus);
       
       // Atualização local imediata após confirmação do banco
       setLeads(prev => prev.map(lead => 
@@ -298,7 +320,7 @@ export const useLeadsPipeline = () => {
     } finally {
       setDragLoading(null);
     }
-  }, [user, toast, fetchLeads]);
+  }, [user, toast, fetchLeads, logStatusChange]);
 
   const handleDragEnd = useCallback(async (result: any) => {
     if (!result.destination) return;

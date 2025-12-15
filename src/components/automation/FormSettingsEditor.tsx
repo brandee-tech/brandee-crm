@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { LeadFormSettings } from '@/types/leadForm';
+import { FileUploader } from './FileUploader';
 
 interface FormSettingsEditorProps {
   settings: LeadFormSettings;
@@ -170,30 +171,25 @@ export const FormSettingsEditor = ({ settings, onSettingsChange }: FormSettingsE
       {/* Logo */}
       <div className="space-y-3">
         <h3 className="font-medium text-sm">Logo (opcional)</h3>
-        <div>
-          <Label className="text-xs">URL da Logo</Label>
-          <Input
-            value={settings.logoUrl || ''}
-            onChange={(e) => updateSetting('logoUrl', e.target.value)}
-            placeholder="https://exemplo.com/logo.png"
-          />
-        </div>
+        <FileUploader
+          label="Logo"
+          value={settings.logoUrl || ''}
+          onChange={(url) => updateSetting('logoUrl', url)}
+          accept="image/*"
+          helpText="Formatos aceitos: PNG, JPG, SVG. Máx: 5MB"
+        />
       </div>
 
       {/* Banner de Fundo */}
       <div className="space-y-3">
         <h3 className="font-medium text-sm">Banner de Fundo (opcional)</h3>
-        <div>
-          <Label className="text-xs">URL do Banner</Label>
-          <Input
-            value={settings.bannerUrl || ''}
-            onChange={(e) => updateSetting('bannerUrl', e.target.value)}
-            placeholder="https://exemplo.com/banner.jpg"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Se definido, o banner será usado como fundo da página no lugar da cor de fundo
-          </p>
-        </div>
+        <FileUploader
+          label="Banner"
+          value={settings.bannerUrl || ''}
+          onChange={(url) => updateSetting('bannerUrl', url)}
+          accept="image/*"
+          helpText="Se definido, o banner será usado como fundo da página. Formatos aceitos: PNG, JPG, WebP. Máx: 5MB"
+        />
       </div>
     </div>
   );

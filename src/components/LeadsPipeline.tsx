@@ -25,6 +25,7 @@ import { ViewLeadJourneyDialog } from '@/components/ViewLeadJourneyDialog';
 import { TransferLeadDialog } from '@/components/TransferLeadDialog';
 import { ImportLeadsDialog } from '@/components/ImportLeadsDialog';
 import { ViewLeadDetailDialog } from '@/components/ViewLeadDetailDialog';
+import { DuplicateLeadsDialog } from '@/components/DuplicateLeadsDialog';
 import { useExportLeads } from '@/hooks/useExportLeads';
 import { useToast } from '@/hooks/use-toast';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -96,6 +97,7 @@ export const LeadsPipeline = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [viewLeadDetailOpen, setViewLeadDetailOpen] = useState(false);
   const [selectedLeadForDetail, setSelectedLeadForDetail] = useState<any>(null);
+  const [duplicatesDialogOpen, setDuplicatesDialogOpen] = useState(false);
 
   // Handle opening the lead detail dialog
   const handleOpenLeadDetail = useCallback((lead: any) => {
@@ -205,10 +207,7 @@ export const LeadsPipeline = () => {
     exportFilteredLeads(leads, adaptedFilters);
   };
   const handleFindDuplicates = () => {
-    toast({
-      title: "Em breve",
-      description: "Funcionalidade de localização de duplicatas será implementada em breve."
-    });
+    setDuplicatesDialogOpen(true);
   };
   const handleSort = (order: SortOrder) => {
     setSortOrder(order);
@@ -544,5 +543,7 @@ export const LeadsPipeline = () => {
       <ViewLeadDetailDialog open={viewLeadDetailOpen} onOpenChange={setViewLeadDetailOpen} lead={selectedLeadForDetail} onLeadUpdated={() => {
       // Refresh will happen automatically via realtime
     }} />
+
+      <DuplicateLeadsDialog open={duplicatesDialogOpen} onOpenChange={setDuplicatesDialogOpen} />
     </div>;
 };

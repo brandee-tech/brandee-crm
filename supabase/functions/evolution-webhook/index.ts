@@ -48,7 +48,7 @@ async function autoLinkLeadByPhone(
     }
 
     // Buscar lead com telefone correspondente
-    const matchingLead = leads.find(lead => {
+    const matchingLead = leads.find((lead: { id: string; phone: string | null; name: string }) => {
       if (!lead.phone) return false;
       const normalizedLeadPhone = normalizePhoneNumber(lead.phone);
       
@@ -279,7 +279,7 @@ serve(async (req) => {
         // Criar ou obter conversa
         const { data: conversation, error: conversationError } = await supabaseAdmin
           .from('whatsapp_conversations')
-          .select('id')
+          .select('id, unread_count')
           .eq('contact_id', contact.id)
           .eq('instance_id', instanceData.id)
           .single();
@@ -452,8 +452,9 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('Webhook Error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

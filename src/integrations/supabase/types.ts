@@ -2427,10 +2427,6 @@ export type Database = {
       }
       get_advanced_saas_analytics:
         | {
-            Args: { company_filter?: string; period_days?: number }
-            Returns: Json
-          }
-        | {
             Args: never
             Returns: {
               active_companies: number
@@ -2439,6 +2435,10 @@ export type Database = {
               total_leads: number
               total_users: number
             }[]
+          }
+        | {
+            Args: { company_filter?: string; period_days?: number }
+            Returns: Json
           }
       get_current_user_company_id: { Args: never; Returns: string }
       get_current_user_info: {

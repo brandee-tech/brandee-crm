@@ -67,20 +67,17 @@ export function StatCard({
   return (
     <Card 
       className={cn(
-        "hover-lift group overflow-hidden relative opacity-0 animate-fade-in-up animation-fill-both",
+        "overflow-hidden relative opacity-0 animate-fade-in-up animation-fill-both",
         className
       )}
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
-        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
         <div className={cn(
-          "p-2.5 rounded-lg transition-all duration-300 group-hover:scale-110",
+          "p-2.5 rounded-lg",
           styles.icon
         )}>
           <Icon className="h-4 w-4" />

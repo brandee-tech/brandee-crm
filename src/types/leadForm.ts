@@ -7,7 +7,7 @@ export interface LeadFormSettings {
   title: string;
   subtitle: string;
   logoUrl?: string;
-  backgroundImage?: string;
+  bannerUrl?: string;
   // Step-by-step form settings
   welcomeMessage?: string;
   startButtonText?: string;

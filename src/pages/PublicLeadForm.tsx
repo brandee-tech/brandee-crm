@@ -177,11 +177,20 @@ const PublicLeadForm = () => {
     );
   }
 
+  const hasBanner = !!form.settings.bannerUrl;
   const isGradient = form.settings.backgroundColor.includes('gradient');
-  const backgroundStyle = {
-    background: isGradient ? form.settings.backgroundColor : undefined,
-    backgroundColor: !isGradient ? form.settings.backgroundColor : undefined,
-  };
+  
+  const backgroundStyle = hasBanner
+    ? {
+        backgroundImage: `url(${form.settings.bannerUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }
+    : {
+        background: isGradient ? form.settings.backgroundColor : undefined,
+        backgroundColor: !isGradient ? form.settings.backgroundColor : undefined,
+      };
 
   // Get text defaults
   const welcomeMessage = form.settings.welcomeMessage || `${form.settings.title}\n\n${form.settings.subtitle}`;
@@ -193,11 +202,16 @@ const PublicLeadForm = () => {
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={backgroundStyle}>
-        <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 text-center animate-scale-in">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-green-500" />
+        <div className="w-full max-w-lg text-center animate-scale-in">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-500/20 backdrop-blur-sm flex items-center justify-center">
+            <CheckCircle className="w-10 h-10 text-green-400" />
           </div>
-          <h2 className="text-2xl font-bold mb-2 text-gray-800">{form.settings.successMessage}</h2>
+          <h2 
+            className="text-2xl font-bold mb-2"
+            style={{ color: hasBanner ? '#FFFFFF' : form.settings.textColor }}
+          >
+            {form.settings.successMessage}
+          </h2>
         </div>
       </div>
     );
@@ -206,44 +220,59 @@ const PublicLeadForm = () => {
   // Welcome screen
   if (currentStep === 'welcome') {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={backgroundStyle}>
-        <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8 text-center animate-scale-in">
-          {/* Logo */}
-          {form.settings.logoUrl && (
-            <div className="mb-8">
-              <img
-                src={form.settings.logoUrl}
-                alt="Logo"
-                className="h-16 mx-auto object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-          )}
+      <div className="min-h-screen flex flex-col p-6 md:p-12" style={backgroundStyle}>
+        {/* Logo */}
+        {form.settings.logoUrl && (
+          <div className="mb-auto">
+            <img
+              src={form.settings.logoUrl}
+              alt="Logo"
+              className="h-12 md:h-16 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+        )}
 
-          {/* Welcome Message */}
-          <div className="mb-8">
-            <p className="text-lg text-gray-700 whitespace-pre-line leading-relaxed">
-              {welcomeMessage}
+        {/* Content centered */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-full max-w-lg animate-scale-in">
+            {/* Welcome Message */}
+            <div className="mb-8">
+              <p 
+                className="text-lg md:text-xl whitespace-pre-line leading-relaxed"
+                style={{ color: hasBanner ? '#FFFFFF' : form.settings.textColor }}
+              >
+                {welcomeMessage}
+              </p>
+            </div>
+
+            {/* Start Button */}
+            <button
+              onClick={startForm}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-lg font-semibold text-lg transition-all hover:opacity-90 hover:scale-105 shadow-lg"
+              style={{ 
+                backgroundColor: form.settings.primaryColor,
+                color: hasBanner ? '#FFFFFF' : form.settings.textColor 
+              }}
+            >
+              {startButtonText}
+              <ArrowRight className="w-5 h-5" />
+            </button>
+
+            {/* Field count indicator */}
+            <p 
+              className="mt-6 text-sm opacity-70"
+              style={{ color: hasBanner ? '#FFFFFF' : form.settings.textColor }}
+            >
+              {form.fields.length} {form.fields.length === 1 ? 'pergunta' : 'perguntas'}
             </p>
           </div>
-
-          {/* Start Button */}
-          <button
-            onClick={startForm}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-white text-lg transition-all hover:opacity-90 hover:scale-105 shadow-lg"
-            style={{ backgroundColor: form.settings.primaryColor }}
-          >
-            {startButtonText}
-            <ArrowRight className="w-5 h-5" />
-          </button>
-
-          {/* Field count indicator */}
-          <p className="mt-6 text-sm text-gray-500">
-            {form.fields.length} {form.fields.length === 1 ? 'pergunta' : 'perguntas'}
-          </p>
         </div>
+
+        {/* Spacer for balance */}
+        <div className="mt-auto" />
       </div>
     );
   }
@@ -253,158 +282,187 @@ const PublicLeadForm = () => {
   const isLastStep = currentStep === form.fields.length - 1;
   const progress = ((currentStep + 1) / form.fields.length) * 100;
 
+  const textColor = hasBanner ? '#FFFFFF' : form.settings.textColor;
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={backgroundStyle}>
-      <div 
-        className={cn(
-          "w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-8",
-          direction === 'forward' ? 'animate-fade-in' : 'animate-fade-in'
-        )}
-        key={currentStep}
-      >
-        {/* Progress Bar */}
+    <div className="min-h-screen flex flex-col p-6 md:p-12" style={backgroundStyle}>
+      {/* Logo */}
+      {form.settings.logoUrl && (
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-gray-500 font-medium">
-              Pergunta {currentStep + 1} de {form.fields.length}
-            </span>
-            <span className="text-xs text-gray-500 font-medium">
-              {Math.round(progress)}%
-            </span>
-          </div>
-          <Progress value={progress} className="h-2" />
+          <img
+            src={form.settings.logoUrl}
+            alt="Logo"
+            className="h-10 md:h-12 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
         </div>
+      )}
 
-        {/* Logo (small) */}
-        {form.settings.logoUrl && (
-          <div className="mb-4">
-            <img
-              src={form.settings.logoUrl}
-              alt="Logo"
-              className="h-8 object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
+      {/* Content centered */}
+      <div className="flex-1 flex items-center justify-center">
+        <div 
+          className={cn(
+            "w-full max-w-lg",
+            direction === 'forward' ? 'animate-fade-in' : 'animate-fade-in'
+          )}
+          key={currentStep}
+        >
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium opacity-70" style={{ color: textColor }}>
+                Pergunta {currentStep + 1} de {form.fields.length}
+              </span>
+              <span className="text-xs font-medium opacity-70" style={{ color: textColor }}>
+                {Math.round(progress)}%
+              </span>
+            </div>
+            <Progress value={progress} className="h-1 bg-white/20" />
           </div>
-        )}
 
-        {/* Current Field */}
-        <div className="mb-8">
-          <label className="block text-xl font-semibold mb-4 text-gray-800">
-            {currentField.label}
-            {currentField.is_required && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          
-          {currentField.field_type === 'textarea' ? (
-            <Textarea
-              placeholder={currentField.placeholder || ''}
-              value={formValues[currentField.field_name] || ''}
-              onChange={(e) => {
-                setFormValues({ ...formValues, [currentField.field_name]: e.target.value });
-                setFieldError(null);
-              }}
-              onKeyDown={handleKeyDown}
-              className={cn(
-                "w-full text-lg py-4 px-4 min-h-[120px]",
-                fieldError && "border-red-500 focus-visible:ring-red-500"
-              )}
-              autoFocus
-            />
-          ) : currentField.field_type === 'select' ? (
-            <Select
-              value={formValues[currentField.field_name] || ''}
-              onValueChange={(value) => {
-                setFormValues({ ...formValues, [currentField.field_name]: value });
-                setFieldError(null);
+          {/* Current Field */}
+          <div className="mb-8">
+            <label 
+              className="block text-xl md:text-2xl font-semibold mb-4"
+              style={{ color: textColor }}
+            >
+              {currentField.label}
+              {currentField.is_required && <span className="text-red-400 ml-1">*</span>}
+            </label>
+            
+            {currentField.field_type === 'textarea' ? (
+              <Textarea
+                placeholder={currentField.placeholder || 'Sua resposta...'}
+                value={formValues[currentField.field_name] || ''}
+                onChange={(e) => {
+                  setFormValues({ ...formValues, [currentField.field_name]: e.target.value });
+                  setFieldError(null);
+                }}
+                onKeyDown={handleKeyDown}
+                className={cn(
+                  "w-full text-lg py-4 px-0 min-h-[120px] bg-transparent border-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-current placeholder:opacity-50",
+                  fieldError && "border-red-500"
+                )}
+                style={{ 
+                  color: textColor, 
+                  borderColor: hasBanner ? 'rgba(255,255,255,0.3)' : form.settings.textColor 
+                }}
+                autoFocus
+              />
+            ) : currentField.field_type === 'select' ? (
+              <Select
+                value={formValues[currentField.field_name] || ''}
+                onValueChange={(value) => {
+                  setFormValues({ ...formValues, [currentField.field_name]: value });
+                  setFieldError(null);
+                }}
+              >
+                <SelectTrigger 
+                  className={cn(
+                    "w-full text-lg py-6 bg-transparent border-0 border-b-2 rounded-none focus:ring-0",
+                    fieldError && "border-red-500"
+                  )}
+                  style={{ 
+                    color: textColor, 
+                    borderColor: hasBanner ? 'rgba(255,255,255,0.3)' : form.settings.textColor 
+                  }}
+                >
+                  <SelectValue placeholder={currentField.placeholder || 'Selecione...'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {(currentField.options || []).map((opt, i) => (
+                    <SelectItem key={i} value={opt} className="text-lg py-3">
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                type={
+                  currentField.field_type === 'email'
+                    ? 'email'
+                    : currentField.field_type === 'phone'
+                    ? 'tel'
+                    : currentField.field_type === 'number'
+                    ? 'number'
+                    : currentField.field_type === 'date'
+                    ? 'date'
+                    : 'text'
+                }
+                placeholder={currentField.placeholder || 'Sua resposta...'}
+                value={formValues[currentField.field_name] || ''}
+                onChange={(e) => {
+                  setFormValues({ ...formValues, [currentField.field_name]: e.target.value });
+                  setFieldError(null);
+                }}
+                onKeyDown={handleKeyDown}
+                className={cn(
+                  "w-full text-lg py-6 px-0 bg-transparent border-0 border-b-2 rounded-none focus-visible:ring-0 focus-visible:border-current placeholder:opacity-50",
+                  fieldError && "border-red-500"
+                )}
+                style={{ 
+                  color: textColor, 
+                  borderColor: hasBanner ? 'rgba(255,255,255,0.3)' : form.settings.textColor 
+                }}
+                autoFocus
+              />
+            )}
+
+            {/* Field Error */}
+            {fieldError && (
+              <p className="mt-2 text-sm text-red-400 animate-fade-in">
+                {fieldError}
+              </p>
+            )}
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={goBack}
+              className="py-3 px-6 rounded-lg font-medium transition-all hover:opacity-80 flex items-center justify-center gap-2"
+              style={{ 
+                backgroundColor: hasBanner ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                color: textColor 
               }}
             >
-              <SelectTrigger className={cn(
-                "w-full text-lg py-6",
-                fieldError && "border-red-500 focus:ring-red-500"
-              )}>
-                <SelectValue placeholder={currentField.placeholder || 'Selecione...'} />
-              </SelectTrigger>
-              <SelectContent>
-                {(currentField.options || []).map((opt, i) => (
-                  <SelectItem key={i} value={opt} className="text-lg py-3">
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <Input
-              type={
-                currentField.field_type === 'email'
-                  ? 'email'
-                  : currentField.field_type === 'phone'
-                  ? 'tel'
-                  : currentField.field_type === 'number'
-                  ? 'number'
-                  : currentField.field_type === 'date'
-                  ? 'date'
-                  : 'text'
-              }
-              placeholder={currentField.placeholder || ''}
-              value={formValues[currentField.field_name] || ''}
-              onChange={(e) => {
-                setFormValues({ ...formValues, [currentField.field_name]: e.target.value });
-                setFieldError(null);
-              }}
-              onKeyDown={handleKeyDown}
-              className={cn(
-                "w-full text-lg py-6 px-4",
-                fieldError && "border-red-500 focus-visible:ring-red-500"
-              )}
-              autoFocus
-            />
-          )}
+              <ArrowLeft className="w-4 h-4" />
+              {backButtonText}
+            </button>
+            
+            {isLastStep ? (
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="py-3 px-6 rounded-lg font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ backgroundColor: form.settings.primaryColor, color: '#FFFFFF' }}
+              >
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {form.settings.buttonText}
+              </button>
+            ) : (
+              <button
+                onClick={goNext}
+                className="py-3 px-6 rounded-lg font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                style={{ backgroundColor: form.settings.primaryColor, color: '#FFFFFF' }}
+              >
+                {nextButtonText}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
 
-          {/* Field Error */}
-          {fieldError && (
-            <p className="mt-2 text-sm text-red-500 animate-fade-in">
-              {fieldError}
-            </p>
-          )}
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={goBack}
-            className="flex-1 py-4 px-4 rounded-xl font-medium text-gray-600 bg-gray-100 transition-all hover:bg-gray-200 flex items-center justify-center gap-2"
+          {/* Keyboard hint */}
+          <p 
+            className="mt-6 text-xs opacity-50"
+            style={{ color: textColor }}
           >
-            <ArrowLeft className="w-4 h-4" />
-            {backButtonText}
-          </button>
-          
-          {isLastStep ? (
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex-1 py-4 px-4 rounded-xl font-medium text-white transition-all hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50"
-              style={{ backgroundColor: form.settings.primaryColor }}
-            >
-              {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-              {form.settings.buttonText}
-            </button>
-          ) : (
-            <button
-              onClick={goNext}
-              className="flex-1 py-4 px-4 rounded-xl font-medium text-white transition-all hover:opacity-90 flex items-center justify-center gap-2"
-              style={{ backgroundColor: form.settings.primaryColor }}
-            >
-              {nextButtonText}
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
+            Pressione <kbd className="px-1.5 py-0.5 bg-white/10 rounded">Enter ↵</kbd> para continuar
+          </p>
         </div>
-
-        {/* Keyboard hint */}
-        <p className="mt-4 text-center text-xs text-gray-400">
-          Pressione <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-gray-500">Enter ↵</kbd> para continuar
-        </p>
       </div>
     </div>
   );

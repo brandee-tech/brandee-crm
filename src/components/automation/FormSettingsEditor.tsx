@@ -179,6 +179,22 @@ export const FormSettingsEditor = ({ settings, onSettingsChange }: FormSettingsE
           />
         </div>
       </div>
+
+      {/* Banner de Fundo */}
+      <div className="space-y-3">
+        <h3 className="font-medium text-sm">Banner de Fundo (opcional)</h3>
+        <div>
+          <Label className="text-xs">URL do Banner</Label>
+          <Input
+            value={settings.bannerUrl || ''}
+            onChange={(e) => updateSetting('bannerUrl', e.target.value)}
+            placeholder="https://exemplo.com/banner.jpg"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Se definido, o banner será usado como fundo da página no lugar da cor de fundo
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

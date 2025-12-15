@@ -79,9 +79,6 @@ const Index = () => {
     navigate(path);
   };
   
-  // Estado do sidebar colapsado
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  
   const [addScriptDialogOpen, setAddScriptDialogOpen] = useState(false);
   
   // Script form state
@@ -163,8 +160,6 @@ const Index = () => {
             <Sidebar 
               activeTab={activeTab} 
               setActiveTab={setActiveTab}
-              collapsed={sidebarCollapsed}
-              onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
             
             <main className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">

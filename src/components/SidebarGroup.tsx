@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ChevronDown, LucideIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MenuItem {
@@ -23,7 +23,6 @@ interface SidebarGroupProps {
   canAccess: (permission: string) => boolean;
   onNavigate?: (route: string) => void;
   defaultOpen?: boolean;
-  collapsed?: boolean;
 }
 
 export const SidebarGroup = ({
@@ -36,19 +35,9 @@ export const SidebarGroup = ({
   canAccess,
   onNavigate,
   defaultOpen = false,
-  collapsed = false,
 }: SidebarGroupProps) => {
-  // Auto-expandir se contém o item ativo
   const hasActiveItem = items.some(item => item.id === activeTab);
-  const [isOpen, setIsOpen] = useState(hasActiveItem || defaultOpen);
   const [popoverOpen, setPopoverOpen] = useState(false);
-
-  // Atualizar estado quando a aba ativa mudar
-  useEffect(() => {
-    if (hasActiveItem && !isOpen) {
-      setIsOpen(true);
-    }
-  }, [activeTab, hasActiveItem, isOpen]);
 
   // Filtrar itens visíveis baseado em permissões
   const visibleItems = items.filter(
@@ -57,29 +46,30 @@ export const SidebarGroup = ({
 
   if (visibleItems.length === 0) return null;
 
-  // Modo colapsado: usar Popover
-  if (collapsed) {
-    return (
+  return (
+    <Tooltip>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant={hasActiveItem ? "default" : "ghost"}
-            className={cn(
-              "w-full flex flex-col items-center justify-center h-14 gap-1 px-1 transition-all duration-200",
-              hasActiveItem && "bg-primary text-primary-foreground shadow-md",
-              !hasActiveItem && "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            )}
-          >
-            <GroupIcon className={cn("h-5 w-5", hasActiveItem && "scale-110")} />
-            <span className="text-[10px] leading-tight text-center truncate w-full">
-              {label}
-            </span>
-          </Button>
-        </PopoverTrigger>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <Button
+              variant={hasActiveItem ? "default" : "ghost"}
+              className={cn(
+                "w-full flex items-center justify-center h-12 transition-all duration-200",
+                hasActiveItem && "bg-primary text-primary-foreground shadow-md",
+                !hasActiveItem && "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              )}
+            >
+              <GroupIcon className={cn("h-5 w-5", hasActiveItem && "scale-110")} />
+            </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent side="right" sideOffset={8}>
+          {label}
+        </TooltipContent>
         <PopoverContent 
           side="right" 
           align="start" 
-          className="w-48 p-2"
+          className="w-48 p-2 bg-popover border border-border shadow-lg"
           sideOffset={8}
         >
           <div className="space-y-1">
@@ -113,54 +103,6 @@ export const SidebarGroup = ({
           </div>
         </PopoverContent>
       </Popover>
-    );
-  }
-
-  // Modo expandido: usar Collapsible
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-between",
-            hasActiveItem && "bg-primary/10 text-primary"
-          )}
-        >
-          <span className="flex items-center">
-            <GroupIcon className="mr-2 h-4 w-4" />
-            {label}
-          </span>
-          <ChevronDown className={cn(
-            "h-4 w-4 transition-transform duration-200",
-            isOpen && "rotate-180"
-          )} />
-        </Button>
-      </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-1 pl-4 mt-1">
-        {visibleItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Button
-              key={item.id}
-              variant={activeTab === item.id ? "default" : "ghost"}
-              size="sm"
-              className={cn(
-                "w-full justify-start",
-                activeTab === item.id && "bg-primary text-primary-foreground"
-              )}
-              onClick={() => {
-                if (item.route && onNavigate) {
-                  onNavigate(item.route);
-                }
-              }}
-            >
-              <Icon className="mr-2 h-4 w-4" />
-              {item.label}
-            </Button>
-          );
-        })}
-      </CollapsibleContent>
-    </Collapsible>
+    </Tooltip>
   );
 };

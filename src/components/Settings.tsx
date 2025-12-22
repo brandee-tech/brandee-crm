@@ -2,13 +2,14 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Building2, 
-  Users, 
-  Settings as SettingsIcon, 
+import {
+  Building2,
+  Users,
+  Settings as SettingsIcon,
   Shield,
   Mail,
-  MessageCircle
+  MessageCircle,
+  Key
 } from 'lucide-react';
 import { CompanyInfoSettings } from './settings/CompanyInfoSettings';
 import { SystemSettings } from './settings/SystemSettings';
@@ -16,6 +17,7 @@ import { UserRoleManagement } from './settings/UserRoleManagement';
 import { AdvancedSettings } from './settings/AdvancedSettings';
 import { InvitationSettings } from './settings/InvitationSettings';
 import { UserGoalsSettings } from './settings/UserGoalsSettings';
+import { ApiKeysSettings } from './settings/ApiKeysSettings';
 import { UserWhatsAppSettings } from './whatsapp/UserWhatsAppSettings';
 import { CompanyWhatsAppInstances } from './whatsapp/CompanyWhatsAppInstances';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -67,6 +69,12 @@ export const Settings = () => {
       component: SystemSettings,
     },
     {
+      id: 'apikeys',
+      label: 'API & Chaves',
+      icon: Key,
+      component: ApiKeysSettings,
+    },
+    {
       id: 'advanced',
       label: 'Avançado',
       icon: Shield,
@@ -88,9 +96,9 @@ export const Settings = () => {
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
-              <TabsTrigger 
-                key={tab.id} 
-                value={tab.id} 
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
                 className="flex items-center gap-2 p-3"
               >
                 <Icon className="w-4 h-4" />

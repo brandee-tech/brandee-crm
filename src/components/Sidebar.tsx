@@ -5,9 +5,9 @@ import { useCurrentCompany } from "@/hooks/useCurrentCompany";
 import { useSaasAdmin } from "@/hooks/useSaasAdmin";
 import { useNavigate } from "react-router-dom";
 import { SidebarGroup } from "@/components/SidebarGroup";
-import { 
-  LayoutDashboard, Users, CheckSquare, BarChart3, Settings, UserPlus, 
-  Kanban, FileText, Calendar, CalendarDays, Video, Shield, Package, 
+import {
+  LayoutDashboard, Users, CheckSquare, BarChart3, Settings, UserPlus,
+  Kanban, FileText, Calendar, CalendarDays, Video, Shield, Package,
   Handshake, Clock, Tag, MessageCircle, LucideIcon
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -133,7 +133,7 @@ const menuStructure = [{
     id: 'settings',
     label: 'Configurações',
     icon: Settings,
-    permission: 'settings',
+    permission: null,
     route: '/settings'
   }]
 }];
@@ -172,21 +172,21 @@ export const Sidebar = ({
             </TooltipContent>
           </Tooltip>
         </div>
-        
+
         {/* Navigation */}
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto scrollbar-none">
           {menuStructure.map((item, index) => {
             if (item.type === 'group') {
               return (
-                <SidebarGroup 
-                  key={item.id} 
-                  id={item.id} 
-                  label={item.label} 
-                  icon={item.icon} 
-                  items={item.items} 
-                  activeTab={activeTab} 
-                  setActiveTab={setActiveTab} 
-                  canAccess={canAccess} 
+                <SidebarGroup
+                  key={item.id}
+                  id={item.id}
+                  label={item.label}
+                  icon={item.icon}
+                  items={item.items}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  canAccess={canAccess}
                   onNavigate={handleNavigate}
                 />
               );
@@ -232,8 +232,8 @@ export const Sidebar = ({
             <div className="border-t border-sidebar-border pt-3 mt-3">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     className="w-full flex items-center justify-center h-12 text-sidebar-primary hover:text-sidebar-primary hover:bg-sidebar-primary/10 transition-colors"
                     onClick={() => navigate('/admin')}
                   >

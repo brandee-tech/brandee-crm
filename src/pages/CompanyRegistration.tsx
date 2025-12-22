@@ -99,7 +99,7 @@ export const CompanyRegistration = () => {
     }
   };
 
-  const inputClasses = "h-12 bg-[#F4F4F6] border-none focus-visible:ring-1 focus-visible:ring-primary/20";
+  const inputClasses = "h-12 bg-[#F4F4F6] border-b-2 border-transparent focus-visible:border-b-primary transition-all";
   const labelClasses = "text-sm font-semibold text-slate-900";
 
   return (
@@ -315,7 +315,7 @@ export const CompanyRegistration = () => {
                 <FormControl>
                   <Textarea
                     placeholder="Conte-nos mais sobre seu negócio..."
-                    className="min-h-[120px] bg-[#F4F4F6] border-none focus-visible:ring-1 focus-visible:ring-primary/20"
+                    className="min-h-[120px] bg-[#F4F4F6] border-b-2 border-transparent focus-visible:border-b-primary transition-all"
                     {...field}
                   />
                 </FormControl>

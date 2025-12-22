@@ -69,7 +69,7 @@ const Auth = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="h-12 bg-[#F4F4F6] border-none focus-visible:ring-1 focus-visible:ring-primary/20"
+              className="h-12 bg-[#F4F4F6] border-b-2 border-transparent focus-visible:border-b-primary transition-all"
             />
           </div>
 
@@ -85,7 +85,7 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-12 bg-[#F4F4F6] border-none focus-visible:ring-1 focus-visible:ring-primary/20 pr-10"
+                className="h-12 bg-[#F4F4F6] border-b-2 border-transparent focus-visible:border-b-primary transition-all pr-10"
               />
               <button
                 type="button"

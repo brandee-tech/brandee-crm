@@ -13,18 +13,18 @@ import { Building2 } from 'lucide-react';
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const { signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     const { error } = await signIn(email, password);
-    
+
     if (error) {
       toast({
         title: 'Erro ao fazer login',
@@ -38,31 +38,11 @@ const Auth = () => {
       });
       navigate('/');
     }
-    
+
     setLoading(false);
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    const { error } = await signUp(email, password, fullName);
-    
-    if (error) {
-      toast({
-        title: 'Erro ao criar conta',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } else {
-      toast({
-        title: 'Conta criada com sucesso!',
-        description: 'Verifique seu email para confirmar a conta',
-      });
-    }
-    
-    setLoading(false);
-  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -74,14 +54,14 @@ const Auth = () => {
           <CardTitle className="text-2xl">CRM Pro</CardTitle>
           <CardDescription>Sistema de Vendas Profissional</CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <Tabs defaultValue="signin" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Criar Conta</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -94,7 +74,7 @@ const Auth = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
                   <Input
@@ -105,52 +85,31 @@ const Auth = () => {
                     required
                   />
                 </div>
-                
+
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
               </form>
             </TabsContent>
-            
+
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Nome Completo</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
+              <div className="text-center py-6 space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-gray-700 mb-4">
+                    Para criar uma conta, é necessário cadastrar uma empresa.
+                    Você será o administrador principal.
+                  </p>
+                  <Button
+                    className="w-full"
+                    onClick={() => navigate('/register-company')}
+                  >
+                    Cadastrar Minha Empresa
+                  </Button>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signupEmail">Email</Label>
-                  <Input
-                    id="signupEmail"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                <div className="text-sm text-gray-500">
+                  Já tem um convite? Peça ao administrador para reenviar o link.
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signupPassword">Senha</Label>
-                  <Input
-                    id="signupPassword"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Criando conta...' : 'Criar Conta'}
-                </Button>
-              </form>
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>

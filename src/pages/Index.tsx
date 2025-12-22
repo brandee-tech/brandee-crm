@@ -69,18 +69,18 @@ const tabToPath: Record<string, string> = {
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Derivar tab ativa da URL
   const activeTab = pathToTab[location.pathname] || 'dashboard';
-  
+
   // Função para navegar (substitui setActiveTab)
   const setActiveTab = (tab: string) => {
     const path = tabToPath[tab] || '/dashboard';
     navigate(path);
   };
-  
+
   const [addScriptDialogOpen, setAddScriptDialogOpen] = useState(false);
-  
+
   // Script form state
   const [scriptFormData, setScriptFormData] = useState({
     title: '',
@@ -89,7 +89,7 @@ const Index = () => {
     description: ''
   });
   const [createdScriptId, setCreatedScriptId] = useState<string | null>(null);
-  
+
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -102,7 +102,7 @@ const Index = () => {
 
   // Este componente agora só é renderizado quando o usuário está logado
   // (a lógica de verificação foi movida para Home.tsx)
-  
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -126,8 +126,8 @@ const Index = () => {
       case 'tasks':
         return <Tasks />;
       case 'scripts':
-        return <Scripts 
-          addDialogOpen={addScriptDialogOpen} 
+        return <Scripts
+          addDialogOpen={addScriptDialogOpen}
           setAddDialogOpen={setAddScriptDialogOpen}
           scriptFormData={scriptFormData}
           setScriptFormData={setScriptFormData}
@@ -157,34 +157,33 @@ const Index = () => {
         <div className="h-screen bg-background flex flex-col w-full">
           <div className="flex flex-1 min-w-0 overflow-hidden">
             {/* Desktop Sidebar */}
-            <Sidebar 
-              activeTab={activeTab} 
+            <Sidebar
+              activeTab={activeTab}
               setActiveTab={setActiveTab}
             />
-            
+
             <main className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
               {/* Mobile Header */}
               {activeTab !== 'whatsapp' && (
                 <div className="md:hidden bg-card shadow-sm border-b p-4 flex items-center justify-between shrink-0">
                   <MobileSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-                  <h1 className="font-semibold text-lg">We CRM</h1>
+                  <h1 className="font-semibold text-lg">Brandée CRM</h1>
                   <div className="w-10"></div> {/* Spacer for balance */}
                 </div>
               )}
-              
+
               {/* TopBar - visível apenas no desktop e quando não estiver no WhatsApp */}
               {activeTab !== 'whatsapp' && (
                 <div className="hidden md:block shrink-0">
                   <TopBar />
                 </div>
               )}
-              
+
               {/* Main Content */}
-              <div className={`flex-1 min-h-0 min-w-0 ${
-                activeTab === 'whatsapp' || activeTab === 'leadsPipeline' 
-                  ? 'overflow-hidden' 
+              <div className={`flex-1 min-h-0 min-w-0 ${activeTab === 'whatsapp' || activeTab === 'leadsPipeline'
+                  ? 'overflow-hidden'
                   : 'overflow-y-auto overflow-x-hidden'
-              }`}>
+                }`}>
                 {activeTab === 'whatsapp' || activeTab === 'leadsPipeline' ? (
                   <div className="h-full">
                     {renderContent()}

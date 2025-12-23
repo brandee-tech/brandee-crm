@@ -67,11 +67,11 @@ export const useCompanies = () => {
       // Atualizar o perfil do usuário para associá-lo à empresa
       if (user && data.id) {
         console.log('Atualizando perfil do usuário:', user.id, 'para empresa:', data.id);
-        
+
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ 
-            company_id: data.id 
+          .update({
+            company_id: data.id
           })
           .eq('id', user.id);
 
@@ -90,11 +90,15 @@ export const useCompanies = () => {
       });
 
       return data;
-    } catch (error) {
-      console.error('Erro ao criar empresa:', error);
+    } catch (error: any) {
+      // Only log full error if it's NOT a 429 or validation error to reduce noise
+      if (error?.status !== 429 && !error?.message?.includes("rate limit")) {
+        console.error('Erro ao criar empresa:', error);
+      }
+
       toast({
         title: "Erro ao criar empresa",
-        description: "Não foi possível criar a empresa. Tente novamente.",
+        description: error.message || "Não foi possível criar a empresa. Tente novamente.",
         variant: "destructive"
       });
       throw error;

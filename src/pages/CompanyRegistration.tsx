@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const companySchema = z.object({
   name: z.string().min(2, 'Nome da empresa deve ter pelo menos 2 caracteres'),
@@ -58,15 +59,32 @@ export const CompanyRegistration = () => {
   });
 
   const onSubmit = async (data: CompanyFormData) => {
+    if (isSubmitting) return; // Prevent double submission
     setIsSubmitting(true);
+
     try {
-      const { error: signUpError } = await signUp(data.contactEmail, data.contactPassword, data.contactName);
-      if (signUpError) {
-        throw new Error(signUpError.message);
+      // 1. Check if user is already authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      let userId = session?.user?.id;
+
+      // 2. If not authenticated, sign up
+      if (!userId) {
+        const { data: signUpData, error: signUpError } = await signUp(data.contactEmail, data.contactPassword, data.contactName);
+
+        if (signUpError) {
+          // Handle Rate Limit specifically
+          if (signUpError.status === 429) {
+            throw new Error("Muitas tentativas de cadastro. Por favor, aguarde alguns instantes antes de tentar novamente.");
+          }
+          throw signUpError;
+        }
+
+        userId = signUpData.user?.id;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!userId) throw new Error("Falha ao identificar usuário após cadastro.");
 
+      // 3. Create Company
       await createCompany({
         name: data.name,
         industry: data.industry,
@@ -81,17 +99,27 @@ export const CompanyRegistration = () => {
 
       toast({
         title: "Sucesso!",
-        description: "Empresa e usuário cadastrados com sucesso. Redirecionando para o dashboard...",
+        description: "Empresa e usuário cadastrados com sucesso. Redirecionando...",
       });
 
+      // Short delay just for UX feedback
       setTimeout(() => {
         navigate('/');
       }, 1500);
+
     } catch (error: any) {
       console.error('Erro ao cadastrar empresa:', error);
+
+      let message = error.message || "Não foi possível cadastrar a empresa.";
+
+      // Friendly message for 429 if it comes from other sources
+      if (message.includes("429") || message.includes("Too Many Requests")) {
+        message = "O sistema está recebendo muitas solicitações. Aguarde um momento e tente novamente.";
+      }
+
       toast({
-        title: "Erro",
-        description: error.message || "Não foi possível cadastrar a empresa. Tente novamente.",
+        title: "Erro no cadastro",
+        description: message,
         variant: "destructive"
       });
     } finally {

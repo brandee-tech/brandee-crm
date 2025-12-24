@@ -14,12 +14,12 @@ interface FileUploaderProps {
   helpText?: string;
 }
 
-export const FileUploader = ({ 
-  label, 
-  value, 
-  onChange, 
+export const FileUploader = ({
+  label,
+  value,
+  onChange,
   accept = 'image/*',
-  helpText 
+  helpText
 }: FileUploaderProps) => {
   const [uploading, setUploading] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -32,6 +32,9 @@ export const FileUploader = ({
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Arquivo muito grande. Máximo: 5MB');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return;
     }
 
@@ -72,15 +75,15 @@ export const FileUploader = ({
   return (
     <div className="space-y-2">
       <Label className="text-xs">{label}</Label>
-      
+
       {value ? (
         <div className="relative group">
           <div className="border rounded-lg p-2 bg-muted/30">
             <div className="flex items-center gap-3">
               {value.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) ? (
-                <img 
-                  src={value} 
-                  alt="Preview" 
+                <img
+                  src={value}
+                  alt="Preview"
                   className="w-16 h-16 object-cover rounded"
                 />
               ) : (
@@ -130,7 +133,7 @@ export const FileUploader = ({
               <Link className="w-4 h-4" />
             </Button>
           </div>
-          
+
           <input
             ref={fileInputRef}
             type="file"
@@ -138,7 +141,7 @@ export const FileUploader = ({
             onChange={handleFileUpload}
             className="hidden"
           />
-          
+
           {showUrlInput && (
             <Input
               placeholder="https://exemplo.com/imagem.png"
@@ -161,7 +164,7 @@ export const FileUploader = ({
           )}
         </div>
       )}
-      
+
       {helpText && (
         <p className="text-xs text-muted-foreground">{helpText}</p>
       )}

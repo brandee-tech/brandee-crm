@@ -55,11 +55,14 @@ export const useSaasMetrics = () => {
 
   const fetchMetrics = async () => {
     try {
-      const { data, error } = await supabase.rpc('get_advanced_saas_analytics', { period_days: 30 });
+      const { data, error } = await supabase.rpc('get_advanced_saas_analytics', {
+        period_days: 30,
+        company_filter: null
+      });
       if (error) throw error;
-      
+
       console.log('Raw data from get_advanced_saas_analytics:', data);
-      
+
       // A função retorna diretamente o objeto JSON com as métricas
       setMetrics(data as unknown as SaasMetrics);
     } catch (error) {

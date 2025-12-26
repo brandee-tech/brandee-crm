@@ -29,7 +29,7 @@ export const usePipelineColumns = () => {
 
     try {
       console.log('Fetching pipeline columns for user:', user.id);
-      
+
       // Buscar company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -52,7 +52,7 @@ export const usePipelineColumns = () => {
         console.error('Error fetching pipeline columns:', error);
         throw error;
       }
-      
+
       console.log('Fetched pipeline columns:', data?.length || 0, 'columns');
       setColumns(data || []);
     } catch (error) {
@@ -80,7 +80,7 @@ export const usePipelineColumns = () => {
 
     try {
       console.log('Creating pipeline column:', columnData);
-      
+
       // Buscar company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -94,9 +94,9 @@ export const usePipelineColumns = () => {
 
       const { data, error } = await supabase
         .from('pipeline_columns')
-        .insert([{ 
-          ...columnData, 
-          company_id: profileData.company_id 
+        .insert([{
+          ...columnData,
+          company_id: profileData.company_id
         }])
         .select()
         .single();
@@ -105,7 +105,7 @@ export const usePipelineColumns = () => {
         console.error('Error creating pipeline column:', error);
         throw error;
       }
-      
+
       console.log('Pipeline column created successfully:', data);
       setColumns(prev => [...prev, data].sort((a, b) => a.position - b.position));
       toast({
@@ -135,7 +135,7 @@ export const usePipelineColumns = () => {
 
     try {
       console.log('Updating pipeline column:', id, updates);
-      
+
       const { data, error } = await supabase
         .from('pipeline_columns')
         .update(updates)
@@ -147,7 +147,7 @@ export const usePipelineColumns = () => {
         console.error('Error updating pipeline column:', error);
         throw error;
       }
-      
+
       console.log('Pipeline column updated successfully:', data);
       setColumns(prev => prev.map(col => col.id === id ? data : col).sort((a, b) => a.position - b.position));
       toast({
@@ -177,7 +177,7 @@ export const usePipelineColumns = () => {
 
     try {
       console.log('Deleting pipeline column:', id);
-      
+
       const { error } = await supabase
         .from('pipeline_columns')
         .delete()
@@ -187,7 +187,7 @@ export const usePipelineColumns = () => {
         console.error('Error deleting pipeline column:', error);
         throw error;
       }
-      
+
       console.log('Pipeline column deleted successfully');
       setColumns(prev => prev.filter(col => col.id !== id));
       toast({
@@ -205,31 +205,44 @@ export const usePipelineColumns = () => {
   };
 
   const reorderColumns = async (newOrder: PipelineColumn[]) => {
+    // 1. Otimização Otimista: Atualizar o estado local imediatamente
+    const previousColumns = [...columns];
+    setColumns(newOrder);
+
     try {
-      console.log('Reordering pipeline columns');
-      
+      console.log('Reordering pipeline columns (Optimistic Update)');
+
+      // 2. Preparar dados para update em batch
       const updates = newOrder.map((col, index) => ({
         id: col.id,
-        position: index + 1
+        company_id: col.company_id, // Necessário para o upsert não falhar com RLS/Constraints se exigido
+        name: col.name,
+        color: col.color,
+        position: index + 1,
+        // Mantemos outros campos se necessário, mas para reorder position é o principal
       }));
 
-      for (const update of updates) {
-        await supabase
-          .from('pipeline_columns')
-          .update({ position: update.position })
-          .eq('id', update.id);
+      // 3. Executar single batch upsert
+      const { error } = await supabase
+        .from('pipeline_columns')
+        .upsert(updates, { onConflict: 'id' });
+
+      if (error) {
+        throw error;
       }
-      
-      setColumns(newOrder);
-      toast({
-        title: "Sucesso",
-        description: "Ordem das colunas atualizada"
-      });
+
+      // Não precisamos refazer fetch ou toast de sucesso invasivo se tudo deu certo,
+      // pois o usuário já viu o resultado. Mas podemos mostrar um toast discreto ou nada.
+      // Vamos manter um toast discreto apenas para debug/confirmação se necessário, 
+      // ou remover para UX mais fluida. Vou manter mas sem bloquear.
+
     } catch (error) {
       console.error('Erro ao reordenar colunas:', error);
+      // 4. Reverter em caso de erro
+      setColumns(previousColumns);
       toast({
-        title: "Erro",
-        description: "Não foi possível reordenar as colunas",
+        title: "Erro ao salvar ordem",
+        description: "Suas alterações foram revertidas. Tente novamente.",
         variant: "destructive"
       });
     }

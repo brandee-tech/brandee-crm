@@ -183,9 +183,7 @@ export const PipelineColumnManagerDialog = ({
   };
   const handleDeleteColumn = async (columnId: string) => {
     const column = columns.find(col => col.id === columnId);
-    if (column?.is_protected) {
-      return;
-    }
+    // Removed is_protected check to allow user to manage all columns
     if (window.confirm('Tem certeza que deseja excluir esta etapa?')) {
       await deleteColumn(columnId);
     }
@@ -233,148 +231,148 @@ export const PipelineColumnManagerDialog = ({
     onOpenChange(false);
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
-        <DialogHeader className="shrink-0">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <DialogTitle className="text-xl">Configurar funil de vendas</DialogTitle>
-              <DialogDescription>
-                Customize as etapas do seu processo de vendas ou escolha um modelo pré-pronto.
-              </DialogDescription>
-            </div>
-            <div className="flex gap-2">
-              
-            </div>
+    <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogHeader className="shrink-0">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <DialogTitle className="text-xl">Configurar funil de vendas</DialogTitle>
+            <DialogDescription>
+              Customize as etapas do seu processo de vendas ou escolha um modelo pré-pronto.
+            </DialogDescription>
           </div>
-        </DialogHeader>
+          <div className="flex gap-2">
 
-        <div className="flex-1 min-h-0 grid grid-cols-[200px_1fr] gap-6 mt-4">
-          {/* Coluna esquerda - Templates */}
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm text-muted-foreground mb-3">Modelos</h4>
-            <div className="space-y-1">
-              {PIPELINE_TEMPLATES.map(template => <button key={template.id} className={cn("w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2", selectedTemplate === template.id ? "bg-primary text-primary-foreground" : "hover:bg-accent")} onClick={() => handleSelectTemplate(template)} disabled={syncing}>
-                  {selectedTemplate === template.id && <Check className="w-4 h-4" />}
-                  <span className={selectedTemplate !== template.id ? "ml-6" : ""}>{template.name}</span>
-                </button>)}
-            </div>
           </div>
+        </div>
+      </DialogHeader>
 
-          {/* Coluna direita - Etapas */}
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-6">
-              {/* Etapa inicial - Leads recebidos */}
-              {initialColumn && <div className="space-y-3">
-                  <div>
-                    <h4 className="font-medium text-sm flex items-center gap-2">
-                      Leads recebidos
-                      <span className="w-3 h-3 rounded-full" style={{
+      <div className="flex-1 min-h-0 grid grid-cols-[200px_1fr] gap-6 mt-4">
+        {/* Coluna esquerda - Templates */}
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-muted-foreground mb-3">Modelos</h4>
+          <div className="space-y-1">
+            {PIPELINE_TEMPLATES.map(template => <button key={template.id} className={cn("w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2", selectedTemplate === template.id ? "bg-primary text-primary-foreground" : "hover:bg-accent")} onClick={() => handleSelectTemplate(template)} disabled={syncing}>
+              {selectedTemplate === template.id && <Check className="w-4 h-4" />}
+              <span className={selectedTemplate !== template.id ? "ml-6" : ""}>{template.name}</span>
+            </button>)}
+          </div>
+        </div>
+
+        {/* Coluna direita - Etapas */}
+        <ScrollArea className="h-[60vh] pr-4">
+          <div className="space-y-6">
+            {/* Etapa inicial - Leads recebidos */}
+            {initialColumn && <div className="space-y-3">
+              <div>
+                <h4 className="font-medium text-sm flex items-center gap-2">
+                  Leads recebidos
+                  <span className="w-3 h-3 rounded-full" style={{
                     backgroundColor: initialColumn.color || '#6B7280'
                   }} />
-                    </h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Esta etapa captura automaticamente os leads de todas as fontes.
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-lg text-white font-medium" style={{
+                </h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Esta etapa captura automaticamente os leads de todas as fontes.
+                </p>
+              </div>
+              <div className="p-3 rounded-lg text-white font-medium" style={{
                 backgroundColor: initialColumn.color || '#6B7280'
               }}>
-                    {initialColumn.name}
-                  </div>
-                </div>}
+                {initialColumn.name}
+              </div>
+            </div>}
 
-              {/* Etapas ativas - Com drag and drop */}
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-medium text-sm">Etapas ativas</h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Arraste para reordenar. Essas são as etapas principais do seu fluxo.
-                  </p>
-                </div>
+            {/* Etapas ativas - Com drag and drop */}
+            <div className="space-y-3">
+              <div>
+                <h4 className="font-medium text-sm">Etapas ativas</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Arraste para reordenar. Essas são as etapas principais do seu fluxo.
+                </p>
+              </div>
 
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="pipeline-columns">
-                    {(provided, snapshot) => <div ref={provided.innerRef} {...provided.droppableProps} className={cn("space-y-2 p-2 rounded-lg transition-colors", snapshot.isDraggingOver && "bg-accent/50")}>
-                        {activeColumns.map((column, index) => <Draggable key={column.id} draggableId={column.id} index={index} isDragDisabled={column.is_protected}>
-                            {(provided, snapshot) => <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={cn("flex items-center gap-2 p-3 rounded-lg transition-all", snapshot.isDragging && "shadow-lg rotate-1 scale-105")} style={{
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="pipeline-columns">
+                  {(provided, snapshot) => <div ref={provided.innerRef} {...provided.droppableProps} className={cn("space-y-2 p-2 rounded-lg transition-colors", snapshot.isDraggingOver && "bg-accent/50")}>
+                    {activeColumns.map((column, index) => <Draggable key={column.id} draggableId={column.id} index={index}>
+                      {(provided, snapshot) => <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={cn("flex items-center gap-2 p-3 rounded-lg transition-all", snapshot.isDragging && "shadow-lg rotate-1 scale-105")} style={{
                         backgroundColor: column.color || '#3B82F6',
                         ...provided.draggableProps.style
                       }}>
-                                <GripVertical className="w-4 h-4 text-white/70 cursor-grab" />
-                                
-                                {editingColumnId === column.id ? <div className="flex-1 flex items-center gap-2">
-                                    <Input value={editingName} onChange={e => setEditingName(e.target.value)} className="h-7 bg-white/20 border-white/30 text-white placeholder:text-white/50" autoFocus onKeyDown={e => {
+                        <GripVertical className="w-4 h-4 text-white/70 cursor-grab" />
+
+                        {editingColumnId === column.id ? <div className="flex-1 flex items-center gap-2">
+                          <Input value={editingName} onChange={e => setEditingName(e.target.value)} className="h-7 bg-white/20 border-white/30 text-white placeholder:text-white/50" autoFocus onKeyDown={e => {
                             if (e.key === 'Enter') handleSaveEdit();
                             if (e.key === 'Escape') handleCancelEdit();
                           }} />
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-white/20" onClick={handleSaveEdit}>
-                                      <Check className="w-4 h-4" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-white/20" onClick={handleCancelEdit}>
-                                      <X className="w-4 h-4" />
-                                    </Button>
-                                  </div> : <>
-                                    <span className="flex-1 text-white font-medium">{column.name}</span>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20" onClick={() => handleEditColumn(column)}>
-                                      <Edit2 className="w-4 h-4" />
-                                    </Button>
-                                    {!column.is_protected && <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20" onClick={() => handleDeleteColumn(column.id)}>
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>}
-                                  </>}
-                              </div>}
-                          </Draggable>)}
-                        {provided.placeholder}
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-white/20" onClick={handleSaveEdit}>
+                            <Check className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-white/20" onClick={handleCancelEdit}>
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div> : <>
+                          <span className="flex-1 text-white font-medium">{column.name}</span>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20" onClick={() => handleEditColumn(column)}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/20" onClick={() => handleDeleteColumn(column.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </>}
                       </div>}
-                  </Droppable>
-                </DragDropContext>
+                    </Draggable>)}
+                    {provided.placeholder}
+                  </div>}
+                </Droppable>
+              </DragDropContext>
 
-                {/* Adicionar nova etapa */}
-                {showAddColumn ? <div className="space-y-3 p-3 border border-dashed rounded-lg">
-                    <Input placeholder="Nome da etapa" value={newColumnName} onChange={e => setNewColumnName(e.target.value)} autoFocus onKeyDown={e => {
+              {/* Adicionar nova etapa */}
+              {showAddColumn ? <div className="space-y-3 p-3 border border-dashed rounded-lg">
+                <Input placeholder="Nome da etapa" value={newColumnName} onChange={e => setNewColumnName(e.target.value)} autoFocus onKeyDown={e => {
                   if (e.key === 'Enter') handleAddColumn();
                   if (e.key === 'Escape') setShowAddColumn(false);
                 }} />
-                    <div className="flex gap-2">
-                      {COLOR_OPTIONS.map(color => <button key={color.value} className={cn("w-6 h-6 rounded-full border-2 transition-transform hover:scale-110", newColumnColor === color.value ? "border-foreground scale-110" : "border-transparent")} style={{
+                <div className="flex gap-2">
+                  {COLOR_OPTIONS.map(color => <button key={color.value} className={cn("w-6 h-6 rounded-full border-2 transition-transform hover:scale-110", newColumnColor === color.value ? "border-foreground scale-110" : "border-transparent")} style={{
                     backgroundColor: color.value
                   }} onClick={() => setNewColumnColor(color.value)} title={color.name} />)}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={handleAddColumn} className="flex-1">
-                        Adicionar
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setShowAddColumn(false)}>
-                        Cancelar
-                      </Button>
-                    </div>
-                  </div> : <Button variant="ghost" className="w-full justify-start text-muted-foreground border border-dashed" onClick={() => setShowAddColumn(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar etapa
-                  </Button>}
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={handleAddColumn} className="flex-1">
+                    Adicionar
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setShowAddColumn(false)}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div> : <Button variant="ghost" className="w-full justify-start text-muted-foreground border border-dashed" onClick={() => setShowAddColumn(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar etapa
+              </Button>}
+            </div>
+
+            {/* Etapas finais - Conclusão */}
+            {finalColumns.length > 0 && <div className="space-y-3">
+              <div>
+                <h4 className="font-medium text-sm">Conclusão</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Essas etapas marcam o fim do seu fluxo de trabalho.
+                </p>
               </div>
 
-              {/* Etapas finais - Conclusão */}
-              {finalColumns.length > 0 && <div className="space-y-3">
-                  <div>
-                    <h4 className="font-medium text-sm">Conclusão</h4>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Essas etapas marcam o fim do seu fluxo de trabalho.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    {finalColumns.map(column => <div key={column.id} className="p-3 rounded-lg font-medium" style={{
+              <div className="space-y-2">
+                {finalColumns.map(column => <div key={column.id} className="p-3 rounded-lg font-medium" style={{
                   backgroundColor: column.name === 'Vendido' || column.name === 'Ganho' ? '#DCFCE7' : '#F3F4F6',
                   color: column.name === 'Vendido' || column.name === 'Ganho' ? '#166534' : '#374151'
                 }}>
-                        {column.name === 'Vendido' || column.name === 'Ganho' ? `${column.name} - ganho ✓` : `${column.name} - perdido`}
-                      </div>)}
-                  </div>
-                </div>}
-            </div>
-          </ScrollArea>
-        </div>
-      </DialogContent>
-    </Dialog>;
+                  {column.name === 'Vendido' || column.name === 'Ganho' ? `${column.name} - ganho ✓` : `${column.name} - perdido`}
+                </div>)}
+              </div>
+            </div>}
+          </div>
+        </ScrollArea>
+      </div>
+    </DialogContent>
+  </Dialog>;
 };

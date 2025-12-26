@@ -53,10 +53,7 @@ export const PipelineColumnManager = () => {
 
   const handleDeleteColumn = async (columnId: string) => {
     const column = columns.find(col => col.id === columnId);
-    if (column?.is_protected) {
-      alert('Esta coluna não pode ser excluída pois é uma coluna base do sistema.');
-      return;
-    }
+    // Removed is_protected check to allow user to manage all columns
 
     if (window.confirm('Tem certeza que deseja excluir esta coluna? Todos os leads nela serão movidos para a primeira coluna.')) {
       await deleteColumn(columnId);
@@ -209,8 +206,8 @@ export const PipelineColumnManager = () => {
             onDrop={(e) => handleDrop(e, column.id)}
             onDragEnd={handleDragEnd}
             className={`flex items-center gap-3 p-3 border rounded-lg cursor-move transition-all ${draggedColumnId === column.id
-                ? 'opacity-50 bg-gray-50'
-                : 'hover:bg-gray-50'
+              ? 'opacity-50 bg-gray-50'
+              : 'hover:bg-gray-50'
               }`}
           >
             <GripVertical className="w-4 h-4 text-gray-400" />
@@ -238,9 +235,8 @@ export const PipelineColumnManager = () => {
             <Button
               variant="ghost"
               size="sm"
-              className={`${column.is_protected ? 'opacity-50 cursor-not-allowed' : 'text-red-600 hover:text-red-700'}`}
+              className="text-red-600 hover:text-red-700"
               onClick={() => handleDeleteColumn(column.id)}
-              disabled={column.is_protected}
             >
               <Trash2 className="w-4 h-4" />
             </Button>

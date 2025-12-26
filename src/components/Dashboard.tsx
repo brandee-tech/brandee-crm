@@ -126,13 +126,7 @@ export const Dashboard = () => {
             )}
           </div>
           <p className="text-sm sm:text-base text-muted-foreground mt-1 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-warning" />
             Bem-vindo de volta, {userInfo?.full_name || user?.email?.split('@')[0]}!
-            {userInfo?.company_name && (
-              <span className="text-xs text-muted-foreground/70">
-                • {userInfo.company_name}
-              </span>
-            )}
           </p>
         </div>
         

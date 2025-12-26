@@ -39,18 +39,6 @@ export const Settings = () => {
       icon: Users,
       component: UserRoleManagement,
     },
-
-    {
-      id: 'whatsapp',
-      label: 'WhatsApp',
-      icon: MessageCircle,
-      component: () => (
-        <div className="space-y-6">
-          <UserWhatsAppSettings />
-          {isAdmin && <CompanyWhatsAppInstances />}
-        </div>
-      ),
-    },
     {
       id: 'goals',
       label: 'Metas',

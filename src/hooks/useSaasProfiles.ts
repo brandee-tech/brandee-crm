@@ -87,7 +87,7 @@ export const useSaasProfiles = () => {
         .single();
 
       if (error) throw error;
-      
+
       setProfiles(prev => prev.map(profile => profile.id === id ? data : profile));
       toast({
         title: "Sucesso",
@@ -113,7 +113,7 @@ export const useSaasProfiles = () => {
         .eq('id', id);
 
       if (error) throw error;
-      
+
       setProfiles(prev => prev.filter(profile => profile.id !== id));
       toast({
         title: "Sucesso",
@@ -140,7 +140,7 @@ export const useSaasProfiles = () => {
       };
 
       const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/7fa656f4-29ca-486a-9151-e37dc4860090';
-      
+
       console.log('🚀 Enviando para n8n (Admin SaaS):', webhookData);
 
       const response = await fetch(webhookUrl, {
@@ -153,11 +153,11 @@ export const useSaasProfiles = () => {
 
       console.log('📡 Status da resposta:', response.status);
       console.log('📡 Response OK:', response.ok);
-      
+
       if (!response.ok) {
         throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       toast({
         title: "Sucesso",
         description: "Convite enviado com sucesso"
@@ -177,6 +177,26 @@ export const useSaasProfiles = () => {
 
   useEffect(() => {
     fetchAllProfiles();
+
+    const channel = supabase
+      .channel('saas-profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          console.log('🔄 Alteração detectada em profiles, recarregando...');
+          fetchAllProfiles();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return {

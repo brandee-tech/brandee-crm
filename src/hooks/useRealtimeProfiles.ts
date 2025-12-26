@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useToast } from '@/hooks/use-toast';
 
 interface Profile {
@@ -28,28 +28,18 @@ export const useRealtimeProfiles = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const { user } = useAuth();
+  const { userInfo } = useCurrentUser();
   const { toast } = useToast();
   const channelRef = useRef<any>(null);
-  const isSubscribedRef = useRef(false);
 
   const fetchProfiles = async () => {
     try {
-      // Primeiro obter o company_id do usuário atual
-      const { data: currentUserProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user?.id)
-        .single();
-
-      if (profileError) {
-        console.error('Erro ao buscar company_id do usuário:', profileError);
-        setProfiles([]);
+      if (!userInfo?.company_id) {
         setLoading(false);
         return;
       }
 
-      let query = supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select(`
           *,
@@ -64,15 +54,9 @@ export const useRealtimeProfiles = () => {
             domain,
             plan
           )
-        `);
-
-      // Se o usuário tem company_id, filtrar por empresa
-      // Caso contrário, buscar todos os usuários
-      if (currentUserProfile?.company_id) {
-        query = query.eq('company_id', currentUserProfile.company_id);
-      }
-
-      const { data, error } = await query.order('created_at', { ascending: false });
+        `)
+        .eq('company_id', userInfo.company_id)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setProfiles(data || []);
@@ -128,8 +112,7 @@ export const useRealtimeProfiles = () => {
 
   const deleteProfile = async (id: string) => {
     try {
-      // Verificar se não está tentando deletar a si mesmo
-      if (id === user?.id) {
+      if (id === userInfo?.user_id) {
         toast({
           title: "Erro",
           description: "Você não pode deletar seu próprio perfil",
@@ -144,7 +127,7 @@ export const useRealtimeProfiles = () => {
         .eq('id', id);
 
       if (error) throw error;
-      
+
       toast({
         title: "Sucesso",
         description: "Usuário removido com sucesso"
@@ -160,57 +143,42 @@ export const useRealtimeProfiles = () => {
   };
 
   useEffect(() => {
-    if (!user) return;
-    
+    if (!userInfo?.company_id) return;
+
     fetchProfiles();
 
-    // Cleanup function to remove channel
-    const cleanup = () => {
-      if (channelRef.current && isSubscribedRef.current) {
-        console.log('Cleaning up realtime profiles channel');
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-        isSubscribedRef.current = false;
-      }
-    };
+    const channelName = `realtime-profiles-${userInfo.company_id}`;
 
-    // Clean up any existing channel first
-    cleanup();
+    // Clean up any existing channel before subscribing to a new one
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
 
-    // Create unique channel name using user ID and timestamp
-    const channelName = `realtime-profiles-${user.id}-${Date.now()}`;
-    
-    // Setup realtime subscription
-    const channel = supabase.channel(channelName);
-    
-    channel
+    const channel = supabase.channel(channelName)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'profiles'
+          table: 'profiles',
+          filter: `company_id=eq.${userInfo.company_id}`
         },
         (payload) => {
-          console.log('Realtime profile change detected:', payload);
+          console.log('🔄 Alteração detectada em profiles (Company), recarregando...', payload);
           setIsUpdating(true);
-          
-          fetchProfiles().finally(() => {
-            setIsUpdating(false);
-          });
+          fetchProfiles().finally(() => setIsUpdating(false));
         }
       )
-      .subscribe((status) => {
-        console.log('Realtime profiles subscription status:', status);
-        if (status === 'SUBSCRIBED') {
-          isSubscribedRef.current = true;
-        }
-      });
+      .subscribe();
 
     channelRef.current = channel;
 
-    return cleanup;
-  }, [user]);
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
+  }, [userInfo?.company_id]);
 
   return {
     profiles,

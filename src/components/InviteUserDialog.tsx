@@ -70,7 +70,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
     
     try {
       const roleData = roles.find(role => role.id === selectedRole);
-      const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
+      const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/09705cd4-3e37-42f4-ac3d-57ac99ed8293';
       
       console.log("🔗 [DEBUG] URL do webhook:", webhookUrl);
       console.log("👤 [DEBUG] Dados do role encontrado:", roleData);

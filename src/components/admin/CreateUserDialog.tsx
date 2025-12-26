@@ -81,7 +81,7 @@ export const CreateUserDialog = ({ open, onOpenChange, onSuccess, preselectedCom
       }
 
       // URL do webhook
-      const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/09705cd4-3e37-42f4-ac3d-57ac99ed8292';
+      const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/09705cd4-3e37-42f4-ac3d-57ac99ed8293';
 
       console.log('Enviando dados para webhook:', {
         nome: formData.full_name,

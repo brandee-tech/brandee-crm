@@ -192,15 +192,6 @@ const LeadAutomation = () => {
               )}
             </CardContent>
           </Card>
-
-          {/* Future Sources Placeholder */}
-          <Card className="border-dashed">
-            <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">
-                Mais fontes de captação em breve: Landing Pages, Integrações com redes sociais, Webhooks...
-              </p>
-            </CardContent>
-          </Card>
         </div>
       {/* Form Editor Dialog */}
       <FormEditorDialog

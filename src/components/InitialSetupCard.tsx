@@ -11,21 +11,21 @@ interface InitialSetupCardProps {
   count?: number;
 }
 
-export const InitialSetupCard = ({ 
-  title, 
-  description, 
-  icon: Icon, 
-  actionLabel, 
+export const InitialSetupCard = ({
+  title,
+  description,
+  icon: Icon,
+  actionLabel,
   onAction,
-  count = 0 
+  count = 0
 }: InitialSetupCardProps) => {
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Icon className="w-5 h-5 text-blue-600" />
+            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Icon className="w-5 h-5 text-primary" />
             </div>
             <div>
               <CardTitle className="text-lg">{title}</CardTitle>

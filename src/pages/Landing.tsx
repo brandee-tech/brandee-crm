@@ -11,7 +11,7 @@ export const Landing = () => {
     user
   } = useAuth();
   const features = [{
-    icon: <Building2 className="w-8 h-8 text-blue-600" />,
+    icon: <Building2 className="w-8 h-8 text-primary" />,
     title: "Gestão de Empresas",
     description: "Gerencie todas as informações das suas empresas clientes em um só lugar"
   }, {
@@ -49,13 +49,13 @@ export const Landing = () => {
     features: ["Usuários ilimitados", "Leads ilimitados", "Relatórios personalizados", "Suporte 24/7", "Integrações personalizadas"],
     popular: false
   }];
-  return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+  return <div className="min-h-screen bg-gradient-to-br from-primary/5 to-indigo-100">
     {/* Header */}
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
           <div className="flex items-center">
-            <Building2 className="w-8 h-8 text-blue-600 mr-3" />
+            <Building2 className="w-8 h-8 text-primary mr-3" />
             <h1 className="text-2xl font-bold text-gray-900">Brandée CRM</h1>
           </div>
           <div className="flex items-center space-x-4">
@@ -84,7 +84,7 @@ export const Landing = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-5xl font-bold text-gray-900 mb-6">
           Gerencie suas vendas com
-          <span className="text-blue-600"> inteligência</span>
+          <span className="text-primary"> inteligência</span>
         </h2>
         <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
           Plataforma completa para gestão de leads, equipes de vendas e relacionamento com clientes.
@@ -153,8 +153,8 @@ export const Landing = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => <Card key={index} className={`relative ${plan.popular ? 'border-blue-500 shadow-xl' : ''}`}>
-            {plan.popular && <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600">
+          {plans.map((plan, index) => <Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-xl' : ''}`}>
+            {plan.popular && <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary">
               Mais Popular
             </Badge>}
             <CardHeader className="text-center">
@@ -182,12 +182,12 @@ export const Landing = () => {
     </section>
 
     {/* CTA Section */}
-    <section className="py-20 bg-blue-600">
+    <section className="py-20 bg-primary">
       <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
         <h3 className="text-3xl font-bold text-white mb-4">
           Pronto para transformar suas vendas?
         </h3>
-        <p className="text-xl text-blue-100 mb-8">
+        <p className="text-xl text-primary-foreground/90 mb-8">
           Junte-se a centenas de empresas que já aumentaram suas vendas com nossa plataforma
         </p>
         {user ? <Button size="lg" variant="secondary" onClick={() => navigate('/')}>
@@ -206,7 +206,7 @@ export const Landing = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center mb-4">
-              <Building2 className="w-6 h-6 text-blue-400 mr-2" />
+              <Building2 className="w-6 h-6 text-primary mr-2" />
               <h4 className="text-lg font-semibold">ZestCRM</h4>
             </div>
             <p className="text-gray-400">

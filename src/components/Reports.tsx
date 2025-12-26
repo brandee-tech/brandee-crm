@@ -23,9 +23,9 @@ export const Reports = () => {
   const [selectedCloser, setSelectedCloser] = useState<string>('');
   const [selectedGeneralCloser, setSelectedGeneralCloser] = useState<string>('');
   const [periodDays, setPeriodDays] = useState(30);
-  
+
   const { reportData, isLoading } = useReports(selectedGeneralCloser || undefined);
-  
+
   const { reportData: meetingsAppointmentsData, isLoading: isLoadingMeetingsAppointments } = useMeetingsAndAppointmentsReports(selectedPeriod);
   const { closers, loading: closersLoading } = useClosers();
   const { reportData: closerReportData, isLoading: isLoadingCloserReport } = useCloserReports(selectedCloser, periodDays);
@@ -75,15 +75,15 @@ export const Reports = () => {
   // Funções específicas de exportação
   const exportSalesData = () => {
     if (!reportData) return;
-    
+
     const headers = {
       month: 'Mês',
       value: 'Valor (R$)',
       count: 'Quantidade de Vendas'
     };
-    
+
     const csvContent = convertToCSV(reportData.salesByMonth, headers);
-    const filename = selectedGeneralCloser 
+    const filename = selectedGeneralCloser
       ? `vendas-por-periodo-${closers.find(c => c.id === selectedGeneralCloser)?.full_name?.replace(/\s+/g, '-').toLowerCase()}`
       : 'vendas-por-periodo';
     downloadCSV(csvContent, filename);
@@ -91,7 +91,7 @@ export const Reports = () => {
 
   const exportMeetingsData = () => {
     if (!meetingsAppointmentsData) return;
-    
+
     const headers = {
       period: 'Período',
       count: 'Total',
@@ -99,14 +99,14 @@ export const Reports = () => {
       scheduled: 'Agendadas',
       inProgress: 'Em Andamento'
     };
-    
+
     const csvContent = convertToCSV(meetingsAppointmentsData.meetingsByPeriod, headers);
     downloadCSV(csvContent, `reunioes-${selectedPeriod}`);
   };
 
   const exportAppointmentsData = () => {
     if (!meetingsAppointmentsData) return;
-    
+
     const headers = {
       period: 'Período',
       count: 'Total',
@@ -114,39 +114,39 @@ export const Reports = () => {
       completed: 'Realizados',
       cancelled: 'Cancelados'
     };
-    
+
     const csvContent = convertToCSV(meetingsAppointmentsData.appointmentsByPeriod, headers);
     downloadCSV(csvContent, `agendamentos-${selectedPeriod}`);
   };
 
   const exportLeadsData = () => {
     if (!reportData) return;
-    
+
     const headers = {
       source: 'Fonte',
       count: 'Quantidade'
     };
-    
+
     const csvContent = convertToCSV(reportData.leadsBySource, headers);
     downloadCSV(csvContent, 'leads-por-fonte');
   };
 
   const exportPipelineData = () => {
     if (!reportData) return;
-    
+
     const headers = {
       status: 'Status',
       value: 'Valor (R$)',
       count: 'Quantidade'
     };
-    
+
     const csvContent = convertToCSV(reportData.pipelineData, headers);
     downloadCSV(csvContent, 'pipeline-vendas');
   };
 
   const exportKPIsData = () => {
     if (!reportData || !meetingsAppointmentsData) return;
-    
+
     const kpiData = [
       {
         metrica: 'Taxa de Conversão',
@@ -189,15 +189,15 @@ export const Reports = () => {
         categoria: 'Atendimento'
       }
     ];
-    
+
     const headers = {
       metrica: 'Métrica',
       valor: 'Valor',
       categoria: 'Categoria'
     };
-    
+
     const csvContent = convertToCSV(kpiData, headers);
-    const filename = selectedGeneralCloser 
+    const filename = selectedGeneralCloser
       ? `kpis-gerais-${closers.find(c => c.id === selectedGeneralCloser)?.full_name?.replace(/\s+/g, '-').toLowerCase()}`
       : 'kpis-gerais';
     downloadCSV(csvContent, filename);
@@ -205,13 +205,13 @@ export const Reports = () => {
 
   const exportActivitiesData = () => {
     if (!reportData) return;
-    
+
     const headers = {
       month: 'Mês',
       tasks: 'Tarefas',
       appointments: 'Agendamentos'
     };
-    
+
     const csvContent = convertToCSV(reportData.activitiesByMonth, headers);
     downloadCSV(csvContent, 'atividades-mensais');
   };
@@ -219,7 +219,7 @@ export const Reports = () => {
   // Funções de exportação por closer
   const exportCloserReportData = () => {
     if (!closerReportData) return;
-    
+
     const reportDataForCSV = [
       {
         metrica: 'Total de Leads',
@@ -258,19 +258,19 @@ export const Reports = () => {
         valor: closerReportData.completedTasks.toString()
       }
     ];
-    
+
     const headers = {
       metrica: 'Métrica',
       valor: 'Valor'
     };
-    
+
     const csvContent = convertToCSV(reportDataForCSV, headers);
     downloadCSV(csvContent, `relatorio-${closerReportData.closerName.replace(/\s+/g, '-').toLowerCase()}`);
   };
 
   const exportClosersComparisonData = () => {
     if (!comparisonData) return;
-    
+
     const headers = {
       name: 'Closer',
       leads: 'Total Leads',
@@ -279,14 +279,14 @@ export const Reports = () => {
       revenue: 'Receita (R$)',
       appointments: 'Agendamentos'
     };
-    
+
     const csvContent = convertToCSV(comparisonData.closers, headers);
     downloadCSV(csvContent, 'comparativo-closers');
   };
 
   const exportCloserGoalsData = () => {
     if (!closerReportData?.goals) return;
-    
+
     const goalsData = Object.entries(closerReportData.goals)
       .filter(([_, goal]) => goal !== null)
       .map(([type, goal]) => ({
@@ -296,7 +296,7 @@ export const Reports = () => {
         progresso: `${(goal?.progress || 0).toFixed(1)}%`,
         status: (goal?.progress || 0) >= 100 ? 'Concluída' : 'Em Andamento'
       }));
-    
+
     const headers = {
       tipo: 'Tipo de Meta',
       meta: 'Meta',
@@ -304,7 +304,7 @@ export const Reports = () => {
       progresso: 'Progresso',
       status: 'Status'
     };
-    
+
     const csvContent = convertToCSV(goalsData, headers);
     downloadCSV(csvContent, `metas-${closerReportData.closerName.replace(/\s+/g, '-').toLowerCase()}`);
   };
@@ -326,27 +326,27 @@ export const Reports = () => {
   }
 
   const kpis = [
-    { 
-      label: 'Taxa de Conversão', 
-      value: `${reportData.conversionRate.toFixed(1)}%`, 
+    {
+      label: 'Taxa de Conversão',
+      value: `${reportData.conversionRate.toFixed(1)}%`,
       trend: formatPercentage(reportData.trendsData.conversionChange),
       trendDirection: reportData.trendsData.conversionChange >= 0 ? 'up' : 'down'
     },
-    { 
-      label: 'Ticket Médio', 
-      value: formatCurrency(reportData.avgDealValue), 
+    {
+      label: 'Ticket Médio',
+      value: formatCurrency(reportData.avgDealValue),
       trend: '+R$ 1.250',
       trendDirection: 'up'
     },
-    { 
-      label: 'Leads Qualificados', 
-      value: reportData.qualifiedLeads.toString(), 
+    {
+      label: 'Leads Qualificados',
+      value: reportData.qualifiedLeads.toString(),
       trend: formatPercentage(reportData.trendsData.leadsChange),
       trendDirection: reportData.trendsData.leadsChange >= 0 ? 'up' : 'down'
     },
-    { 
-      label: 'Ciclo de Vendas', 
-      value: `${Math.round(reportData.avgSalesCycle)} dias`, 
+    {
+      label: 'Ciclo de Vendas',
+      value: `${Math.round(reportData.avgSalesCycle)} dias`,
       trend: '-1.5 dias',
       trendDirection: 'up'
     }
@@ -389,7 +389,7 @@ export const Reports = () => {
       title: 'Exportar KPIs Gerais',
       description: 'Métricas principais de vendas e atendimento',
       icon: BarChart3,
-      color: 'bg-blue-100 text-blue-600',
+      color: 'bg-primary/10 text-primary',
       action: exportKPIsData
     },
     {
@@ -444,9 +444,9 @@ export const Reports = () => {
           <p className="text-gray-600 mt-1">Análises e métricas do seu negócio</p>
         </div>
         <div className="flex gap-4 items-center">
-          <PeriodSelector 
-            selectedPeriod={selectedPeriod} 
-            onPeriodChange={setSelectedPeriod} 
+          <PeriodSelector
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
           />
         </div>
       </div>
@@ -495,9 +495,8 @@ export const Reports = () => {
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-2">{kpi.label}</p>
                   <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-                  <div className={`flex items-center justify-center gap-1 text-sm mt-1 ${
-                    kpi.trendDirection === 'up' ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <div className={`flex items-center justify-center gap-1 text-sm mt-1 ${kpi.trendDirection === 'up' ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {kpi.trendDirection === 'up' ? (
                       <ArrowUpRight className="w-4 h-4" />
                     ) : (
@@ -514,7 +513,7 @@ export const Reports = () => {
           <div className="space-y-6">
             <div className="border-t pt-6">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">Relatórios de Atendimentos e Agendamentos</h2>
-              
+
               {/* KPIs de Reuniões e Agendamentos */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 {meetingsAppointmentsKpis.map((kpi, index) => {
@@ -522,10 +521,9 @@ export const Reports = () => {
                   return (
                     <Card key={index} className="p-6">
                       <div className="flex items-center justify-between mb-2">
-                        <Icon className="w-8 h-8 text-blue-600" />
-                        <div className={`flex items-center gap-1 text-sm ${
-                          kpi.trendDirection === 'up' ? 'text-green-600' : 'text-red-600'
-                        }`}>
+                        <Icon className="w-8 h-8 text-primary" />
+                        <div className={`flex items-center gap-1 text-sm ${kpi.trendDirection === 'up' ? 'text-green-600' : 'text-red-600'
+                          }`}>
                           {kpi.trendDirection === 'up' ? (
                             <ArrowUpRight className="w-4 h-4" />
                           ) : (
@@ -547,7 +545,7 @@ export const Reports = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Reuniões por Período</h3>
                   <MeetingsReportChart data={meetingsAppointmentsData.meetingsByPeriod} />
                 </Card>
-                
+
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Agendamentos por Período</h3>
                   <AppointmentsReportChart data={meetingsAppointmentsData.appointmentsByPeriod} />
@@ -658,7 +656,7 @@ export const Reports = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Vendas por Mês</h3>
               <SalesChart data={reportData.salesByMonth} />
             </Card>
-            
+
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Pipeline de Vendas</h3>
               <PipelineChart data={reportData.pipelineData} />
@@ -683,9 +681,9 @@ export const Reports = () => {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">{option.title}</h3>
                     <p className="text-gray-600 mb-4">{option.description}</p>
-                    <Button 
+                    <Button
                       onClick={option.action}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      className="w-full bg-primary hover:bg-primary/90"
                       size="sm"
                     >
                       <FileDown className="w-4 h-4 mr-2" />
@@ -719,7 +717,7 @@ export const Reports = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="flex-1">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Período (dias)
@@ -745,7 +743,7 @@ export const Reports = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="p-6">
                   <div className="flex items-center gap-3 mb-2">
-                    <Users className="w-6 h-6 text-blue-600" />
+                    <Users className="w-6 h-6 text-primary" />
                     <h3 className="font-medium text-gray-900">Total de Leads</h3>
                   </div>
                   <p className="text-2xl font-bold text-gray-900">{closerReportData.totalLeads}</p>
@@ -800,8 +798,8 @@ export const Reports = () => {
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-blue-600 h-2 rounded-full" 
+                            <div
+                              className="bg-blue-600 h-2 rounded-full"
                               style={{ width: `${Math.min((goal?.progress || 0), 100)}%` }}
                             />
                           </div>
@@ -818,7 +816,7 @@ export const Reports = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Receita por Mês</h3>
                   <SalesChart data={closerReportData.revenueByMonth.map(item => ({ ...item, count: item.value }))} />
                 </Card>
-                
+
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Agendamentos por Mês</h3>
                   <ActivitiesChart data={closerReportData.appointmentsByMonth.map(item => ({ month: item.month, tasks: item.count, appointments: 0 }))} />
@@ -839,17 +837,17 @@ export const Reports = () => {
                     <FileDown className="w-4 h-4" />
                     Relatório Completo
                   </Button>
-                  
+
                   {Object.values(closerReportData.goals).some(goal => goal !== null) && (
                     <Button onClick={exportCloserGoalsData} variant="outline" className="flex items-center gap-2">
                       <Target className="w-4 h-4" />
                       Dados das Metas
                     </Button>
                   )}
-                  
-                  <Button 
-                    onClick={exportClosersComparisonData} 
-                    variant="outline" 
+
+                  <Button
+                    onClick={exportClosersComparisonData}
+                    variant="outline"
                     className="flex items-center gap-2"
                     disabled={!comparisonData}
                   >
@@ -884,7 +882,7 @@ export const Reports = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="mt-6 pt-6 border-t">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   <div>

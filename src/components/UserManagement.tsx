@@ -115,7 +115,7 @@ export const UserManagement = () => {
           <h1 className="text-3xl font-bold text-gray-900">Gerenciamento de Usuários</h1>
           <p className="text-gray-600 mt-1">Gerencie os usuários e seus cargos na sua empresa</p>
         </div>
-        
+
         <PermissionGuard module="admin" action="manageUsers">
           <InviteUserDialog />
         </PermissionGuard>
@@ -133,7 +133,7 @@ export const UserManagement = () => {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-semibold">
                     {profile.full_name?.charAt(0)?.toUpperCase() || profile.email?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div>
@@ -143,7 +143,7 @@ export const UserManagement = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <PermissionGuard module="admin" action="manageUsers">
                   {profile.id !== user?.id && (
                     <div className="flex items-center gap-1">
@@ -206,7 +206,7 @@ export const UserManagement = () => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tem certeza que deseja excluir o usuário <strong>{profile.full_name || profile.email}</strong>? 
+                              Tem certeza que deseja excluir o usuário <strong>{profile.full_name || profile.email}</strong>?
                               Esta ação não pode ser desfeita.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
@@ -226,23 +226,23 @@ export const UserManagement = () => {
                 </PermissionGuard>
               </div>
             </CardHeader>
-            
+
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Mail className="w-4 h-4" />
                 {profile.email}
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Building2 className="w-4 h-4" />
                 {profile.companies?.name || 'Empresa não definida'}
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <Badge className={getRoleBadgeColor(profile.roles?.name || 'Usuário')}>
                   {profile.roles?.name || 'Sem cargo'}
                 </Badge>
-                
+
                 {profile.companies?.plan && (
                   <span className="text-xs text-gray-500 capitalize">
                     Plano: {profile.companies.plan}

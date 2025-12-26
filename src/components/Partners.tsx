@@ -14,7 +14,7 @@ export const Partners = () => {
   const [editingPartner, setEditingPartner] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  
+
   const { partners, loading, deletePartner, createPartner } = usePartners();
   const { hasPermission } = usePermissions();
 
@@ -57,11 +57,11 @@ export const Partners = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Parceiros</h1>
           <p className="text-gray-600 mt-1">Gerencie seus parceiros de negócio</p>
         </div>
-        <PermissionGuard 
-          module="partners" 
+        <PermissionGuard
+          module="partners"
           action="create"
           fallback={
-            <Button 
+            <Button
               disabled
               className="bg-gray-400 cursor-not-allowed w-full sm:w-auto"
               title="Você não tem permissão para criar parceiros"
@@ -71,8 +71,8 @@ export const Partners = () => {
             </Button>
           }
         >
-          <Button 
-            className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+          <Button
+            className="w-full sm:w-auto"
             onClick={() => setAddDialogOpen(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -92,11 +92,11 @@ export const Partners = () => {
                     {partner.status === 'ativo' ? 'Ativo' : 'Inativo'}
                   </Badge>
                 </div>
-                
+
                 {partner.description && (
                   <p className="text-gray-600 mb-3">{partner.description}</p>
                 )}
-                
+
                 <div className="flex flex-col sm:flex-row gap-2 text-sm text-gray-500">
                   {partner.contact_person && (
                     <div className="flex items-center gap-1">
@@ -118,15 +118,15 @@ export const Partners = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="text-left sm:text-right">
                   <p className="text-xs text-gray-400 mt-1">Criado: {formatDate(partner.created_at)}</p>
                 </div>
-                
+
                 <div className="flex gap-2 w-full sm:w-auto">
-                  <PermissionGuard 
-                    module="partners" 
+                  <PermissionGuard
+                    module="partners"
                     action="edit"
                     fallback={
                       <Button
@@ -151,9 +151,9 @@ export const Partners = () => {
                       <span className="sm:hidden">Editar</span>
                     </Button>
                   </PermissionGuard>
-                  
-                  <PermissionGuard 
-                    module="partners" 
+
+                  <PermissionGuard
+                    module="partners"
                     action="delete"
                     fallback={
                       <Button

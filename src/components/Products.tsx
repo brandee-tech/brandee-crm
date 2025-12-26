@@ -13,7 +13,7 @@ export const Products = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  
+
   const { products, loading, deleteProduct } = useProducts();
 
   const handleDelete = async (id: string) => {
@@ -40,8 +40,8 @@ export const Products = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Produtos</h1>
           <p className="text-gray-600 mt-1">Gerencie os produtos e serviços da sua empresa</p>
         </div>
-        <Button 
-          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto hover-scale"
+        <Button
+          className="w-full sm:w-auto hover-scale"
           onClick={() => setAddDialogOpen(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -57,7 +57,7 @@ export const Products = () => {
                 <div className="flex-1">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                     <div className="flex items-center gap-2">
-                      <Package className="w-5 h-5 text-blue-600" />
+                      <Package className="w-5 h-5 text-primary" />
                       <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
                     </div>
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 w-fit">
@@ -70,16 +70,16 @@ export const Products = () => {
                       </Badge>
                     )}
                   </div>
-                  
+
                   {product.description && (
                     <p className="text-gray-600 text-sm mb-3">{product.description}</p>
                   )}
-                  
+
                   <div className="text-xs text-gray-400">
                     Criado em: {new Date(product.created_at).toLocaleDateString('pt-BR')}
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
@@ -110,7 +110,7 @@ export const Products = () => {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction 
+                        <AlertDialogAction
                           onClick={() => handleDelete(product.id)}
                           className="bg-red-600 hover:bg-red-700"
                         >
@@ -132,9 +132,9 @@ export const Products = () => {
             <p className="text-gray-600 mb-4">
               Comece criando seu primeiro produto ou serviço.
             </p>
-            <Button 
+            <Button
               onClick={() => setAddDialogOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 hover-scale"
+              className="hover-scale"
             >
               <Plus className="w-4 h-4 mr-2" />
               Criar Primeiro Produto

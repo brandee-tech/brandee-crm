@@ -76,7 +76,7 @@ export const ChatMessages = ({
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       'Novo Lead': 'bg-gray-100 text-gray-700',
-      'Atendimento': 'bg-blue-100 text-blue-700',
+      'Atendimento': 'bg-primary/10 text-primary',
       'Agendamento': 'bg-orange-100 text-orange-700',
       'Vendido': 'bg-green-100 text-green-700',
       'Perdido': 'bg-red-100 text-red-700'
@@ -176,87 +176,87 @@ export const ChatMessages = ({
     };
   }, [conversation.id, queryClient]);
   return <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-border bg-background max-h-48 overflow-y-auto">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src={conversation.contact?.profile_picture_url} />
-              <AvatarFallback className="bg-green-600 text-white">{initials}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-semibold">{contactName}</h3>
-              <p className="text-sm text-muted-foreground">{conversation.contact?.phone}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <AssignAgentDropdown 
-              conversationId={conversation.id}
-              currentAgentId={conversation.assigned_to}
-              companyId={conversation.company_id}
-            />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="w-5 h-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-background z-50">
-                <DropdownMenuItem onClick={() => setClearMessagesOpen(true)} className="cursor-pointer">
-                  <MessageSquareX className="w-4 h-4 mr-2" />
-                  Limpar mensagens
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDeleteConversationOpen(true)} className="cursor-pointer text-destructive focus:text-destructive">
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Deletar conversa
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+    {/* Header */}
+    <div className="flex-shrink-0 p-4 border-b border-border bg-background max-h-48 overflow-y-auto">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage src={conversation.contact?.profile_picture_url} />
+            <AvatarFallback className="bg-green-600 text-white">{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h3 className="font-semibold">{contactName}</h3>
+            <p className="text-sm text-muted-foreground">{conversation.contact?.phone}</p>
           </div>
         </div>
 
-        {/* Lead Info or Actions */}
-        {linkedLead ? <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-sm">{linkedLead.name}</h4>
-                  <Badge className={getStatusColor(linkedLead.status || 'Novo Lead')}>
-                    {linkedLead.status || 'Novo Lead'}
-                  </Badge>
-                </div>
-                {linkedLead.product_name && <p className="text-sm text-muted-foreground">
-                    Produto: {linkedLead.product_name}
-                  </p>}
-                {linkedLead.product_value && <p className="text-sm font-medium text-green-600">
-                    R$ {linkedLead.product_value.toFixed(2)}
-                  </p>}
-              </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={handleViewLead} title="Ver lead">
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={handleUnlinkLead} title="Desvincular lead">
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div> : <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setLinkDialogOpen(true)} className="flex-1">
-              <Link2 className="w-4 h-4 mr-2" />
-              Vincular a Lead
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setCreateLeadDialogOpen(true)} className="flex-1">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Criar Lead
-            </Button>
-          </div>}
+        <div className="flex items-center gap-2">
+          <AssignAgentDropdown
+            conversationId={conversation.id}
+            currentAgentId={conversation.assigned_to}
+            companyId={conversation.company_id}
+          />
 
-        {/* Tags */}
-        <div className="mt-3">
-          <TagSelector selectedTags={assignedTags || []} onTagsChange={tags => {
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="w-5 h-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 bg-background z-50">
+              <DropdownMenuItem onClick={() => setClearMessagesOpen(true)} className="cursor-pointer">
+                <MessageSquareX className="w-4 h-4 mr-2" />
+                Limpar mensagens
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDeleteConversationOpen(true)} className="cursor-pointer text-destructive focus:text-destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Deletar conversa
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Lead Info or Actions */}
+      {linkedLead ? <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="font-semibold text-sm">{linkedLead.name}</h4>
+              <Badge className={getStatusColor(linkedLead.status || 'Novo Lead')}>
+                {linkedLead.status || 'Novo Lead'}
+              </Badge>
+            </div>
+            {linkedLead.product_name && <p className="text-sm text-muted-foreground">
+              Produto: {linkedLead.product_name}
+            </p>}
+            {linkedLead.product_value && <p className="text-sm font-medium text-green-600">
+              R$ {linkedLead.product_value.toFixed(2)}
+            </p>}
+          </div>
+          <div className="flex gap-1">
+            <Button variant="ghost" size="icon" onClick={handleViewLead} title="Ver lead">
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={handleUnlinkLead} title="Desvincular lead">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </div> : <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => setLinkDialogOpen(true)} className="flex-1">
+          <Link2 className="w-4 h-4 mr-2" />
+          Vincular a Lead
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setCreateLeadDialogOpen(true)} className="flex-1">
+          <UserPlus className="w-4 h-4 mr-2" />
+          Criar Lead
+        </Button>
+      </div>}
+
+      {/* Tags */}
+      <div className="mt-3">
+        <TagSelector selectedTags={assignedTags || []} onTagsChange={tags => {
           const currentTagIds = assignedTags?.map(t => t.id) || [];
           const newTagIds = tags.map(t => t.id);
           const added = newTagIds.filter(id => !currentTagIds.includes(id));
@@ -274,64 +274,64 @@ export const ChatMessages = ({
             });
           });
         }} placeholder="Adicionar tags à conversa..." />
-        </div>
       </div>
+    </div>
 
-      {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4" ref={scrollRef}>
-        <div className="space-y-4">
-          {messages?.map(message => <MessageBubble key={message.id} message={message} />)}
-        </div>
+    {/* Messages */}
+    <div className="flex-1 min-h-0 overflow-y-auto p-4" ref={scrollRef}>
+      <div className="space-y-4">
+        {messages?.map(message => <MessageBubble key={message.id} message={message} />)}
       </div>
+    </div>
 
-      {/* Input */}
-      <div className="flex-shrink-0">
-        <MessageInput conversation={conversation} instanceName={instanceName} />
-      </div>
+    {/* Input */}
+    <div className="flex-shrink-0">
+      <MessageInput conversation={conversation} instanceName={instanceName} />
+    </div>
 
-      {/* Dialogs */}
-      {conversation.contact && <>
-          <LinkContactToLeadDialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen} contactId={conversation.contact.id} contactName={contactName} contactPhone={conversation.contact.phone} />
+    {/* Dialogs */}
+    {conversation.contact && <>
+      <LinkContactToLeadDialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen} contactId={conversation.contact.id} contactName={contactName} contactPhone={conversation.contact.phone} />
 
-          <CreateLeadFromWhatsAppDialog open={createLeadDialogOpen} onOpenChange={setCreateLeadDialogOpen} contactId={conversation.contact.id} contactName={contactName} contactPhone={conversation.contact.phone} />
-        </>}
+      <CreateLeadFromWhatsAppDialog open={createLeadDialogOpen} onOpenChange={setCreateLeadDialogOpen} contactId={conversation.contact.id} contactName={contactName} contactPhone={conversation.contact.phone} />
+    </>}
 
-      {/* Clear Messages Dialog */}
-      <AlertDialog open={clearMessagesOpen} onOpenChange={setClearMessagesOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Limpar mensagens</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja limpar todas as mensagens desta conversa? 
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearMessages}>
-              Limpar mensagens
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+    {/* Clear Messages Dialog */}
+    <AlertDialog open={clearMessagesOpen} onOpenChange={setClearMessagesOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Limpar mensagens</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tem certeza que deseja limpar todas as mensagens desta conversa?
+            Esta ação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleClearMessages}>
+            Limpar mensagens
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
 
-      {/* Delete Conversation Dialog */}
-      <AlertDialog open={deleteConversationOpen} onOpenChange={setDeleteConversationOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Deletar conversa</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja deletar esta conversa permanentemente? 
-              Todas as mensagens também serão removidas. Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConversation} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Deletar conversa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>;
+    {/* Delete Conversation Dialog */}
+    <AlertDialog open={deleteConversationOpen} onOpenChange={setDeleteConversationOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Deletar conversa</AlertDialogTitle>
+          <AlertDialogDescription>
+            Tem certeza que deseja deletar esta conversa permanentemente?
+            Todas as mensagens também serão removidas. Esta ação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteConversation} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Deletar conversa
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </div>;
 };

@@ -59,7 +59,7 @@ export const Contacts = () => {
         </div>
         <div className="flex items-center gap-4">
           <Button
-            className="bg-blue-600 hover:bg-blue-700"
+            className="w-full sm:w-auto"
             onClick={() => setAddDialogOpen(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -97,7 +97,7 @@ export const Contacts = () => {
               <div className="flex items-center gap-3">
                 <Avatar className="w-12 h-12">
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                     {getInitials(contact.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -107,16 +107,16 @@ export const Contacts = () => {
                 </div>
               </div>
               <div className="flex gap-1">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => handleEdit(contact)}
                 >
                   <Edit2 className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-red-600 hover:text-red-700"
                   onClick={() => handleDelete(contact.id)}
                 >

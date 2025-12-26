@@ -34,18 +34,18 @@ export const Meetings = () => {
   const [meetingToReschedule, setMeetingToReschedule] = useState<Meeting | null>(null);
 
   const currentUserProfile = profiles.find(p => p.id === user?.id);
-  
+
   // Log para debug
   console.log('Current user:', user?.id);
   console.log('Current user profile:', currentUserProfile);
   console.log('All profiles:', profiles);
-  
+
   // Verificar se é admin através das permissões do cargo
   const userRole = currentUserProfile?.roles;
-  const isAdmin = userRole?.permissions && 
-    typeof userRole.permissions === 'object' && 
+  const isAdmin = userRole?.permissions &&
+    typeof userRole.permissions === 'object' &&
     (userRole.permissions as any).admin === true;
-  
+
   console.log('User role:', userRole);
   console.log('Is admin:', isAdmin);
   console.log('Role permissions:', userRole?.permissions);
@@ -53,7 +53,7 @@ export const Meetings = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Agendada':
-        return 'bg-blue-500';
+        return 'bg-primary';
       case 'Finalizada':
         return 'bg-gray-500';
       case 'Cancelada':
@@ -92,9 +92,9 @@ export const Meetings = () => {
 
   if (selectedMeetingId) {
     return (
-      <MeetingDetails 
-        meetingId={selectedMeetingId} 
-        onBack={() => setSelectedMeetingId(null)} 
+      <MeetingDetails
+        meetingId={selectedMeetingId}
+        onBack={() => setSelectedMeetingId(null)}
       />
     );
   }
@@ -139,8 +139,8 @@ export const Meetings = () => {
       ) : (
         <div className="grid gap-4 px-6">
           {meetings.map((meeting) => (
-            <Card 
-              key={meeting.id} 
+            <Card
+              key={meeting.id}
               className="cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => setSelectedMeetingId(meeting.id)}
             >
@@ -155,11 +155,11 @@ export const Meetings = () => {
                         {meeting.status}
                       </Badge>
                     </div>
-                    
+
                     {meeting.description && (
                       <p className="text-gray-600 mb-3">{meeting.description}</p>
                     )}
-                    
+
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
@@ -172,11 +172,11 @@ export const Meetings = () => {
                       {meeting.meeting_url && (
                         <div className="flex items-center gap-1">
                           <ExternalLink className="w-4 h-4" />
-                          <a 
+                          <a
                             href={meeting.meeting_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 underline"
+                            className="text-primary hover:text-primary/80 underline"
                             onClick={(e) => e.stopPropagation()}
                           >
                             Link da reunião
@@ -185,41 +185,41 @@ export const Meetings = () => {
                       )}
                     </div>
                   </div>
-                  
-                   <div className="flex flex-col items-end gap-2">
-                     <div className="flex items-center gap-2">
-                       <ExportMeetingButton 
-                         meetingId={meeting.id} 
-                         variant="outline" 
-                         size="sm" 
-                         showIcon={false}
-                       />
-                       {(meeting.status === 'Cancelada' || meeting.status === 'Agendada') && (
-                         <Button 
-                           variant="outline" 
-                           size="sm"
-                           onClick={(e) => handleRescheduleMeeting(meeting, e)}
-                           className="text-orange-600 border-orange-600 hover:bg-orange-50"
-                         >
-                           <RotateCcw className="w-4 h-4 mr-1" />
-                           Reagendar
-                         </Button>
-                       )}
-                       <Button 
-                         variant="outline" 
-                         size="sm"
-                         onClick={(e) => {
-                           e.stopPropagation();
-                           setSelectedMeetingId(meeting.id);
-                         }}
-                       >
-                         <FileText className="w-4 h-4 mr-1" />
-                         Ver Detalhes
-                       </Button>
+
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2">
+                      <ExportMeetingButton
+                        meetingId={meeting.id}
+                        variant="outline"
+                        size="sm"
+                        showIcon={false}
+                      />
+                      {(meeting.status === 'Cancelada' || meeting.status === 'Agendada') && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleRescheduleMeeting(meeting, e)}
+                          className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                        >
+                          <RotateCcw className="w-4 h-4 mr-1" />
+                          Reagendar
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedMeetingId(meeting.id);
+                        }}
+                      >
+                        <FileText className="w-4 h-4 mr-1" />
+                        Ver Detalhes
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -227,25 +227,25 @@ export const Meetings = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={(e) => handleStatusChange(meeting.id, 'Agendada', e)}
                             disabled={meeting.status === 'Agendada'}
                           >
                             Marcar como Agendada
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={(e) => handleStatusChange(meeting.id, 'Finalizada', e)}
                             disabled={meeting.status === 'Finalizada'}
                           >
                             Marcar como Finalizada
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={(e) => handleStatusChange(meeting.id, 'Cancelada', e)}
                             disabled={meeting.status === 'Cancelada'}
                           >
                             Marcar como Cancelada
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={(e) => handleDeleteMeeting(meeting.id, e)}
                             className="text-red-600 focus:text-red-600"
                           >
@@ -263,8 +263,8 @@ export const Meetings = () => {
         </div>
       )}
 
-      <MeetingDialog 
-        open={dialogOpen} 
+      <MeetingDialog
+        open={dialogOpen}
         onOpenChange={setDialogOpen}
       />
 
@@ -278,7 +278,7 @@ export const Meetings = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700"
             >

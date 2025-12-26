@@ -27,26 +27,26 @@ export const PipelineColumnManager = () => {
 
   const handleCreateColumn = async () => {
     if (!newColumn.name.trim()) return;
-    
+
     const maxOrder = Math.max(...columns.map(col => col.position), 0);
     await createColumn({
       name: newColumn.name,
       color: newColumn.color,
       position: maxOrder + 1
     });
-    
+
     setNewColumn({ name: '', color: '#3B82F6' });
     setDialogOpen(false);
   };
 
   const handleUpdateColumn = async () => {
     if (!editingColumn || !editingColumn.name.trim()) return;
-    
+
     await updateColumn(editingColumn.id, {
       name: editingColumn.name,
       color: editingColumn.color
     });
-    
+
     setEditingColumn(null);
     setEditDialogOpen(false);
   };
@@ -57,7 +57,7 @@ export const PipelineColumnManager = () => {
       alert('Esta coluna não pode ser excluída pois é uma coluna base do sistema.');
       return;
     }
-    
+
     if (window.confirm('Tem certeza que deseja excluir esta coluna? Todos os leads nela serão movidos para a primeira coluna.')) {
       await deleteColumn(columnId);
     }
@@ -75,7 +75,7 @@ export const PipelineColumnManager = () => {
 
   const handleDrop = async (e: React.DragEvent, targetColumnId: string) => {
     e.preventDefault();
-    
+
     if (!draggedColumnId || draggedColumnId === targetColumnId) {
       setDraggedColumnId(null);
       return;
@@ -83,7 +83,7 @@ export const PipelineColumnManager = () => {
 
     const draggedColumn = columns.find(col => col.id === draggedColumnId);
     const targetColumn = columns.find(col => col.id === targetColumnId);
-    
+
     if (!draggedColumn || !targetColumn) {
       setDraggedColumnId(null);
       return;
@@ -114,7 +114,7 @@ export const PipelineColumnManager = () => {
   };
 
   const colorOptions = [
-    { name: 'Azul', value: '#3B82F6' },
+    { name: 'Azul', value: 'hsl(var(--primary))' },
     { name: 'Verde', value: '#10B981' },
     { name: 'Amarelo', value: '#F59E0B' },
     { name: 'Vermelho', value: '#EF4444' },
@@ -173,9 +173,8 @@ export const PipelineColumnManager = () => {
                     {colorOptions.map((color) => (
                       <button
                         key={color.value}
-                        className={`w-8 h-8 rounded-full border-2 ${
-                          newColumn.color === color.value ? 'border-gray-800' : 'border-gray-300'
-                        }`}
+                        className={`w-8 h-8 rounded-full border-2 ${newColumn.color === color.value ? 'border-gray-800' : 'border-gray-300'
+                          }`}
                         style={{ backgroundColor: color.value }}
                         onClick={() => setNewColumn(prev => ({ ...prev, color: color.value }))}
                         title={color.name}
@@ -209,11 +208,10 @@ export const PipelineColumnManager = () => {
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, column.id)}
             onDragEnd={handleDragEnd}
-            className={`flex items-center gap-3 p-3 border rounded-lg cursor-move transition-all ${
-              draggedColumnId === column.id 
-                ? 'opacity-50 bg-gray-50' 
+            className={`flex items-center gap-3 p-3 border rounded-lg cursor-move transition-all ${draggedColumnId === column.id
+                ? 'opacity-50 bg-gray-50'
                 : 'hover:bg-gray-50'
-            }`}
+              }`}
           >
             <GripVertical className="w-4 h-4 text-gray-400" />
             <div
@@ -222,7 +220,7 @@ export const PipelineColumnManager = () => {
             />
             <span className="flex-1 font-medium">{column.name}</span>
             {column.is_protected && (
-              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                 Protegida
               </span>
             )}
@@ -272,9 +270,8 @@ export const PipelineColumnManager = () => {
                   {colorOptions.map((color) => (
                     <button
                       key={color.value}
-                      className={`w-8 h-8 rounded-full border-2 ${
-                        editingColumn.color === color.value ? 'border-gray-800' : 'border-gray-300'
-                      }`}
+                      className={`w-8 h-8 rounded-full border-2 ${editingColumn.color === color.value ? 'border-gray-800' : 'border-gray-300'
+                        }`}
                       style={{ backgroundColor: color.value }}
                       onClick={() => setEditingColumn(prev => prev ? ({ ...prev, color: color.value }) : null)}
                       title={color.name}

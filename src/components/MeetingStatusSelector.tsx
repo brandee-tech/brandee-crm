@@ -23,7 +23,7 @@ export const MeetingStatusSelector = ({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Agendada':
-        return 'bg-blue-500';
+        return 'bg-primary';
       case 'Finalizada':
         return 'bg-gray-500';
       case 'Cancelada':
@@ -47,7 +47,7 @@ export const MeetingStatusSelector = ({
       <Badge className={getStatusColor(meeting.status)}>
         {meeting.status}
       </Badge>
-      
+
       <Select
         value={meeting.status}
         onValueChange={onStatusChange}

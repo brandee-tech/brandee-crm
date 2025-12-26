@@ -52,7 +52,7 @@ export const LinkContactToLeadDialog = ({
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       'Novo Lead': 'bg-gray-100 text-gray-700',
-      'Atendimento': 'bg-blue-100 text-blue-700',
+      'Atendimento': 'bg-primary/10 text-primary',
       'Agendamento': 'bg-orange-100 text-orange-700',
       'Vendido': 'bg-green-100 text-green-700',
       'Perdido': 'bg-red-100 text-red-700',

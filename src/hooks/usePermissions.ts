@@ -30,52 +30,75 @@ export const usePermissions = () => {
       }
 
       try {
-        // Buscar role_id baseado no nome do cargo
+        // 1. Buscar definição do cargo (incluindo is_system_role e permissions)
         const { data: roleData, error: roleError } = await supabase
           .from('roles')
-          .select('id')
+          .select('id, is_system_role, permissions')
           .eq('name', userInfo.role_name)
-          .eq('is_system_role', true)
+          .maybeSingle(); // Usar maybeSingle pois pode haver múltiplos roles com mesmo nome (um sistema e um custom em outra empresa), mas aqui assumimos nome único por contexto ou refinaremos a query se necessário.
+        // Melhoria: Se for custom role, deveria filtrar por company_id. 
+        // Mas como role_name é usado como chave aqui, vamos tentar buscar um que combine.
+
+
+        // Refinado: Buscar role que corresponda ao nome E (seja do sistema OU seja da empresa do usuário)
+        const { data: exactRoleData, error: exactRoleError } = await supabase
+          .from('roles')
+          .select('id, is_system_role, permissions')
+          .eq('name', userInfo.role_name)
+          .or(`company_id.eq.${userInfo.company_id},is_system_role.eq.true`)
+          .order('is_system_role', { ascending: false }) // Priorizar sistema se houver ambiguidade, ou refinar lógica
+          .limit(1)
           .single();
 
-        if (roleError) {
-          console.log('ℹ️ [DEBUG] Role não encontrado na tabela roles:', userInfo.role_name, 'Usando permissões padrão');
+        if (exactRoleError || !exactRoleData) {
+          console.log('ℹ️ [DEBUG] Role não encontrado ou erro:', userInfo.role_name, exactRoleError);
+          // Fallback para padrão
           setCustomPermissions(null);
           setLoading(false);
           return;
         }
 
-        if (!roleData) {
-          console.log('ℹ️ [DEBUG] Role não encontrado:', userInfo.role_name, 'Usando permissões padrão');
-          setCustomPermissions(null);
-          setLoading(false);
-          return;
-        }
+        // 2. Lógica de Permissões
+        if (exactRoleData.is_system_role) {
+          // Cargo de Sistema: Verificar se há override na tabela company_role_permissions
+          const { data: overrideData, error: overrideError } = await supabase
+            .from('company_role_permissions')
+            .select('permissions')
+            .eq('company_id', userInfo.company_id)
+            .eq('role_id', exactRoleData.id)
+            .maybeSingle();
 
-        // Buscar permissões customizadas para este cargo na empresa
-        const { data: permData, error: permError } = await supabase
-          .from('company_role_permissions')
-          .select('permissions')
-          .eq('company_id', userInfo.company_id)
-          .eq('role_id', roleData.id)
-          .maybeSingle();
+          if (overrideError) {
+            console.log('ℹ️ [DEBUG] Erro ao buscar override:', overrideError);
+          }
 
-        if (permError) {
-          console.log('ℹ️ [DEBUG] Tabela company_role_permissions não existe ou erro de acesso. Usando permissões padrão:', permError.message);
-          setCustomPermissions(null);
-          setLoading(false);
-          return;
-        }
+          if (overrideData?.permissions) {
+            console.log('✅ [DEBUG] Permissões customizadas (Override) encontradas para System Role:', userInfo.role_name);
+            setCustomPermissions(overrideData.permissions as unknown as RolePermissions);
+          } else {
+            console.log('ℹ️ [DEBUG] Sem override para System Role, usando padrão/definição base:', userInfo.role_name);
+            // Se o role do sistema tiver permissões definidas no banco, poderíamos usar `exactRoleData.permissions`
+            // Mas por compatibilidade atual, mantemos null para cair no DEFAULT_PERMISSIONS hardcoded ou usamos exactRoleData.permissions se não vazio
+            if (exactRoleData.permissions && Object.keys(exactRoleData.permissions).length > 0) {
+              setCustomPermissions(exactRoleData.permissions as unknown as RolePermissions);
+            } else {
+              setCustomPermissions(null);
+            }
+          }
 
-        if (permData?.permissions) {
-          console.log('✅ [DEBUG] Permissões customizadas encontradas para:', userInfo.role_name);
-          setCustomPermissions(permData.permissions as unknown as RolePermissions);
         } else {
-          console.log('ℹ️ [DEBUG] Usando permissões padrão para:', userInfo.role_name);
-          setCustomPermissions(null);
+          // Cargo Customizado: Usar permissões definidas na própria tabela roles
+          if (exactRoleData.permissions) {
+            console.log('✅ [DEBUG] Permissões encontradas para Custom Role:', userInfo.role_name);
+            setCustomPermissions(exactRoleData.permissions as unknown as RolePermissions);
+          } else {
+            console.log('⚠️ [DEBUG] Custom Role sem permissões definidas?', userInfo.role_name);
+            setCustomPermissions(null);
+          }
         }
+
       } catch (error) {
-        console.log('ℹ️ [DEBUG] Erro ao buscar permissões customizadas, usando padrão:', error);
+        console.log('ℹ️ [DEBUG] Erro ao buscar permissões:', error);
         setCustomPermissions(null);
       } finally {
         setLoading(false);
@@ -87,7 +110,7 @@ export const usePermissions = () => {
 
   const userPermissions = useMemo((): RolePermissions | null => {
     console.log('🔍 [DEBUG] usePermissions - userInfo:', userInfo);
-    
+
     // Se não tem userInfo, retorna null
     if (!userInfo) {
       console.log('❌ [DEBUG] usePermissions - Sem userInfo');

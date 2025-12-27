@@ -26,13 +26,43 @@ export const useAdminRoles = (companyId: string) => {
     }
 
     try {
+      // Buscar roles da empresa E roles do sistema
       const { data, error } = await supabase
         .from('roles')
         .select('*')
-        .eq('company_id', companyId)
+        .or(`company_id.eq.${companyId},is_system_role.eq.true`)
         .order('name');
 
       if (error) throw error;
+
+      // Se tivermos roles, vamos verificar se existem overrides de permissão para os roles de sistema
+      if (data && data.length > 0) {
+        const systemRoleIds = data.filter(r => r.is_system_role).map(r => r.id);
+
+        if (systemRoleIds.length > 0) {
+          const { data: overrides, error: overridesError } = await supabase
+            .from('company_role_permissions')
+            .select('*')
+            .eq('company_id', companyId)
+            .in('role_id', systemRoleIds);
+
+          if (!overridesError && overrides) {
+            // Aplicar overrides aos roles de sistema na lista
+            const rolesWithOverrides = data.map(role => {
+              if (role.is_system_role) {
+                const override = overrides.find(o => o.role_id === role.id);
+                if (override && override.permissions) {
+                  return { ...role, permissions: override.permissions };
+                }
+              }
+              return role;
+            });
+            setRoles(rolesWithOverrides);
+            return;
+          }
+        }
+      }
+
       setRoles(data || []);
     } catch (error) {
       console.error('Erro ao buscar cargos:', error);
@@ -61,13 +91,13 @@ export const useAdminRoles = (companyId: string) => {
         .single();
 
       if (error) throw error;
-      
+
       setRoles(prev => [data, ...prev]);
       toast({
         title: "Sucesso",
         description: "Cargo criado com sucesso"
       });
-      
+
       return data;
     } catch (error: any) {
       console.error('Erro ao criar cargo:', error);
@@ -98,13 +128,13 @@ export const useAdminRoles = (companyId: string) => {
         .single();
 
       if (error) throw error;
-      
+
       setRoles(prev => prev.map(role => role.id === id ? data : role));
       toast({
         title: "Sucesso",
         description: "Cargo atualizado com sucesso"
       });
-      
+
       return data;
     } catch (error: any) {
       console.error('Erro ao atualizar cargo:', error);
@@ -133,7 +163,7 @@ export const useAdminRoles = (companyId: string) => {
         .eq('id', id);
 
       if (error) throw error;
-      
+
       setRoles(prev => prev.filter(role => role.id !== id));
       toast({
         title: "Sucesso",
@@ -153,8 +183,60 @@ export const useAdminRoles = (companyId: string) => {
     fetchRoles();
   }, [companyId]);
 
-  const updateRolePermissions = async (id: string, permissions: any) => {
-    await updateRole(id, { permissions });
+  const updateRolePermissions = async (roleId: string, permissions: any) => {
+    try {
+      const role = roles.find(r => r.id === roleId);
+      if (!role) throw new Error('Role not found');
+
+      if (role.is_system_role) {
+        // Para roles do sistema, atualizamos a tabela de permissões da empresa (Override)
+        console.log('Atualizando permissões de System Role via override:', role.name);
+
+        // Verificar se já existe override
+        const { data: existingOverride } = await supabase
+          .from('company_role_permissions')
+          .select('id')
+          .eq('company_id', companyId)
+          .eq('role_id', roleId)
+          .maybeSingle();
+
+        let error;
+
+        if (existingOverride) {
+          const { error: updateError } = await supabase
+            .from('company_role_permissions')
+            .update({ permissions })
+            .eq('id', existingOverride.id);
+          error = updateError;
+        } else {
+          const { error: insertError } = await supabase
+            .from('company_role_permissions')
+            .insert({
+              company_id: companyId,
+              role_id: roleId,
+              permissions
+            });
+          error = insertError;
+        }
+
+        if (error) throw error;
+      } else {
+        // Para roles customizados, atualizamos diretamente na tabela roles
+        console.log('Atualizando permissões de Custom Role:', role.name);
+        const { error } = await supabase
+          .from('roles')
+          .update({ permissions })
+          .eq('id', roleId);
+
+        if (error) throw error;
+      }
+
+      // Atualizar estado local
+      setRoles(prev => prev.map(r => r.id === roleId ? { ...r, permissions } : r));
+    } catch (error) {
+      console.error('Erro ao atualizar permissões:', error);
+      throw error;
+    }
   };
 
   return {

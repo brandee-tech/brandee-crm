@@ -27,7 +27,7 @@ interface InviteUserDialogProps {
   onUserCreated?: () => void;
 }
 
-export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
+export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps): JSX.Element => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,17 +35,17 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
   const [selectedRole, setSelectedRole] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const { roles } = useRoles();
   const { toast } = useToast();
   const { company } = useCurrentCompany();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     console.log("🐛 [DEBUG] Iniciando criação de usuário");
     console.log("🐛 [DEBUG] Dados do formulário:", { name, email, selectedRole, companyId: company?.id });
-    
+
     if (!name || !email || !password || !selectedRole || !company?.id) {
       console.log("❌ [DEBUG] Erro: Campos obrigatórios faltando");
       toast({
@@ -65,16 +65,16 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const roleData = roles.find(role => role.id === selectedRole);
       const webhookUrl = 'https://webhook.sparkassessoria.com/webhook/09705cd4-3e37-42f4-ac3d-57ac99ed8293';
-      
+
       console.log("🔗 [DEBUG] URL do webhook:", webhookUrl);
       console.log("👤 [DEBUG] Dados do role encontrado:", roleData);
-      
+
       const payload = {
         nome: name,
         email: email,
@@ -86,10 +86,10 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
         create_with_password: true,
         timestamp: new Date().toISOString()
       };
-      
+
       console.log("📦 [DEBUG] Payload a ser enviado:", payload);
       console.log("🚀 [DEBUG] Iniciando requisição para:", webhookUrl);
-      
+
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
@@ -108,7 +108,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
         title: "Solicitação enviada!",
         description: `A solicitação para criar ${name} foi enviada. Verifique se o usuário foi criado no sistema.`
       });
-      
+
       console.log("🧹 [DEBUG] Limpando formulário e fechando dialog");
       setName('');
       setEmail('');
@@ -121,7 +121,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
       console.error('❌ [DEBUG] Tipo do erro:', error.constructor.name);
       console.error('❌ [DEBUG] Mensagem do erro:', error.message);
       console.error('❌ [DEBUG] Stack trace:', error.stack);
-      
+
       // Verificar se é erro de rede DNS
       if (error.message?.includes('ERR_NAME_NOT_RESOLVED')) {
         console.error('🌐 [DEBUG] Erro DNS detectado - URL não pode ser resolvida');
@@ -166,7 +166,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
             Crie um novo usuário diretamente no sistema
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nome *</Label>
@@ -219,7 +219,7 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
               </Button>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="role">Cargo *</Label>
             <Select value={selectedRole} onValueChange={setSelectedRole} required>
@@ -235,11 +235,11 @@ export const InviteUserDialog = ({ onUserCreated }: InviteUserDialogProps) => {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="flex justify-end gap-2">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setDialogOpen(false)}
               disabled={isSubmitting}
             >

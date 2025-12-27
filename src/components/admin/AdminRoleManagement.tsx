@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminRoles } from '@/hooks/useAdminRoles';
 import { RolePermissionsDialog } from '../RolePermissionsDialog';
-import { Plus, Edit, Trash2, Shield } from 'lucide-react';
+import { Plus, Edit, Trash2, Shield, Lock } from 'lucide-react';
 
 interface AdminRoleManagementProps {
   companyId: string;
@@ -29,7 +29,7 @@ export const AdminRoleManagement = ({ companyId, companyName }: AdminRoleManagem
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     try {
       if (editingRole) {
         await updateRole(editingRole.id, {
@@ -79,17 +79,17 @@ export const AdminRoleManagement = ({ companyId, companyName }: AdminRoleManagem
     return <div className="p-6">Carregando cargos...</div>;
   }
 
-  // Filtrar apenas cargos da empresa
-  const companyRoles = roles.filter(role => !role.is_system_role);
+  const systemRoles = roles.filter(role => role.is_system_role);
+  const customRoles = roles.filter(role => !role.is_system_role);
 
   const getPermissionsSummary = (role: any) => {
     if (!role.permissions || Object.keys(role.permissions).length === 0) {
       return 'Permissões padrão';
     }
-    
+
     let totalPermissions = 0;
     let enabledPermissions = 0;
-    
+
     Object.values(role.permissions).forEach((category: any) => {
       Object.values(category).forEach((permission: any) => {
         totalPermissions++;
@@ -98,130 +98,173 @@ export const AdminRoleManagement = ({ companyId, companyName }: AdminRoleManagem
         }
       });
     });
-    
+
     return `${enabledPermissions}/${totalPermissions} permissões`;
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">Cargos Personalizados</h3>
-          <p className="text-sm text-gray-600">Gerencie os cargos personalizados de {companyName}</p>
+    <div className="space-y-8">
+      {/* Seção de Cargos do Sistema */}
+      <section className="space-y-4">
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {systemRoles.map((role) => (
+            <Card key={role.id} className="border-blue-100 bg-blue-50/10">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      {role.name}
+                      <Badge variant="secondary" className="text-[10px] h-5">Sistema</Badge>
+                    </CardTitle>
+                  </div>
+
+                  <div className="flex gap-1">
+                    <RolePermissionsDialog
+                      role={role}
+                      onUpdatePermissions={updateRolePermissions}
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-2">
+                <CardDescription>{role.description || 'Cargo padrão do sistema'}</CardDescription>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-3 h-3 text-gray-400" />
+                  <Badge variant="outline" className="text-xs bg-white">
+                    {getPermissionsSummary(role)}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => {
-              setEditingRole(null);
-              setFormData({ name: '', description: '' });
-            }}>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Cargo
-            </Button>
-          </DialogTrigger>
-          
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingRole ? 'Editar Cargo' : 'Novo Cargo'}
-              </DialogTitle>
-              <DialogDescription>
-                {editingRole ? 'Edite as informações do cargo' : `Crie um novo cargo personalizado para ${companyName}`}
-              </DialogDescription>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome do Cargo</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Descrição</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Descrição das responsabilidades do cargo..."
-                />
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit">
-                  {editingRole ? 'Atualizar' : 'Criar'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+      </section>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {companyRoles.map((role) => (
-          <Card key={role.id}>
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg">{role.name}</CardTitle>
-                </div>
-                
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(role)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  
-                  <RolePermissionsDialog
-                    role={role}
-                    onUpdatePermissions={updateRolePermissions}
+      <div className="border-t border-gray-100 my-4"></div>
+
+      {/* Seção de Cargos Personalizados */}
+      <section className="space-y-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-medium">Cargos Personalizados</h3>
+            <p className="text-sm text-gray-600">Gerencie os cargos personalizados de {companyName}</p>
+          </div>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => {
+                setEditingRole(null);
+                setFormData({ name: '', description: '' });
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Cargo
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingRole ? 'Editar Cargo' : 'Novo Cargo'}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingRole ? 'Edite as informações do cargo' : `Crie um novo cargo personalizado para ${companyName}`}
+                </DialogDescription>
+              </DialogHeader>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nome do Cargo</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
                   />
-                  
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Descrição das responsabilidades do cargo..."
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(role)}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    {editingRole ? 'Atualizar' : 'Criar'}
                   </Button>
                 </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-2">
-              <CardDescription>{role.description || 'Sem descrição'}</CardDescription>
-              <div className="flex items-center gap-2">
-                <Shield className="w-3 h-3 text-gray-400" />
-                <Badge variant="outline" className="text-xs">
-                  {getPermissionsSummary(role)}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-      {companyRoles.length === 0 && (
-        <Card className="p-12 text-center">
-          <p className="text-gray-500 text-lg">Nenhum cargo personalizado encontrado</p>
-          <p className="text-gray-400 mt-2">Esta empresa possui apenas os cargos padrão (Admin, SDR, Closer)</p>
-        </Card>
-      )}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {customRoles.map((role) => (
+            <Card key={role.id}>
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg">{role.name}</CardTitle>
+                  </div>
+
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleEdit(role)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+
+                    <RolePermissionsDialog
+                      role={role}
+                      onUpdatePermissions={updateRolePermissions}
+                    />
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDelete(role)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-2">
+                <CardDescription>{role.description || 'Sem descrição'}</CardDescription>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-3 h-3 text-gray-400" />
+                  <Badge variant="outline" className="text-xs">
+                    {getPermissionsSummary(role)}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {customRoles.length === 0 && (
+            <Card className="col-span-full p-8 text-center bg-gray-50 border-dashed">
+              <p className="text-gray-500">Nenhum cargo personalizado criado ainda.</p>
+              <p className="text-gray-400 text-sm mt-1">Crie cargos específicos para as necessidades da sua empresa.</p>
+            </Card>
+          )}
+        </div>
+      </section>
     </div>
   );
 };

@@ -20,6 +20,7 @@ import { UserGoalsSettings } from './settings/UserGoalsSettings';
 import { ApiKeysSettings } from './settings/ApiKeysSettings';
 import { UserWhatsAppSettings } from './whatsapp/UserWhatsAppSettings';
 import { CompanyWhatsAppInstances } from './whatsapp/CompanyWhatsAppInstances';
+import { PrivacySettings } from './settings/PrivacySettings';
 import { usePermissions } from '@/hooks/usePermissions';
 
 export const Settings = () => {
@@ -51,6 +52,12 @@ export const Settings = () => {
       label: 'API & Chaves',
       icon: Key,
       component: ApiKeysSettings,
+    },
+    {
+      id: 'privacy',
+      label: 'Privacidade',
+      icon: Shield,
+      component: PrivacySettings,
     },
 
   ];

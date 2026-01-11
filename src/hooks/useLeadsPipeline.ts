@@ -45,7 +45,7 @@ interface Lead {
   follow_ups_count?: number;
 }
 
-export const useLeadsPipeline = () => {
+export const useLeadsPipeline = (pipelineId?: string) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -60,11 +60,11 @@ export const useLeadsPipeline = () => {
   });
   const { user } = useAuth();
   const { toast } = useToast();
-  const { columns } = usePipelineColumns();
+  const { columns } = usePipelineColumns(pipelineId);
   const { logCreate, logStatusChange } = useLeadAuditLog();
 
   const fetchLeads = useCallback(async () => {
-    if (!user) {
+    if (!user || !pipelineId) {
       setLoading(false);
       return;
     }
@@ -98,7 +98,8 @@ export const useLeadsPipeline = () => {
             created_at
           )
         `)
-        .eq('company_id', profileData.company_id);
+        .eq('company_id', profileData.company_id)
+        .eq('pipeline_id', pipelineId);
 
       // Aplicar filtros
       if (filters.searchTerm) {
@@ -124,11 +125,11 @@ export const useLeadsPipeline = () => {
       const { data, error } = await query.order('updated_at', { ascending: false });
 
       if (error) throw error;
-      
+
       // Processar dados dos leads
       const processedLeads = (data || []).map(lead => {
         const appointments = lead.appointments || [];
-        const latestAppointment = appointments.length > 0 
+        const latestAppointment = appointments.length > 0
           ? appointments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
           : null;
 
@@ -141,9 +142,9 @@ export const useLeadsPipeline = () => {
           follow_ups_count: 0 // Será calculado em uma query separada se necessário
         };
       });
-      
+
       console.log('Pipeline leads before filtering:', processedLeads.length);
-      
+
       // Aplicar filtro por tags se selecionadas
       let filteredByTags = processedLeads;
       if (filters.tags && filters.tags.length > 0) {
@@ -153,7 +154,7 @@ export const useLeadsPipeline = () => {
         });
         console.log('Pipeline filtering by tags - showing leads with selected tags:', filteredByTags.length);
       }
-      
+
       // Aplicar filtro por role após buscar os dados
       const { data: userProfile } = await supabase
         .from('profiles')
@@ -170,7 +171,7 @@ export const useLeadsPipeline = () => {
       let filteredLeads = filteredByTags;
       if (userRole === 'Closer') {
         // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
-        filteredLeads = filteredByTags.filter(lead => 
+        filteredLeads = filteredByTags.filter(lead =>
           lead.assigned_to === user.id || lead.assigned_to === null
         );
         console.log('Pipeline filtering for Closer - showing assigned + unassigned leads:', filteredLeads.length);
@@ -178,7 +179,7 @@ export const useLeadsPipeline = () => {
         // Admins, SDRs e outros roles veem todos os leads da empresa
         console.log('Pipeline user is Admin/SDR - showing all company leads:', filteredLeads.length);
       }
-      
+
       setLeads(filteredLeads);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);
@@ -191,7 +192,7 @@ export const useLeadsPipeline = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, toast, filters]);
+  }, [user?.id, toast, filters, pipelineId]);
 
   const createLead = useCallback(async (leadData: {
     name: string;
@@ -202,7 +203,7 @@ export const useLeadsPipeline = () => {
     partner_id: string | null;
     temperature: string | null;
   }) => {
-    if (!user) return null;
+    if (!user || !pipelineId) return null;
 
     try {
       // Buscar company_id do usuário
@@ -224,7 +225,8 @@ export const useLeadsPipeline = () => {
           status: 'Novo Lead', // FORÇAR sempre "Novo Lead"
           temperature: leadData.temperature || 'Frio',
           company_id: profileData.company_id,
-          created_by: user.id
+          created_by: user.id,
+          pipeline_id: pipelineId
         })
         .select()
         .single();
@@ -235,7 +237,7 @@ export const useLeadsPipeline = () => {
       await logCreate(data.id, profileData.company_id, data);
 
       await fetchLeads();
-      
+
       toast({
         title: "Sucesso",
         description: "Lead criado com sucesso"
@@ -251,13 +253,13 @@ export const useLeadsPipeline = () => {
       });
       return null;
     }
-  }, [user, fetchLeads, toast, logCreate]);
+  }, [user, fetchLeads, toast, logCreate, pipelineId]);
 
   const updateLeadStatus = useCallback(async (leadId: string, newStatus: string) => {
     if (!user) return;
 
     setDragLoading(leadId);
-    
+
     try {
       console.log('🔄 Updating lead status:', leadId, 'to:', newStatus);
 
@@ -277,7 +279,7 @@ export const useLeadsPipeline = () => {
 
       const { data, error } = await supabase
         .from('leads')
-        .update({ 
+        .update({
           status: newStatus,
           updated_at: new Date().toISOString()
         })
@@ -291,19 +293,19 @@ export const useLeadsPipeline = () => {
       }
 
       console.log('✅ Lead status updated successfully:', data);
-      
+
       // Registrar audit log de mudança de status
       await logStatusChange(leadId, currentLead.company_id, oldStatus, newStatus);
-      
+
       // Atualização local imediata após confirmação do banco
-      setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { 
-          ...lead, 
+      setLeads(prev => prev.map(lead =>
+        lead.id === leadId ? {
+          ...lead,
           status: newStatus,
           updated_at: new Date().toISOString()
         } : lead
       ));
-      
+
       toast({
         title: "Sucesso",
         description: `Lead movido para "${newStatus}" com sucesso`
@@ -332,7 +334,7 @@ export const useLeadsPipeline = () => {
     if (sourceStatus === newStatus) return;
 
     console.log('🔄 Drag end - Moving lead:', leadId, 'from:', sourceStatus, 'to:', newStatus);
-    
+
     // Verificar se a coluna de destino existe
     const targetColumn = columns.find(col => col.name === newStatus);
     if (!targetColumn) {
@@ -397,12 +399,12 @@ export const useLeadsPipeline = () => {
   });
 
   useEffect(() => {
-    if (user) {
+    if (user && pipelineId) {
       fetchLeads();
 
       // Setup realtime subscription
       const channel = supabase
-        .channel(`leads-pipeline-${user.id}`)
+        .channel(`leads-pipeline-${user.id}-${pipelineId}`)
         .on(
           'postgres_changes',
           {
@@ -412,7 +414,12 @@ export const useLeadsPipeline = () => {
           },
           (payload) => {
             console.log('Lead pipeline change detected:', payload);
-            
+
+            // Filter by pipeline if possible
+            if (payload.new && (payload.new as any).pipeline_id && (payload.new as any).pipeline_id !== pipelineId) {
+              return;
+            }
+
             // Evitar refetch durante drag and drop
             if (!dragLoading) {
               setTimeout(() => {
@@ -427,7 +434,7 @@ export const useLeadsPipeline = () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [user, fetchLeads]);
+  }, [user, fetchLeads, pipelineId, dragLoading]);
 
   return {
     leads,

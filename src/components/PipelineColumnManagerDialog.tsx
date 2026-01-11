@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 interface PipelineColumnManagerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  pipelineId: string;
 }
 const PIPELINE_TEMPLATES = [{
   id: 'custom',
@@ -133,7 +134,8 @@ const COLOR_OPTIONS = [{
 }];
 export const PipelineColumnManagerDialog = ({
   open,
-  onOpenChange
+  onOpenChange,
+  pipelineId
 }: PipelineColumnManagerDialogProps) => {
   const {
     columns,
@@ -142,7 +144,7 @@ export const PipelineColumnManagerDialog = ({
     deleteColumn,
     reorderColumns,
     refetch
-  } = usePipelineColumns();
+  } = usePipelineColumns(pipelineId);
   const {
     createDefaultColumns,
     syncing
@@ -161,7 +163,7 @@ export const PipelineColumnManagerDialog = ({
   const handleSelectTemplate = async (template: typeof PIPELINE_TEMPLATES[0]) => {
     setSelectedTemplate(template.id);
     if (template.id === 'default') {
-      await createDefaultColumns();
+      await createDefaultColumns(pipelineId);
       await refetch();
     }
   };

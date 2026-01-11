@@ -15,37 +15,25 @@ interface PipelineColumn {
   is_protected?: boolean;
 }
 
-export const usePipelineColumns = () => {
+export const usePipelineColumns = (pipelineId?: string) => {
   const [columns, setColumns] = useState<PipelineColumn[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
 
   const fetchColumns = async () => {
-    if (!user) {
+    if (!user || !pipelineId) {
       setLoading(false);
       return;
     }
 
     try {
-      console.log('Fetching pipeline columns for user:', user.id);
-
-      // Buscar company_id do usuário atual
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError || !profileData?.company_id) {
-        console.error('Erro ao buscar company_id:', profileError);
-        throw new Error('Company ID not found for user');
-      }
+      console.log('Fetching pipeline columns for user:', user.id, 'pipeline:', pipelineId);
 
       const { data, error } = await supabase
         .from('pipeline_columns')
         .select('*')
-        .eq('company_id', profileData.company_id)
+        .eq('pipeline_id', pipelineId)
         .order('position', { ascending: true });
 
       if (error) {
@@ -69,10 +57,10 @@ export const usePipelineColumns = () => {
   };
 
   const createColumn = async (columnData: Omit<PipelineColumn, 'id' | 'created_at' | 'updated_at' | 'company_id'>) => {
-    if (!user) {
+    if (!user || !pipelineId) {
       toast({
         title: "Erro",
-        description: "Usuário não autenticado",
+        description: "Pipeline não selecionado ou usuário não autenticado",
         variant: "destructive"
       });
       return;
@@ -96,7 +84,8 @@ export const usePipelineColumns = () => {
         .from('pipeline_columns')
         .insert([{
           ...columnData,
-          company_id: profileData.company_id
+          company_id: profileData.company_id,
+          pipeline_id: pipelineId
         }])
         .select()
         .single();
@@ -249,10 +238,10 @@ export const usePipelineColumns = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && pipelineId) {
       fetchColumns();
     }
-  }, [user]);
+  }, [user, pipelineId]);
 
   return {
     columns,

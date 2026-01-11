@@ -29,7 +29,7 @@ interface Lead {
 // Global subscription manager to prevent multiple subscriptions
 const subscriptionManager = {
   activeChannels: new Map<string, any>(),
-  
+
   createChannel: (channelName: string, callback: (payload: any) => void) => {
     // Clean up existing channel if it exists
     if (subscriptionManager.activeChannels.has(channelName)) {
@@ -41,7 +41,7 @@ const subscriptionManager = {
     // Create new channel
     const channel = supabase.channel(channelName);
     subscriptionManager.activeChannels.set(channelName, channel);
-    
+
     channel
       .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, callback)
       .subscribe((status) => {
@@ -63,7 +63,7 @@ const subscriptionManager = {
   }
 };
 
-export const useLeads = () => {
+export const useLeads = (pipelineId?: string) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -74,15 +74,15 @@ export const useLeads = () => {
   const channelNameRef = useRef<string | null>(null);
 
   const fetchLeads = useCallback(async () => {
-    if (!user || !userInfo?.company_id) {
+    if (!user || !userInfo?.company_id || !pipelineId) {
       setLoading(false);
       return;
     }
 
     try {
-      console.log('Fetching leads for user:', user.id);
+      console.log('Fetching leads for user:', user.id, 'pipeline:', pipelineId);
 
-      // Buscar todos os leads da empresa primeiro
+      // Buscar todos os leads da empresa filtrados por pipeline
       const { data, error } = await supabase
         .from('leads')
         .select(`
@@ -94,13 +94,14 @@ export const useLeads = () => {
           assigned_user:profiles!leads_assigned_to_fkey(id, full_name)
         `)
         .eq('company_id', userInfo.company_id)
+        .eq('pipeline_id', pipelineId)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching leads:', error);
         throw error;
       }
-      
+
       // Processar dados para incluir tags, parceiro e usuário atribuído
       const processedLeads = (data || []).map(lead => ({
         ...lead,
@@ -108,9 +109,9 @@ export const useLeads = () => {
         partner: lead.partners || null,
         assigned_user: lead.assigned_user || null
       }));
-      
-      console.log('Fetched leads for company before filtering:', processedLeads.length, 'leads');
-      
+
+      console.log('Fetched leads for pipeline before user role filtering:', processedLeads.length, 'leads');
+
       // Aplicar filtro por role após buscar os dados (mais simples e confiável)
       const { data: userProfile } = await supabase
         .from('profiles')
@@ -127,7 +128,7 @@ export const useLeads = () => {
       let filteredLeads = processedLeads;
       if (userRole === 'Closer') {
         // Closers veem leads atribuídos a eles OU leads não-atribuídos (para poderem assumir)
-        filteredLeads = processedLeads.filter(lead => 
+        filteredLeads = processedLeads.filter(lead =>
           lead.assigned_to === user.id || lead.assigned_to === null
         );
         console.log('Filtering for Closer - showing assigned + unassigned leads:', filteredLeads.length);
@@ -135,7 +136,7 @@ export const useLeads = () => {
         // Admins, SDRs e outros roles veem todos os leads da empresa
         console.log('User is Admin/SDR - showing all company leads:', filteredLeads.length);
       }
-      
+
       setLeads(filteredLeads);
     } catch (error) {
       console.error('Erro ao buscar leads:', error);
@@ -148,22 +149,27 @@ export const useLeads = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, userInfo?.company_id, toast]);
+  }, [user?.id, userInfo?.company_id, pipelineId, toast]);
 
   useEffect(() => {
-    if (!user?.id || !userInfo?.company_id) return;
-    
+    if (!user?.id || !userInfo?.company_id || !pipelineId) return;
+
     fetchLeads();
 
-    // Create unique channel name using user ID
-    const channelName = `leads-${user.id}`;
+    // Create unique channel name using user ID and pipeline ID
+    const channelName = `leads-${user.id}-${pipelineId}`;
     channelNameRef.current = channelName;
 
     // Use subscription manager to handle the channel
     const handleRealtimeChange = (payload: any) => {
       console.log('Realtime lead change detected:', payload);
+      // Optional: Filter payload by pipeline_id if available in payload
+      if (payload.new && payload.new.pipeline_id && payload.new.pipeline_id !== pipelineId) {
+        return;
+      }
+
       setIsUpdating(true);
-      
+
       // Use a small delay to prevent excessive calls
       setTimeout(() => {
         fetchLeads().finally(() => {
@@ -179,13 +185,13 @@ export const useLeads = () => {
         subscriptionManager.cleanup(channelNameRef.current);
       }
     };
-  }, [user?.id, userInfo?.company_id, fetchLeads]);
+  }, [user?.id, userInfo?.company_id, pipelineId, fetchLeads]);
 
   const createLead = async (leadData: Omit<Lead, 'id' | 'created_at' | 'company_id'> & { partner_id?: string | null }) => {
-    if (!user) {
+    if (!user || !pipelineId) {
       toast({
         title: "Erro",
-        description: "Usuário não autenticado",
+        description: "Pipeline não selecionado ou usuário não autenticado",
         variant: "destructive"
       });
       return;
@@ -193,7 +199,7 @@ export const useLeads = () => {
 
     try {
       console.log('Creating lead:', leadData);
-      
+
       // Buscar company_id do usuário atual
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -219,10 +225,11 @@ export const useLeads = () => {
 
       const { data, error } = await supabase
         .from('leads')
-        .insert([{ 
-          ...finalLeadData, 
+        .insert([{
+          ...finalLeadData,
           created_by: user.id,
-          company_id: profileData.company_id 
+          company_id: profileData.company_id,
+          pipeline_id: pipelineId
         }])
         .select()
         .single();
@@ -231,12 +238,12 @@ export const useLeads = () => {
         console.error('Error creating lead:', error);
         throw error;
       }
-      
+
       console.log('Lead created successfully:', data);
-      
+
       // Registrar audit log de criação
       await logCreate(data.id, profileData.company_id, data);
-      
+
       setLeads(prev => [data, ...prev]);
       toast({
         title: "Sucesso",
@@ -265,7 +272,7 @@ export const useLeads = () => {
 
     try {
       console.log('Updating lead:', id, updates);
-      
+
       // Buscar dados atuais do lead antes de atualizar (para audit log)
       const { data: currentLead, error: fetchError } = await supabase
         .from('leads')
@@ -277,7 +284,7 @@ export const useLeads = () => {
         console.error('Error fetching current lead:', fetchError);
         throw fetchError;
       }
-      
+
       const { data, error } = await supabase
         .from('leads')
         .update(updates)
@@ -289,12 +296,12 @@ export const useLeads = () => {
         console.error('Error updating lead:', error);
         throw error;
       }
-      
+
       console.log('Lead updated successfully:', data);
-      
+
       // Registrar audit log das mudanças
       await logUpdate(id, currentLead.company_id, currentLead, data);
-      
+
       setLeads(prev => prev.map(lead => lead.id === id ? data : lead));
       toast({
         title: "Sucesso",
@@ -323,7 +330,7 @@ export const useLeads = () => {
 
     try {
       console.log('Attempting to delete lead:', id);
-      
+
       // Primeiro, verificar se o lead existe e pertence à empresa do usuário
       const { data: leadData, error: fetchError } = await supabase
         .from('leads')
@@ -393,15 +400,15 @@ export const useLeads = () => {
       }
 
       console.log('Lead deleted successfully. Rows affected:', count);
-      
+
       // Remover do estado local apenas se o delete foi confirmado
       setLeads(prev => prev.filter(lead => lead.id !== id));
-      
+
       toast({
         title: "Sucesso",
         description: "Lead removido com sucesso"
       });
-      
+
     } catch (error) {
       console.error('Erro ao deletar lead:', error);
       toast({
@@ -424,10 +431,10 @@ export const useLeads = () => {
     }>,
     onProgress?: (progress: number) => void
   ) => {
-    if (!user) {
+    if (!user || !pipelineId) {
       toast({
         title: "Erro",
-        description: "Usuário não autenticado",
+        description: "Pipeline não selecionado ou usuário não autenticado",
         variant: "destructive"
       });
       return { success: 0, errors: 0, total: 0 };
@@ -470,36 +477,36 @@ export const useLeads = () => {
       // Processar leads em lotes de 50 para melhor performance
       const batchSize = 50;
       console.log(`Starting import of ${total} leads in batches of ${batchSize}`);
-      
+
       for (let i = 0; i < csvLeads.length; i += batchSize) {
         const batch = csvLeads.slice(i, i + batchSize);
         console.log(`Processing batch ${Math.floor(i / batchSize) + 1}: ${batch.length} leads`);
-        
+
         const leadsToInsert = batch.map(csvLead => {
           let partnerId = null;
           let source = processLeadValue(csvLead.origem);
-          
+
           // Se há um parceiro especificado, procurar pelo nome
           if (csvLead.parceiro && processLeadValue(csvLead.parceiro)) {
             const partnerName = processLeadValue(csvLead.parceiro);
-            const partner = partnersData?.find(p => 
+            const partner = partnersData?.find(p =>
               p.name.toLowerCase().trim() === partnerName.toLowerCase().trim()
             );
-            
+
             if (partner) {
               partnerId = partner.id;
               source = 'Parceiro'; // Definir origem como Parceiro quando há um parceiro
             }
           }
-          
+
           // Processar temperatura do CSV/Excel
           let temperature = processLeadValue(csvLead.temperatura) || 'Frio';
-          
+
           // Validar valores válidos de temperatura
           if (!['Quente', 'Morno', 'Frio'].includes(temperature)) {
             temperature = 'Frio';
           }
-          
+
           return {
             name: processLeadValue(csvLead.nome),
             email: processLeadValue(csvLead.email),
@@ -509,7 +516,8 @@ export const useLeads = () => {
             partner_id: partnerId,
             temperature: temperature,
             created_by: user.id,
-            company_id: profileData.company_id
+            company_id: profileData.company_id,
+            pipeline_id: pipelineId
           };
         });
 
@@ -561,7 +569,7 @@ export const useLeads = () => {
       await fetchLeads();
 
       const results = { success: successCount, errors: errorCount, total };
-      
+
       if (successCount > 0) {
         toast({
           title: "Sucesso",

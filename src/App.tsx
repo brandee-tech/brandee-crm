@@ -15,6 +15,7 @@ import CompanyRegistration from "./pages/CompanyRegistration";
 import NotFound from "./pages/NotFound";
 import LeadAutomation from "./pages/LeadAutomation";
 import PublicLeadForm from "./pages/PublicLeadForm";
+import EmbeddableLeadForm from "./pages/EmbeddableLeadForm";
 import { CompanyEditPage } from "./pages/admin/CompanyEditPage";
 import { WhatsAppButton } from "./components/WhatsAppButton";
 import "./App.css";
@@ -62,6 +63,7 @@ function App() {
                     {/* Other routes */}
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/form/:slug" element={<PublicLeadForm />} />
+                    <Route path="/embed/:slug" element={<EmbeddableLeadForm />} />
                     <Route path="/admin" element={<AdminSaas />} />
                     <Route path="/admin/companies/:id/edit" element={<CompanyEditPage />} />
                     <Route path="/landing" element={<Landing />} />
